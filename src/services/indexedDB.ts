@@ -15,7 +15,8 @@ function isQuotaExceededError(error: unknown): boolean {
   return (
     error instanceof DOMException &&
     (error.name === 'QuotaExceededError' ||
-      error.name === 'NS_ERROR_DOM_QUOTA_REACHED')
+      error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+      (error as { code?: number }).code === 22)
   )
 }
 
@@ -104,6 +105,13 @@ export function openDB(): Promise<IDBDatabase> {
   })
 }
 
+/**
+ * Gets an object store for database operations.
+ * 
+ * @param mode - The transaction mode ('readonly' or 'readwrite'). Defaults to 'readonly'
+ * @returns A promise that resolves to an object containing the object store and transaction
+ * @throws Error if the object store does not exist or if the transaction fails
+ */
 function getObjectStore(mode: IDBTransactionMode = 'readonly'): Promise<ObjectStoreResult> {
   return new Promise((resolve, reject) => {
     openDB()
@@ -143,6 +151,13 @@ export async function getHabit(id: string): Promise<Habit | undefined> {
   return handleRequestError(request, 'Failed to get habit')
 }
 
+/**
+ * Retrieves all habits from the database.
+ * 
+ * @returns A promise that resolves to an array of all habits
+ * @remarks This function loads all habits into memory at once. For applications
+ * with many habits, consider implementing pagination in a future update.
+ */
 export async function getAllHabits(): Promise<Habit[]> {
   const { objectStore } = await getObjectStore('readonly')
   const request = objectStore.getAll()

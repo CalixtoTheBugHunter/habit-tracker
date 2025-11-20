@@ -38,14 +38,18 @@ describe('IndexedDB Service', () => {
     return request
   }
 
+  function createMockIDBRequest<T>(): IDBRequest<T> {
+    return createMockRequest() as unknown as IDBRequest<T>
+  }
+
   beforeEach(() => {
     mockObjectStore = {
-      add: vi.fn(() => createMockRequest() as unknown as IDBRequest<string>),
-      get: vi.fn(() => createMockRequest() as unknown as IDBRequest<Habit | undefined>),
-      getAll: vi.fn(() => createMockRequest() as unknown as IDBRequest<Habit[]>),
-      put: vi.fn(() => createMockRequest() as unknown as IDBRequest<string>),
-      delete: vi.fn(() => createMockRequest() as unknown as IDBRequest<void>),
-      clear: vi.fn(() => createMockRequest() as unknown as IDBRequest<void>),
+      add: vi.fn(() => createMockIDBRequest<string>()),
+      get: vi.fn(() => createMockIDBRequest<Habit | undefined>()),
+      getAll: vi.fn(() => createMockIDBRequest<Habit[]>()),
+      put: vi.fn(() => createMockIDBRequest<string>()),
+      delete: vi.fn(() => createMockIDBRequest<void>()),
+      clear: vi.fn(() => createMockIDBRequest<void>()),
     } as unknown as IDBObjectStore
 
     mockTransaction = {
