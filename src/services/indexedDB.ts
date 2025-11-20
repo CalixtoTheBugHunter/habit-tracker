@@ -25,11 +25,26 @@ function validateHabit(habit: unknown): asserts habit is Habit {
     throw new Error('Habit must be an object')
   }
   const habitObj = habit as Record<string, unknown>
+  
   if (!habitObj.id || typeof habitObj.id !== 'string' || habitObj.id.trim() === '') {
     throw new Error('Habit must have a non-empty string id')
   }
   
-  const stringFields = ['name', 'description', 'createdAt']
+  if (!habitObj.createdDate || typeof habitObj.createdDate !== 'string' || habitObj.createdDate.trim() === '') {
+    throw new Error('Habit must have a non-empty string createdDate')
+  }
+  
+  if (!Array.isArray(habitObj.completionDates)) {
+    throw new Error('Habit must have a completionDates array')
+  }
+  
+  for (const date of habitObj.completionDates) {
+    if (typeof date !== 'string') {
+      throw new Error('All completionDates must be strings')
+    }
+  }
+  
+  const stringFields = ['name', 'description']
   for (const field of stringFields) {
     if (habitObj[field] !== undefined && typeof habitObj[field] !== 'string') {
       throw new Error(`Habit field "${field}" must be a string if provided`)
@@ -99,7 +114,7 @@ export function openDB(): Promise<IDBDatabase> {
         })
 
         objectStore.createIndex('name', 'name', { unique: false })
-        objectStore.createIndex('createdAt', 'createdAt', { unique: false })
+        objectStore.createIndex('createdDate', 'createdDate', { unique: false })
       }
     }
   })
