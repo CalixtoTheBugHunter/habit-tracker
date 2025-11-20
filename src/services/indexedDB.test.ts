@@ -10,6 +10,11 @@ import {
   testUtils,
 } from './indexedDB'
 import type { Habit } from '../types/habit'
+import { createMockHabit, mockHabits } from '../test/fixtures/habits'
+import {
+  triggerIDBRequestSuccess,
+  triggerIDBRequestError,
+} from '../test/utils/indexedDB-test-helpers'
 
 const { resetDB } = testUtils
 
@@ -171,70 +176,30 @@ describe('IndexedDB Service', () => {
     })
 
     it('adds a habit to the database', async () => {
-      const habit: Habit = {
-        id: '1',
-        name: 'Exercise',
-        description: 'Daily exercise routine',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
+      const habit = createMockHabit()
 
       const addPromise = addHabit(habit)
-      
-      await Promise.resolve()
-      await Promise.resolve()
-      
-      addRequest.result = habit.id
-      if (addRequest.onsuccess) {
-        addRequest.onsuccess({ target: { result: habit.id } })
-      }
-
+      await triggerIDBRequestSuccess(addRequest, habit.id)
       const result = await addPromise
 
       expect(mockObjectStore.add).toHaveBeenCalledWith(habit)
       expect(result).toBe(habit.id)
     })
 
-    it('handles add errors', async () => {
-      const habit: Habit = {
-        id: '1',
-        name: 'Exercise',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
-      const error = new Error('Add failed')
+    it.each([
+      ['Add failed', new Error('Add failed'), 'Add failed'],
+      [
+        'Storage quota exceeded',
+        new DOMException('QuotaExceededError', 'QuotaExceededError'),
+        'Storage quota exceeded',
+      ],
+    ])('handles %s error on add', async (_, error, expectedMessage) => {
+      const habit = createMockHabit()
 
       const addPromise = addHabit(habit)
+      await triggerIDBRequestError(addRequest, error)
 
-      await Promise.resolve()
-      await Promise.resolve()
-      addRequest.error = error
-      if (addRequest.onerror) {
-        addRequest.onerror({ target: { error } })
-      }
-
-      await expect(addPromise).rejects.toThrow('Add failed')
-    })
-
-    it('handles quota exceeded error on add', async () => {
-      const habit: Habit = {
-        id: '1',
-        name: 'Exercise',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
-      const quotaError = new DOMException('QuotaExceededError', 'QuotaExceededError')
-
-      const addPromise = addHabit(habit)
-
-      await Promise.resolve()
-      await Promise.resolve()
-      addRequest.error = quotaError
-      if (addRequest.onerror) {
-        addRequest.onerror({ target: { error: quotaError } })
-      }
-
-      await expect(addPromise).rejects.toThrow('Storage quota exceeded')
+      await expect(addPromise).rejects.toThrow(expectedMessage)
     })
   })
 
@@ -248,22 +213,10 @@ describe('IndexedDB Service', () => {
     })
 
     it('retrieves a habit by id', async () => {
-      const habit: Habit = {
-        id: '1',
-        name: 'Exercise',
-        description: 'Daily exercise routine',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
+      const habit = createMockHabit()
 
       const getPromise = getHabit('1')
-
-      await Promise.resolve()
-      await Promise.resolve()
-      getRequest.result = habit
-      if (getRequest.onsuccess) {
-        getRequest.onsuccess({ target: { result: habit } })
-      }
+      await triggerIDBRequestSuccess(getRequest, habit)
 
       const result = await getPromise
 
@@ -273,13 +226,7 @@ describe('IndexedDB Service', () => {
 
     it('returns undefined if habit does not exist', async () => {
       const getPromise = getHabit('999')
-
-      await Promise.resolve()
-      await Promise.resolve()
-      getRequest.result = undefined
-      if (getRequest.onsuccess) {
-        getRequest.onsuccess({ target: { result: undefined } })
-      }
+      await triggerIDBRequestSuccess(getRequest, undefined)
 
       const result = await getPromise
 
@@ -290,13 +237,7 @@ describe('IndexedDB Service', () => {
       const error = new Error('Get failed')
 
       const getPromise = getHabit('1')
-
-      await Promise.resolve()
-      await Promise.resolve()
-      getRequest.error = error
-      if (getRequest.onerror) {
-        getRequest.onerror({ target: { error } })
-      }
+      await triggerIDBRequestError(getRequest, error)
 
       await expect(getPromise).rejects.toThrow('Get failed')
     })
@@ -313,18 +254,12 @@ describe('IndexedDB Service', () => {
 
     it('retrieves all habits from the database', async () => {
       const habits: Habit[] = [
-        { id: '1', name: 'Exercise', createdDate: new Date().toISOString(), completionDates: [] },
-        { id: '2', name: 'Read', createdDate: new Date().toISOString(), completionDates: [] },
+        createMockHabit({ id: '1', name: 'Exercise' }),
+        createMockHabit({ id: '2', name: 'Read' }),
       ]
 
       const getAllPromise = getAllHabits()
-
-      await Promise.resolve()
-      await Promise.resolve()
-      getAllRequest.result = habits
-      if (getAllRequest.onsuccess) {
-        getAllRequest.onsuccess({ target: { result: habits } })
-      }
+      await triggerIDBRequestSuccess(getAllRequest, habits)
 
       const result = await getAllPromise
 
@@ -334,13 +269,7 @@ describe('IndexedDB Service', () => {
 
     it('returns empty array if no habits exist', async () => {
       const getAllPromise = getAllHabits()
-
-      await Promise.resolve()
-      await Promise.resolve()
-      getAllRequest.result = []
-      if (getAllRequest.onsuccess) {
-        getAllRequest.onsuccess({ target: { result: [] } })
-      }
+      await triggerIDBRequestSuccess(getAllRequest, [])
 
       const result = await getAllPromise
 
@@ -351,13 +280,7 @@ describe('IndexedDB Service', () => {
       const error = new Error('GetAll failed')
 
       const getAllPromise = getAllHabits()
-
-      await Promise.resolve()
-      await Promise.resolve()
-      getAllRequest.error = error
-      if (getAllRequest.onerror) {
-        getAllRequest.onerror({ target: { error } })
-      }
+      await triggerIDBRequestError(getAllRequest, error)
 
       await expect(getAllPromise).rejects.toThrow('GetAll failed')
     })
@@ -373,22 +296,13 @@ describe('IndexedDB Service', () => {
     })
 
     it('updates an existing habit', async () => {
-      const habit: Habit = {
-        id: '1',
+      const habit = createMockHabit({
         name: 'Exercise Updated',
         description: 'Updated description',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
+      })
 
       const updatePromise = updateHabit(habit)
-
-      await Promise.resolve()
-      await Promise.resolve()
-      updateRequest.result = habit.id
-      if (updateRequest.onsuccess) {
-        updateRequest.onsuccess({ target: { result: habit.id } })
-      }
+      await triggerIDBRequestSuccess(updateRequest, habit.id)
 
       const result = await updatePromise
 
@@ -396,46 +310,20 @@ describe('IndexedDB Service', () => {
       expect(result).toBe(habit.id)
     })
 
-    it('handles update errors', async () => {
-      const habit: Habit = {
-        id: '1',
-        name: 'Exercise',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
-      const error = new Error('Update failed')
+    it.each([
+      ['Update failed', new Error('Update failed'), 'Update failed'],
+      [
+        'Storage quota exceeded',
+        new DOMException('QuotaExceededError', 'QuotaExceededError'),
+        'Storage quota exceeded',
+      ],
+    ])('handles %s error on update', async (_, error, expectedMessage) => {
+      const habit = createMockHabit()
 
       const updatePromise = updateHabit(habit)
+      await triggerIDBRequestError(updateRequest, error)
 
-      await Promise.resolve()
-      await Promise.resolve()
-      updateRequest.error = error
-      if (updateRequest.onerror) {
-        updateRequest.onerror({ target: { error } })
-      }
-
-      await expect(updatePromise).rejects.toThrow('Update failed')
-    })
-
-    it('handles quota exceeded error on update', async () => {
-      const habit: Habit = {
-        id: '1',
-        name: 'Exercise',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
-      const quotaError = new DOMException('QuotaExceededError', 'QuotaExceededError')
-
-      const updatePromise = updateHabit(habit)
-
-      await Promise.resolve()
-      await Promise.resolve()
-      updateRequest.error = quotaError
-      if (updateRequest.onerror) {
-        updateRequest.onerror({ target: { error: quotaError } })
-      }
-
-      await expect(updatePromise).rejects.toThrow('Storage quota exceeded')
+      await expect(updatePromise).rejects.toThrow(expectedMessage)
     })
   })
 
@@ -450,13 +338,7 @@ describe('IndexedDB Service', () => {
 
     it('deletes a habit by id', async () => {
       const deletePromise = deleteHabit('1')
-
-      await Promise.resolve()
-      await Promise.resolve()
-      deleteRequest.result = undefined
-      if (deleteRequest.onsuccess) {
-        deleteRequest.onsuccess({ target: { result: undefined } })
-      }
+      await triggerIDBRequestSuccess(deleteRequest, undefined)
 
       await deletePromise
 
@@ -467,13 +349,7 @@ describe('IndexedDB Service', () => {
       const error = new Error('Delete failed')
 
       const deletePromise = deleteHabit('1')
-
-      await Promise.resolve()
-      await Promise.resolve()
-      deleteRequest.error = error
-      if (deleteRequest.onerror) {
-        deleteRequest.onerror({ target: { error } })
-      }
+      await triggerIDBRequestError(deleteRequest, error)
 
       await expect(deletePromise).rejects.toThrow('Delete failed')
     })
@@ -485,90 +361,83 @@ describe('IndexedDB Service', () => {
     })
 
     it('validates habit with all required fields', async () => {
-      const habit: Habit = {
-        id: '1',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
+      const habit = mockHabits.minimal()
       const addRequest = createMockRequest()
       ;(mockObjectStore.add as ReturnType<typeof vi.fn>).mockReturnValue(addRequest)
 
       const addPromise = addHabit(habit)
-      await Promise.resolve()
-      await Promise.resolve()
-      addRequest.result = habit.id
-      if (addRequest.onsuccess) {
-        addRequest.onsuccess({ target: { result: habit.id } })
-      }
+      await triggerIDBRequestSuccess(addRequest, habit.id)
 
       await expect(addPromise).resolves.toBe('1')
     })
 
-    it('rejects habit without id', async () => {
-      const invalidHabit = {
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      } as unknown as Habit
-
-      await expect(addHabit(invalidHabit)).rejects.toThrow('Habit must have a non-empty string id')
-    })
-
-    it('rejects habit without createdDate', async () => {
-      const invalidHabit = {
-        id: '1',
-        completionDates: [],
-      } as unknown as Habit
-
-      await expect(addHabit(invalidHabit)).rejects.toThrow('Habit must have a non-empty string createdDate')
-    })
-
-    it('rejects habit without completionDates', async () => {
-      const invalidHabit = {
-        id: '1',
-        createdDate: new Date().toISOString(),
-      } as unknown as Habit
-
-      await expect(addHabit(invalidHabit)).rejects.toThrow('Habit must have a completionDates array')
-    })
-
-    it('rejects habit with non-array completionDates', async () => {
-      const invalidHabit = {
-        id: '1',
-        createdDate: new Date().toISOString(),
-        completionDates: 'not-an-array',
-      } as unknown as Habit
-
-      await expect(addHabit(invalidHabit)).rejects.toThrow('Habit must have a completionDates array')
-    })
-
-    it('rejects habit with non-string completion dates', async () => {
-      const invalidHabit = {
-        id: '1',
-        createdDate: new Date().toISOString(),
-        completionDates: [123, 456],
-      } as unknown as Habit
-
-      await expect(addHabit(invalidHabit)).rejects.toThrow('All completionDates must be strings')
+    it.each([
+      [
+        'id',
+        { createdDate: new Date().toISOString(), completionDates: [] },
+        'Habit must have a non-empty string id',
+      ],
+      [
+        'createdDate',
+        { id: '1', completionDates: [] },
+        'Habit must have a non-empty string createdDate',
+      ],
+      [
+        'completionDates',
+        { id: '1', createdDate: new Date().toISOString() },
+        'Habit must have a completionDates array',
+      ],
+      [
+        'completionDates (non-array)',
+        { id: '1', createdDate: new Date().toISOString(), completionDates: 'not-an-array' },
+        'Habit must have a completionDates array',
+      ],
+      [
+        'completionDates (non-string elements)',
+        { id: '1', createdDate: new Date().toISOString(), completionDates: [123, 456] },
+        'All completionDates must be strings',
+      ],
+      [
+        'createdDate (invalid ISO 8601)',
+        { id: '1', createdDate: 'not-a-date', completionDates: [] },
+        'Habit createdDate must be a valid ISO 8601 date string',
+      ],
+      [
+        'completionDates (invalid ISO 8601)',
+        { id: '1', createdDate: new Date().toISOString(), completionDates: ['not-a-date'] },
+        'All completionDates must be valid ISO 8601 date strings',
+      ],
+      [
+        'name (exceeds max length)',
+        {
+          id: '1',
+          name: 'a'.repeat(256),
+          createdDate: new Date().toISOString(),
+          completionDates: [],
+        },
+        'Habit name must not exceed 255 characters',
+      ],
+      [
+        'description (exceeds max length)',
+        {
+          id: '1',
+          description: 'a'.repeat(5001),
+          createdDate: new Date().toISOString(),
+          completionDates: [],
+        },
+        'Habit description must not exceed 5000 characters',
+      ],
+    ])('rejects habit without valid %s', async (_, invalidHabit, expectedError) => {
+      await expect(addHabit(invalidHabit as unknown as Habit)).rejects.toThrow(expectedError)
     })
 
     it('validates habit with all fields including optional ones', async () => {
-      const habit: Habit = {
-        id: '1',
-        name: 'Exercise',
-        description: 'Daily exercise routine',
-        createdDate: new Date().toISOString(),
-        completionDates: ['2025-01-01T00:00:00.000Z'],
-      }
+      const habit = mockHabits.withCompletions(['2025-01-01T00:00:00.000Z'])
       const addRequest = createMockRequest()
       ;(mockObjectStore.add as ReturnType<typeof vi.fn>).mockReturnValue(addRequest)
 
       const addPromise = addHabit(habit)
-      await Promise.resolve()
-      await Promise.resolve()
-      addRequest.result = habit.id
-      if (addRequest.onsuccess) {
-        addRequest.onsuccess({ target: { result: habit.id } })
-      }
+      await triggerIDBRequestSuccess(addRequest, habit.id)
 
       await expect(addPromise).resolves.toBe('1')
     })

@@ -1,4 +1,7 @@
 import type { Habit } from '../types/habit'
+import { isQuotaExceededError } from '../utils/error/isQuotaExceededError'
+import { validateHabit } from '../utils/validation/validateHabit'
+import { validateId } from '../utils/validation/validateId'
 
 const DB_NAME = 'habit-tracker'
 const DB_VERSION = 1
@@ -9,58 +12,6 @@ let dbInstance: IDBDatabase | null = null
 interface ObjectStoreResult {
   objectStore: IDBObjectStore
   transaction: IDBTransaction
-}
-
-function isQuotaExceededError(error: unknown): boolean {
-  return (
-    error instanceof DOMException &&
-    (error.name === 'QuotaExceededError' ||
-      error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
-      (error as { code?: number }).code === 22)
-  )
-}
-
-function validateHabit(habit: unknown): asserts habit is Habit {
-  if (!habit || typeof habit !== 'object') {
-    throw new Error('Habit must be an object')
-  }
-  const habitObj = habit as Record<string, unknown>
-  
-  if (!habitObj.id || typeof habitObj.id !== 'string' || habitObj.id.trim() === '') {
-    throw new Error('Habit must have a non-empty string id')
-  }
-  
-  if (!habitObj.createdDate || typeof habitObj.createdDate !== 'string' || habitObj.createdDate.trim() === '') {
-    throw new Error('Habit must have a non-empty string createdDate')
-  }
-  
-  if (!Array.isArray(habitObj.completionDates)) {
-    throw new Error('Habit must have a completionDates array')
-  }
-  
-  for (const date of habitObj.completionDates) {
-    if (typeof date !== 'string') {
-      throw new Error('All completionDates must be strings')
-    }
-  }
-  
-  const stringFields = ['name', 'description']
-  for (const field of stringFields) {
-    if (habitObj[field] !== undefined && typeof habitObj[field] !== 'string') {
-      throw new Error(`Habit field "${field}" must be a string if provided`)
-    }
-  }
-  
-  const habitSize = JSON.stringify(habit).length
-  if (habitSize > 100000) {
-    throw new Error('Habit data exceeds maximum size')
-  }
-}
-
-function validateId(id: unknown): asserts id is string {
-  if (!id || typeof id !== 'string' || id.trim() === '') {
-    throw new Error('Habit id must be a non-empty string')
-  }
 }
 
 function handleRequestError<T>(request: IDBRequest<T>, defaultMessage: string): Promise<T> {

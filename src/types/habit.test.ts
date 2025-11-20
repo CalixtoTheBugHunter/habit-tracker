@@ -3,24 +3,17 @@ import type { Habit } from './habit'
 
 describe('Habit Type', () => {
   describe('Shape and Required Fields', () => {
-    it('should have required id field', () => {
+    it.each([
+      ['id', 'test-id'],
+      ['createdDate', '2025-01-01T00:00:00.000Z'],
+    ])('should have required %s field', (field, value) => {
       const habit: Habit = {
         id: 'test-id',
         createdDate: new Date().toISOString(),
         completionDates: [],
+        [field]: value,
       }
-      expect(habit.id).toBe('test-id')
-      expect(typeof habit.id).toBe('string')
-    })
-
-    it('should have required createdDate field', () => {
-      const habit: Habit = {
-        id: 'test-id',
-        createdDate: '2025-01-01T00:00:00.000Z',
-        completionDates: [],
-      }
-      expect(habit.createdDate).toBe('2025-01-01T00:00:00.000Z')
-      expect(typeof habit.createdDate).toBe('string')
+      expect(habit[field as keyof Habit]).toBe(value)
     })
 
     it('should have required completionDates field', () => {
@@ -32,26 +25,17 @@ describe('Habit Type', () => {
       expect(Array.isArray(habit.completionDates)).toBe(true)
     })
 
-    it('should accept optional name field', () => {
+    it.each([
+      ['name', 'Exercise'],
+      ['description', 'Daily exercise routine'],
+    ])('should accept optional %s field', (field, value) => {
       const habit: Habit = {
         id: 'test-id',
-        name: 'Exercise',
         createdDate: new Date().toISOString(),
         completionDates: [],
+        [field]: value,
       }
-      expect(habit.name).toBe('Exercise')
-      expect(typeof habit.name).toBe('string')
-    })
-
-    it('should accept optional description field', () => {
-      const habit: Habit = {
-        id: 'test-id',
-        description: 'Daily exercise routine',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
-      expect(habit.description).toBe('Daily exercise routine')
-      expect(typeof habit.description).toBe('string')
+      expect(habit[field as keyof Habit]).toBe(value)
     })
   })
 
@@ -80,18 +64,7 @@ describe('Habit Type', () => {
       expect(habit.completionDates.length).toBe(3)
     })
 
-    it('should allow habit without optional fields', () => {
-      const habit: Habit = {
-        id: 'test-id',
-        createdDate: new Date().toISOString(),
-        completionDates: [],
-      }
-      expect(habit.id).toBe('test-id')
-      expect(habit.name).toBeUndefined()
-      expect(habit.description).toBeUndefined()
-    })
-
-    it('should allow habit with all fields', () => {
+    it('should allow habit with all fields (including optional ones)', () => {
       const habit: Habit = {
         id: 'test-id',
         name: 'Exercise',
@@ -108,7 +81,7 @@ describe('Habit Type', () => {
   })
 
   describe('Type Safety', () => {
-    it('should enforce string type for id', () => {
+    it('should allow type casting for id (TypeScript compile-time check only)', () => {
       expect(() => {
         const invalid: Habit = {
           id: 123 as unknown as string,
