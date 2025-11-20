@@ -5,7 +5,7 @@ import App from './App'
 describe('App', () => {
   it('renders the habit tracker title', () => {
     render(<App />)
-    const title = screen.getByText('Habit Tracker')
+    const title = screen.getByRole('heading', { name: /habit tracker/i })
     expect(title).toBeInTheDocument()
   })
 
