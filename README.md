@@ -45,6 +45,24 @@ Run tests with coverage:
 npm run test:coverage
 ```
 
+### Linting
+
+This project uses ESLint with strict rules for code quality and consistency. ESLint is configured with React and TypeScript support.
+
+Run linting:
+
+```bash
+npm run lint
+```
+
+Fix linting issues automatically:
+
+```bash
+npm run lint:fix
+```
+
+The linting check runs automatically in CI/CD for all pull requests to ensure code quality standards are maintained.
+
 ### Build
 
 Build for production:
@@ -75,6 +93,11 @@ npm run preview
 - **@testing-library/jest-dom** (^6.6.3) - Custom jest matchers for DOM
 - **@testing-library/user-event** (^14.5.2) - User interaction simulation
 - **jsdom** (^25.0.1) - DOM implementation for Node.js (used in tests)
+- **eslint** - JavaScript and TypeScript linter
+- **eslint-plugin-react** - React-specific linting rules
+- **eslint-plugin-react-hooks** - React Hooks linting rules
+- **@typescript-eslint/eslint-plugin** - TypeScript-specific linting rules
+- **@typescript-eslint/parser** - TypeScript parser for ESLint
 
 ## Project Structure
 
@@ -91,6 +114,7 @@ habit-tracker/
 ├── index.html           # HTML template
 ├── vite.config.js       # Vite configuration
 ├── vitest.config.js     # Vitest configuration
+├── eslint.config.js     # ESLint configuration
 └── package.json         # Project dependencies
 ```
 
