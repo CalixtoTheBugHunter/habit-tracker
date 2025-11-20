@@ -34,6 +34,8 @@ Examples:
 ```
 Create branch using pattern: {username}/GH-{ISSUE_NUMBER}--short-description
   - Get current GitHub username dynamically (don't assume it's always "paulo")
+    * If username is not already saved in memory, retrieve it and save it for future use
+    * This avoids needing to look it up every time when creating branch names
   - Note: This is the developer's GitHub username (which may differ from the repository owner)
   - Extract issue number from GitHub issue
   - Create descriptive short description from issue title
@@ -49,6 +51,7 @@ Example: paulo/GH-123--add-habit-creation
 ```
 Use mcp_github_create_pull_request to create PR:
   - owner: Get current GitHub username/owner dynamically (don't assume it's always "CalixtoTheBugHunter")
+    * Use saved username from memory if available, otherwise retrieve and save it
   - repo: habit-tracker
   - title: Clear, descriptive title referencing issue
   - head: Branch name created in previous step
@@ -72,6 +75,7 @@ Note: GitHub automatically links PRs when using "Fixes #123" or "Closes #123" in
 
 - This workflow uses MCP GitHub operations instead of CLI commands
 - Branch naming pattern: {username}/GH-{ISSUE_NUMBER}--short-description (username retrieved dynamically)
+- **GitHub Username**: Save the GitHub username in memory when first retrieved to avoid repeated lookups for branch naming
 - PR descriptions focus on user-facing value, not technical details
 - **Owner/Repository**: Always retrieve the current GitHub username/owner dynamically. Do not hardcode "CalixtoTheBugHunter" or assume a specific owner. The repository is always "habit-tracker" but the owner should be determined at runtime.
 

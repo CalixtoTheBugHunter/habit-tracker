@@ -9,17 +9,26 @@ import {
   closeDB,
   testUtils,
 } from './indexedDB'
+import type { Habit } from '../types/habit'
 
 const { resetDB } = testUtils
 
-describe('IndexedDB Service', () => {
-  let mockDB
-  let mockTransaction
-  let mockObjectStore
-  let mockIndexedDB
+interface MockRequest {
+  result: unknown
+  error: Error | null
+  onsuccess: ((event: { target: { result: unknown } }) => void) | null
+  onerror: ((event: { target: { error: Error } }) => void) | null
+  readyState: string
+}
 
-  function createMockRequest() {
-    const request = {
+describe('IndexedDB Service', () => {
+  let mockDB: IDBDatabase
+  let mockTransaction: IDBTransaction
+  let mockObjectStore: IDBObjectStore
+  let mockIndexedDB: IDBFactory
+
+  function createMockRequest(): MockRequest {
+    const request: MockRequest = {
       result: null,
       error: null,
       onsuccess: null,
@@ -29,22 +38,26 @@ describe('IndexedDB Service', () => {
     return request
   }
 
+  function createMockIDBRequest<T>(): IDBRequest<T> {
+    return createMockRequest() as unknown as IDBRequest<T>
+  }
+
   beforeEach(() => {
     mockObjectStore = {
-      add: vi.fn(() => createMockRequest()),
-      get: vi.fn(() => createMockRequest()),
-      getAll: vi.fn(() => createMockRequest()),
-      put: vi.fn(() => createMockRequest()),
-      delete: vi.fn(() => createMockRequest()),
-      clear: vi.fn(() => createMockRequest()),
-    }
+      add: vi.fn(() => createMockIDBRequest<string>()),
+      get: vi.fn(() => createMockIDBRequest<Habit | undefined>()),
+      getAll: vi.fn(() => createMockIDBRequest<Habit[]>()),
+      put: vi.fn(() => createMockIDBRequest<string>()),
+      delete: vi.fn(() => createMockIDBRequest<void>()),
+      clear: vi.fn(() => createMockIDBRequest<void>()),
+    } as unknown as IDBObjectStore
 
     mockTransaction = {
       objectStore: vi.fn().mockReturnValue(mockObjectStore),
       oncomplete: null,
       onerror: null,
       onabort: null,
-    }
+    } as unknown as IDBTransaction
 
     mockDB = {
       objectStoreNames: {
@@ -52,14 +65,14 @@ describe('IndexedDB Service', () => {
       },
       transaction: vi.fn().mockReturnValue(mockTransaction),
       close: vi.fn(),
-    }
+    } as unknown as IDBDatabase
 
     mockIndexedDB = {
       open: vi.fn(),
-    }
+    } as unknown as IDBFactory
 
-    global.indexedDB = mockIndexedDB
-    global.window = { indexedDB: mockIndexedDB }
+    globalThis.indexedDB = mockIndexedDB
+    globalThis.window = { indexedDB: mockIndexedDB } as unknown as Window & typeof globalThis
   })
 
   afterEach(() => {
@@ -72,13 +85,14 @@ describe('IndexedDB Service', () => {
       const mockOpenRequest = createMockRequest()
       mockOpenRequest.result = mockDB
 
-      mockIndexedDB.open.mockReturnValue(mockOpenRequest)
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
 
       const openPromise = openDB()
 
       setTimeout(() => {
-        if (mockOpenRequest.onupgradeneeded) {
-          mockOpenRequest.onupgradeneeded({
+        const openRequest = mockOpenRequest as unknown as IDBOpenDBRequest
+        if (openRequest.onupgradeneeded) {
+          openRequest.onupgradeneeded({
             target: {
               result: {
                 objectStoreNames: { contains: () => false },
@@ -87,7 +101,7 @@ describe('IndexedDB Service', () => {
                 }),
               },
             },
-          })
+          } as unknown as IDBVersionChangeEvent)
         }
         if (mockOpenRequest.onsuccess) {
           mockOpenRequest.onsuccess({ target: { result: mockDB } })
@@ -105,7 +119,7 @@ describe('IndexedDB Service', () => {
       const error = new Error('Database open failed')
       mockOpenRequest.error = error
 
-      mockIndexedDB.open.mockReturnValue(mockOpenRequest)
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
 
       const openPromise = openDB()
 
@@ -123,7 +137,7 @@ describe('IndexedDB Service', () => {
       const quotaError = new DOMException('QuotaExceededError', 'QuotaExceededError')
       mockOpenRequest.error = quotaError
 
-      mockIndexedDB.open.mockReturnValue(mockOpenRequest)
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
 
       const openPromise = openDB()
 
@@ -138,12 +152,12 @@ describe('IndexedDB Service', () => {
   })
 
   describe('addHabit', () => {
-    let addRequest
+    let addRequest: MockRequest
 
     beforeEach(async () => {
       const mockOpenRequest = createMockRequest()
       mockOpenRequest.result = mockDB
-      mockIndexedDB.open.mockReturnValue(mockOpenRequest)
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
       const openPromise = openDB()
       setTimeout(() => {
         if (mockOpenRequest.onsuccess) {
@@ -153,11 +167,11 @@ describe('IndexedDB Service', () => {
       await openPromise
 
       addRequest = createMockRequest()
-      mockObjectStore.add.mockReturnValue(addRequest)
+      ;(mockObjectStore.add as ReturnType<typeof vi.fn>).mockReturnValue(addRequest)
     })
 
     it('adds a habit to the database', async () => {
-      const habit = {
+      const habit: Habit = {
         id: '1',
         name: 'Exercise',
         description: 'Daily exercise routine',
@@ -179,7 +193,7 @@ describe('IndexedDB Service', () => {
     })
 
     it('handles add errors', async () => {
-      const habit = { id: '1', name: 'Exercise' }
+      const habit: Habit = { id: '1', name: 'Exercise' }
       const error = new Error('Add failed')
 
       const addPromise = addHabit(habit)
@@ -194,7 +208,7 @@ describe('IndexedDB Service', () => {
     })
 
     it('handles quota exceeded error on add', async () => {
-      const habit = { id: '1', name: 'Exercise' }
+      const habit: Habit = { id: '1', name: 'Exercise' }
       const quotaError = new DOMException('QuotaExceededError', 'QuotaExceededError')
 
       const addPromise = addHabit(habit)
@@ -210,12 +224,12 @@ describe('IndexedDB Service', () => {
   })
 
   describe('getHabit', () => {
-    let getRequest
+    let getRequest: MockRequest
 
     beforeEach(async () => {
       const mockOpenRequest = createMockRequest()
       mockOpenRequest.result = mockDB
-      mockIndexedDB.open.mockReturnValue(mockOpenRequest)
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
       const openPromise = openDB()
       setTimeout(() => {
         if (mockOpenRequest.onsuccess) {
@@ -225,11 +239,11 @@ describe('IndexedDB Service', () => {
       await openPromise
 
       getRequest = createMockRequest()
-      mockObjectStore.get.mockReturnValue(getRequest)
+      ;(mockObjectStore.get as ReturnType<typeof vi.fn>).mockReturnValue(getRequest)
     })
 
     it('retrieves a habit by id', async () => {
-      const habit = {
+      const habit: Habit = {
         id: '1',
         name: 'Exercise',
         description: 'Daily exercise routine',
@@ -280,12 +294,12 @@ describe('IndexedDB Service', () => {
   })
 
   describe('getAllHabits', () => {
-    let getAllRequest
+    let getAllRequest: MockRequest
 
     beforeEach(async () => {
       const mockOpenRequest = createMockRequest()
       mockOpenRequest.result = mockDB
-      mockIndexedDB.open.mockReturnValue(mockOpenRequest)
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
       const openPromise = openDB()
       setTimeout(() => {
         if (mockOpenRequest.onsuccess) {
@@ -295,11 +309,11 @@ describe('IndexedDB Service', () => {
       await openPromise
 
       getAllRequest = createMockRequest()
-      mockObjectStore.getAll.mockReturnValue(getAllRequest)
+      ;(mockObjectStore.getAll as ReturnType<typeof vi.fn>).mockReturnValue(getAllRequest)
     })
 
     it('retrieves all habits from the database', async () => {
-      const habits = [
+      const habits: Habit[] = [
         { id: '1', name: 'Exercise', createdAt: new Date().toISOString() },
         { id: '2', name: 'Read', createdAt: new Date().toISOString() },
       ]
@@ -348,12 +362,12 @@ describe('IndexedDB Service', () => {
   })
 
   describe('updateHabit', () => {
-    let updateRequest
+    let updateRequest: MockRequest
 
     beforeEach(async () => {
       const mockOpenRequest = createMockRequest()
       mockOpenRequest.result = mockDB
-      mockIndexedDB.open.mockReturnValue(mockOpenRequest)
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
       const openPromise = openDB()
       setTimeout(() => {
         if (mockOpenRequest.onsuccess) {
@@ -363,11 +377,11 @@ describe('IndexedDB Service', () => {
       await openPromise
 
       updateRequest = createMockRequest()
-      mockObjectStore.put.mockReturnValue(updateRequest)
+      ;(mockObjectStore.put as ReturnType<typeof vi.fn>).mockReturnValue(updateRequest)
     })
 
     it('updates an existing habit', async () => {
-      const habit = {
+      const habit: Habit = {
         id: '1',
         name: 'Exercise Updated',
         description: 'Updated description',
@@ -389,7 +403,7 @@ describe('IndexedDB Service', () => {
     })
 
     it('handles update errors', async () => {
-      const habit = { id: '1', name: 'Exercise' }
+      const habit: Habit = { id: '1', name: 'Exercise' }
       const error = new Error('Update failed')
 
       const updatePromise = updateHabit(habit)
@@ -404,7 +418,7 @@ describe('IndexedDB Service', () => {
     })
 
     it('handles quota exceeded error on update', async () => {
-      const habit = { id: '1', name: 'Exercise' }
+      const habit: Habit = { id: '1', name: 'Exercise' }
       const quotaError = new DOMException('QuotaExceededError', 'QuotaExceededError')
 
       const updatePromise = updateHabit(habit)
@@ -420,12 +434,12 @@ describe('IndexedDB Service', () => {
   })
 
   describe('deleteHabit', () => {
-    let deleteRequest
+    let deleteRequest: MockRequest
 
     beforeEach(async () => {
       const mockOpenRequest = createMockRequest()
       mockOpenRequest.result = mockDB
-      mockIndexedDB.open.mockReturnValue(mockOpenRequest)
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
       const openPromise = openDB()
       setTimeout(() => {
         if (mockOpenRequest.onsuccess) {
@@ -435,7 +449,7 @@ describe('IndexedDB Service', () => {
       await openPromise
 
       deleteRequest = createMockRequest()
-      mockObjectStore.delete.mockReturnValue(deleteRequest)
+      ;(mockObjectStore.delete as ReturnType<typeof vi.fn>).mockReturnValue(deleteRequest)
     })
 
     it('deletes a habit by id', async () => {

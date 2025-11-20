@@ -1,32 +1,37 @@
+import type { Habit } from '../types/habit'
+
 const DB_NAME = 'habit-tracker'
 const DB_VERSION = 1
 const STORE_NAME = 'habits'
 
-let dbInstance = null
+let dbInstance: IDBDatabase | null = null
 
-function isQuotaExceededError(error) {
+interface ObjectStoreResult {
+  objectStore: IDBObjectStore
+  transaction: IDBTransaction
+}
+
+function isQuotaExceededError(error: unknown): boolean {
   return (
     error instanceof DOMException &&
     (error.name === 'QuotaExceededError' ||
       error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
-      error.code === 22)
+      (error as { code?: number }).code === 22)
   )
 }
 
-/**
- * Validates habit object structure and data types.
- */
-function validateHabit(habit) {
+function validateHabit(habit: unknown): asserts habit is Habit {
   if (!habit || typeof habit !== 'object') {
     throw new Error('Habit must be an object')
   }
-  if (!habit.id || typeof habit.id !== 'string' || habit.id.trim() === '') {
+  const habitObj = habit as Record<string, unknown>
+  if (!habitObj.id || typeof habitObj.id !== 'string' || habitObj.id.trim() === '') {
     throw new Error('Habit must have a non-empty string id')
   }
   
   const stringFields = ['name', 'description', 'createdAt']
   for (const field of stringFields) {
-    if (habit[field] !== undefined && typeof habit[field] !== 'string') {
+    if (habitObj[field] !== undefined && typeof habitObj[field] !== 'string') {
       throw new Error(`Habit field "${field}" must be a string if provided`)
     }
   }
@@ -35,16 +40,15 @@ function validateHabit(habit) {
   if (habitSize > 100000) {
     throw new Error('Habit data exceeds maximum size')
   }
-  return true
 }
 
-function validateId(id) {
+function validateId(id: unknown): asserts id is string {
   if (!id || typeof id !== 'string' || id.trim() === '') {
     throw new Error('Habit id must be a non-empty string')
   }
 }
 
-function handleRequestError(request, defaultMessage) {
+function handleRequestError<T>(request: IDBRequest<T>, defaultMessage: string): Promise<T> {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result)
     request.onerror = () => {
@@ -58,13 +62,13 @@ function handleRequestError(request, defaultMessage) {
   })
 }
 
-export function openDB() {
+export function openDB(): Promise<IDBDatabase> {
   if (dbInstance) {
     return Promise.resolve(dbInstance)
   }
 
   return new Promise((resolve, reject) => {
-    const idb = typeof window !== 'undefined' ? window.indexedDB : global.indexedDB
+    const idb = typeof window !== 'undefined' ? window.indexedDB : globalThis.indexedDB
     if (!idb) {
       reject(new Error('IndexedDB is not supported in this browser'))
       return
@@ -87,7 +91,7 @@ export function openDB() {
     }
 
     request.onupgradeneeded = (event) => {
-      const db = event.target.result
+      const db = (event.target as IDBOpenDBRequest).result
 
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const objectStore = db.createObjectStore(STORE_NAME, {
@@ -103,9 +107,12 @@ export function openDB() {
 
 /**
  * Gets an object store for database operations.
- * Note: A new transaction is created for each operation.
+ * 
+ * @param mode - The transaction mode ('readonly' or 'readwrite'). Defaults to 'readonly'
+ * @returns A promise that resolves to an object containing the object store and transaction
+ * @throws Error if the object store does not exist or if the transaction fails
  */
-function getObjectStore(mode = 'readonly') {
+function getObjectStore(mode: IDBTransactionMode = 'readonly'): Promise<ObjectStoreResult> {
   return new Promise((resolve, reject) => {
     openDB()
       .then((db) => {
@@ -127,15 +134,16 @@ function getObjectStore(mode = 'readonly') {
   })
 }
 
-export async function addHabit(habit) {
+export async function addHabit(habit: Habit): Promise<string> {
   validateHabit(habit)
 
   const { objectStore } = await getObjectStore('readwrite')
   const request = objectStore.add(habit)
-  return handleRequestError(request, 'Failed to add habit')
+  const result = await handleRequestError<IDBValidKey>(request, 'Failed to add habit')
+  return String(result)
 }
 
-export async function getHabit(id) {
+export async function getHabit(id: string): Promise<Habit | undefined> {
   validateId(id)
 
   const { objectStore } = await getObjectStore('readonly')
@@ -145,32 +153,36 @@ export async function getHabit(id) {
 
 /**
  * Retrieves all habits from the database.
- * Note: Loads all habits into memory at once.
+ * 
+ * @returns A promise that resolves to an array of all habits
+ * @remarks This function loads all habits into memory at once. For applications
+ * with many habits, consider implementing pagination in a future update.
  */
-export async function getAllHabits() {
+export async function getAllHabits(): Promise<Habit[]> {
   const { objectStore } = await getObjectStore('readonly')
   const request = objectStore.getAll()
   const result = await handleRequestError(request, 'Failed to get all habits')
   return result || []
 }
 
-export async function updateHabit(habit) {
+export async function updateHabit(habit: Habit): Promise<string> {
   validateHabit(habit)
 
   const { objectStore } = await getObjectStore('readwrite')
   const request = objectStore.put(habit)
-  return handleRequestError(request, 'Failed to update habit')
+  const result = await handleRequestError<IDBValidKey>(request, 'Failed to update habit')
+  return String(result)
 }
 
-export async function deleteHabit(id) {
+export async function deleteHabit(id: string): Promise<void> {
   validateId(id)
 
   const { objectStore } = await getObjectStore('readwrite')
   const request = objectStore.delete(id)
-  return handleRequestError(request, 'Failed to delete habit')
+  await handleRequestError(request, 'Failed to delete habit')
 }
 
-export function closeDB(db) {
+export function closeDB(db: IDBDatabase | null): void {
   if (db && typeof db.close === 'function') {
     db.close()
     if (db === dbInstance) {
@@ -179,15 +191,8 @@ export function closeDB(db) {
   }
 }
 
-/**
- * Test utilities for IndexedDB service.
- * @internal
- */
 export const testUtils = {
-  /**
-   * Resets the database connection for test cleanup.
-   */
-  resetDB() {
+  resetDB(): void {
     if (dbInstance) {
       dbInstance.close()
     }
