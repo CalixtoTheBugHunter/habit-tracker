@@ -1,0 +1,28 @@
+name: Dependabot Verification
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  verify-dependabot:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Display dependency information
+        run: |
+          echo "Dependency: ${{ steps.dependabot-metadata.outputs.dependency-names }}"
+          echo "Dependency type: ${{ steps.dependabot-metadata.outputs.dependency-type }}"
+          echo "Update type: ${{ steps.dependabot-metadata.outputs.update-type }}"
+          echo "New version: ${{ steps.dependabot-metadata.outputs.new-version }}"
+
