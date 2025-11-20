@@ -1,10 +1,10 @@
 ---
-description: Review PR focusing on security, performance, accessibility, code smells, and unnecessary comments
+description: Review PR focusing on security, performance, accessibility, code smells, unnecessary comments, and test quality
 ---
 
 # Review PR Workflow
 
-This workflow performs a focused code review of a GitHub PR, analyzing security risks, performance issues, accessibility concerns, code smells, and unnecessary comments using MCP GitHub operations and codebase analysis.
+This workflow performs a focused code review of a GitHub PR, analyzing security risks, performance issues, accessibility concerns, code smells, unnecessary comments, and test quality using MCP GitHub operations and codebase analysis.
 
 ## Phase 1: PR Information Gathering
 
@@ -314,9 +314,122 @@ Use codebase_search to:
   - Verify documentation standards in the project
 ```
 
-## Phase 6: Review Summary and Recommendations
+## Phase 6: Test Quality Review
 
-### Step 12: Generate Review Report
+### Step 12: Test Validation and Quality Analysis
+
+**Test Quality Check**: Ensure tests are meaningful, maintainable, and follow best practices
+
+```
+For each test file (*.test.ts, *.test.tsx, *.spec.ts, *.spec.tsx) in changed files, analyze:
+
+1. **Test Substance Validation**:
+   - Verify tests actually assert meaningful behavior
+   - Check for "dumb tests" that don't test anything:
+     * Tests that only check if code runs without errors
+     * Tests with no assertions or only trivial assertions
+     * Tests that verify implementation details instead of behavior
+     * Tests that always pass regardless of code changes
+   - Ensure tests verify expected outcomes, not just that functions execute
+   - Check that error cases are properly tested
+   - Verify edge cases are covered
+
+2. **Repetitive Test Patterns**:
+   - Identify tests with similar structure that differ only in input/output
+   - Look for patterns like:
+     * Multiple tests testing the same function with different inputs
+     * Similar test setup/teardown repeated across tests
+     * Repeated assertion patterns
+   - Suggest using parameterized tests (test.each, it.each) or loops where appropriate
+   - Check if test data can be extracted to shared fixtures
+
+3. **Test Redundancy**:
+   - Identify duplicate or overlapping test cases
+   - Check if multiple tests verify the same behavior
+   - Look for tests that are subsets of other tests
+   - Verify tests aren't testing the same thing from different angles unnecessarily
+   - Suggest consolidating redundant tests
+
+4. **Mock Complexity**:
+   - Evaluate if mocks are overly complicated
+   - Check for:
+     * Deeply nested mock structures
+     * Mocks that recreate entire systems
+     * Over-mocking (mocking things that don't need mocking)
+     * Complex mock setup that obscures test intent
+   - Suggest simplifying mocks or using real objects where appropriate
+   - Verify mocks are focused on what's actually being tested
+
+5. **Mock Data Organization**:
+   - Check if mock data is scattered throughout test files
+   - Identify repeated mock data that could be extracted
+   - Look for opportunities to:
+     * Create shared mock factories or builders
+     * Extract mock data to separate files (e.g., __mocks__, fixtures, test-data)
+     * Use consistent mock data patterns across tests
+   - Verify mock data is reusable and maintainable
+
+6. **Test Utilities and Helpers**:
+   - Check if common test patterns could benefit from utilities
+   - Look for:
+     * Repeated setup/teardown code
+     * Common assertion patterns
+     * Shared test helpers that could be extracted
+     * Custom matchers that would improve readability
+   - Suggest creating test utilities for:
+     * Common mock factories
+     * Shared test fixtures
+     * Custom assertion helpers
+     * Test data generators
+   - Verify existing test utilities are being used where appropriate
+
+Use codebase_search to:
+  - Find existing test utilities and patterns
+  - Check for test helper files (test-utils, test-helpers, fixtures)
+  - Identify similar test patterns in other files
+  - Verify consistency with existing test structure
+```
+
+### Step 13: Test Best Practices Verification
+
+**Test Quality Check**: Ensure tests follow testing best practices
+
+```
+For each test file, verify:
+
+1. **Test Structure**:
+   - Tests follow AAA pattern (Arrange, Act, Assert)
+   - Test names clearly describe what is being tested
+   - Tests are independent and can run in any order
+   - Setup and teardown are properly handled
+
+2. **Test Coverage**:
+   - Critical paths are tested
+   - Error cases are covered
+   - Edge cases are considered
+   - Boundary conditions are tested
+
+3. **Test Maintainability**:
+   - Tests are readable and self-documenting
+   - Test data is clear and meaningful
+   - Tests won't break with unrelated code changes
+   - Tests are fast and don't have unnecessary delays
+
+4. **Mock Best Practices**:
+   - Mocks are used appropriately (not over-mocked)
+   - Mock behavior matches real behavior
+   - Mocks are reset between tests
+   - Mock verification is meaningful
+
+Use codebase_search to:
+  - Find testing patterns and conventions in the codebase
+  - Check for existing test utilities that should be used
+  - Verify consistency with project testing standards
+```
+
+## Phase 7: Review Summary and Recommendations
+
+### Step 14: Generate Review Report
 
 **Security Check**: Compile comprehensive review findings
 
@@ -348,14 +461,23 @@ Create structured review report with:
    - Unnecessary comments to remove
    - Code duplication opportunities
 
-5. **Overall Assessment**:
+5. **Test Quality Findings**:
+   - Dumb or meaningless tests identified
+   - Repetitive test patterns that could be parameterized
+   - Redundant tests that should be consolidated
+   - Overcomplicated mocks that need simplification
+   - Mock data organization opportunities
+   - Missing or underutilized test utilities
+   - Test maintainability concerns
+
+6. **Overall Assessment**:
    - Summary of critical issues
    - Priority ranking
    - Estimated effort for fixes
    - Approval recommendation
 ```
 
-### Step 13: Create Review Comments
+### Step 15: Create Review Comments
 
 **Security Check**: Add actionable review comments to PR
 
@@ -398,13 +520,14 @@ Before completing review:
 - [ ] Accessibility concerns checked against WCAG standards
 - [ ] Code smells identified with refactoring suggestions
 - [ ] Unnecessary comments flagged for removal
+- [ ] Test quality analyzed (substance, redundancy, patterns, mocks, utilities)
 - [ ] Review comments added to PR for critical issues
 - [ ] Overall assessment provided with approval recommendation
 
 ## Notes
 
 - This workflow uses MCP GitHub operations instead of CLI commands
-- Focus areas: Security, Performance, Accessibility, Code Quality, Comments
+- Focus areas: Security, Performance, Accessibility, Code Quality, Comments, Test Quality
 - Always reference official documentation for best practices
 - Prioritize critical security and accessibility issues
 - **Owner/Repository**: Always retrieve the current GitHub username/owner dynamically. Do not hardcode "CalixtoTheBugHunter" or assume a specific owner. The repository is always "habit-tracker" but the owner should be determined at runtime.
