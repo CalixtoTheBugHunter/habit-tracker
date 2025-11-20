@@ -25,6 +25,7 @@ Create structured commit:
 ```
 Create branch using pattern: {username}/GH-{ISSUE_NUMBER}--short-description
   - Get current GitHub username dynamically (don't assume it's always "paulo")
+  - Note: This is the developer's GitHub username (which may differ from the repository owner)
   - Extract issue number from GitHub issue
   - Create descriptive short description from issue title
   - Push branch to remote repository
