@@ -24,6 +24,12 @@ export default [
         window: 'readonly',
         document: 'readonly',
         console: 'readonly',
+        global: 'readonly',
+        DOMException: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
       },
     },
     plugins: {

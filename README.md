@@ -109,6 +109,9 @@ habit-tracker/
 │   ├── App.test.jsx     # App component tests
 │   ├── main.jsx         # Application entry point
 │   ├── index.css        # Global styles
+│   ├── services/
+│   │   ├── indexedDB.js      # IndexedDB service for offline storage
+│   │   └── indexedDB.test.js # IndexedDB service tests
 │   └── test/
 │       └── setup.js     # Test setup configuration
 ├── index.html           # HTML template
@@ -121,6 +124,86 @@ habit-tracker/
 ## Styling
 
 This project uses **plain CSS** for styling. No CSS frameworks or preprocessors are used.
+
+## Offline Storage (IndexedDB)
+
+The app uses IndexedDB for offline storage, allowing users to track habits without an internet connection. All data is stored locally in the browser.
+
+### IndexedDB Service
+
+The IndexedDB service (`src/services/indexedDB.js`) provides a complete CRUD API for managing habit objects:
+
+#### Database Schema
+
+- **Database Name**: `habit-tracker`
+- **Version**: `1`
+- **Object Store**: `habits`
+- **Key Path**: `id` (primary key)
+
+#### Habit Object Structure
+
+```javascript
+{
+  id: string,              // Unique identifier (required)
+  name: string,            // Habit name
+  description: string,     // Optional description
+  createdAt: string,      // ISO timestamp
+  // ... other custom fields
+}
+```
+
+#### API Methods
+
+- **`openDB()`** - Opens the database connection and creates object stores if needed
+- **`addHabit(habit)`** - Adds a new habit to the database
+- **`getHabit(id)`** - Retrieves a habit by its ID
+- **`getAllHabits()`** - Retrieves all habits from the database
+- **`updateHabit(habit)`** - Updates an existing habit
+- **`deleteHabit(id)`** - Deletes a habit by its ID
+- **`closeDB(db)`** - Closes the database connection
+
+#### Error Handling
+
+The service includes comprehensive error handling for:
+
+- **Quota Exceeded**: When browser storage quota is exceeded, a user-friendly error message is returned
+- **Version Upgrades**: Database schema upgrades are handled automatically during database initialization
+- **Transaction Errors**: All database operations handle transaction failures gracefully
+
+#### Usage Example
+
+```javascript
+import { openDB, addHabit, getAllHabits, updateHabit, deleteHabit } from './services/indexedDB'
+
+// Open database (usually done once at app startup)
+await openDB()
+
+// Add a new habit
+const habitId = await addHabit({
+  id: '1',
+  name: 'Exercise',
+  description: 'Daily exercise routine',
+  createdAt: new Date().toISOString()
+})
+
+// Get all habits
+const habits = await getAllHabits()
+
+// Update a habit
+await updateHabit({
+  id: '1',
+  name: 'Exercise Updated',
+  description: 'Updated description',
+  createdAt: new Date().toISOString()
+})
+
+// Delete a habit
+await deleteHabit('1')
+```
+
+#### Browser Support
+
+IndexedDB is supported in all modern browsers. The service includes a check for IndexedDB availability and will throw a descriptive error if it's not supported.
 
 ## License
 
