@@ -11,11 +11,20 @@ This workflow handles version control and PR creation for completed implementati
 **Security Check**: Ensure clean, atomic commits
 
 ```
-Create structured commit:
-  - Clear, descriptive commit message
-  - Reference GitHub issue number (e.g., "Fix #123: Add habit creation feature")
+Create one-line commit using commitlint pattern (Conventional Commits):
+  - Format: <type>(<scope>): <subject> (#ISSUE_NUMBER)
+  - Types: fix, feat, docs, style, refactor, test, chore, etc.
+  - Scope: optional, describes the area of change
+  - Subject: brief description in imperative mood
+  - Reference GitHub issue number at the end: (#ISSUE_NUMBER)
+  - Keep to one line, max 72 characters recommended
   - Group related changes logically
   - Ensure no sensitive data is committed
+
+Examples:
+  - fix(setup): initialize Vite + React project with plain CSS (#1)
+  - feat(habits): add habit creation feature (#123)
+  - docs: update README with installation instructions (#45)
 ```
 
 ## Step 2: Create Branch & Push

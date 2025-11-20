@@ -172,6 +172,11 @@ Ensure all checks pass before proceeding
 **User Interaction Required**: Get user validation
 
 ```
+Verify the app runs locally:
+  - Run `npm run dev` to start the development server
+  - Verify the app loads without errors
+  - NEVER run `npm run build` in this workflow - use `npm run dev` instead
+
 Provide user with:
   - Summary of implemented changes
   - Instructions for manual testing
