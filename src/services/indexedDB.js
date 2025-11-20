@@ -15,8 +15,6 @@ function isQuotaExceededError(error) {
 
 /**
  * Validates habit object structure and data types.
- * Ensures habit is an object with a valid string id, validates string fields
- * are strings, and enforces size limits to prevent storage exhaustion.
  */
 function validateHabit(habit) {
   if (!habit || typeof habit !== 'object') {
@@ -26,8 +24,6 @@ function validateHabit(habit) {
     throw new Error('Habit must have a non-empty string id')
   }
   
-  // Validate that common string fields are strings (basic sanitization)
-  // This prevents storing non-string values that could cause issues when rendered
   const stringFields = ['name', 'description', 'createdAt']
   for (const field of stringFields) {
     if (habit[field] !== undefined && typeof habit[field] !== 'string') {
@@ -35,7 +31,6 @@ function validateHabit(habit) {
     }
   }
   
-  // Add size limit check (100KB max per habit)
   const habitSize = JSON.stringify(habit).length
   if (habitSize > 100000) {
     throw new Error('Habit data exceeds maximum size')
@@ -108,8 +103,7 @@ export function openDB() {
 
 /**
  * Gets an object store for database operations.
- * Note: A new transaction is created for each operation. For batch operations,
- * consider reusing a single transaction to reduce overhead.
+ * Note: A new transaction is created for each operation.
  */
 function getObjectStore(mode = 'readonly') {
   return new Promise((resolve, reject) => {
@@ -151,8 +145,7 @@ export async function getHabit(id) {
 
 /**
  * Retrieves all habits from the database.
- * Note: This loads all habits into memory at once. For large datasets (1000+ habits),
- * consider implementing pagination or cursor-based iteration.
+ * Note: Loads all habits into memory at once.
  */
 export async function getAllHabits() {
   const { objectStore } = await getObjectStore('readonly')
@@ -187,13 +180,18 @@ export function closeDB(db) {
 }
 
 /**
- * Resets the database connection. Intended for testing purposes only.
+ * Test utilities for IndexedDB service.
  * @internal
  */
-export function resetDB() {
-  if (dbInstance) {
-    dbInstance.close()
-  }
-  dbInstance = null
+export const testUtils = {
+  /**
+   * Resets the database connection for test cleanup.
+   */
+  resetDB() {
+    if (dbInstance) {
+      dbInstance.close()
+    }
+    dbInstance = null
+  },
 }
 

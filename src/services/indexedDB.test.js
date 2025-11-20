@@ -7,8 +7,10 @@ import {
   updateHabit,
   deleteHabit,
   closeDB,
-  resetDB,
+  testUtils,
 } from './indexedDB'
+
+const { resetDB } = testUtils
 
 describe('IndexedDB Service', () => {
   let mockDB
