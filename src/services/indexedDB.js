@@ -13,6 +13,41 @@ function isQuotaExceededError(error) {
   )
 }
 
+function validateHabit(habit) {
+  if (!habit || typeof habit !== 'object') {
+    throw new Error('Habit must be an object')
+  }
+  if (!habit.id || typeof habit.id !== 'string' || habit.id.trim() === '') {
+    throw new Error('Habit must have a non-empty string id')
+  }
+  // Add size limit check (100KB max per habit)
+  const habitSize = JSON.stringify(habit).length
+  if (habitSize > 100000) {
+    throw new Error('Habit data exceeds maximum size')
+  }
+  return true
+}
+
+function validateId(id) {
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    throw new Error('Habit id must be a non-empty string')
+  }
+}
+
+function handleRequestError(request, defaultMessage) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => {
+      const error = request.error || new Error(defaultMessage)
+      if (isQuotaExceededError(error)) {
+        reject(new Error('Storage quota exceeded. Please free up some space.'))
+      } else {
+        reject(error)
+      }
+    }
+  })
+}
+
 export function openDB() {
   if (dbInstance) {
     return Promise.resolve(dbInstance)
@@ -79,48 +114,19 @@ function getObjectStore(mode = 'readonly') {
 }
 
 export async function addHabit(habit) {
-  if (!habit || !habit.id) {
-    throw new Error('Habit must have an id')
-  }
+  validateHabit(habit)
 
   const { objectStore } = await getObjectStore('readwrite')
-
-  return new Promise((resolve, reject) => {
-    const request = objectStore.add(habit)
-
-    request.onsuccess = () => {
-      resolve(request.result)
-    }
-
-    request.onerror = () => {
-      const error = request.error || new Error('Failed to add habit')
-      if (isQuotaExceededError(error)) {
-        reject(new Error('Storage quota exceeded. Please free up some space.'))
-      } else {
-        reject(error)
-      }
-    }
-  })
+  const request = objectStore.add(habit)
+  return handleRequestError(request, 'Failed to add habit')
 }
 
 export async function getHabit(id) {
-  if (!id) {
-    throw new Error('Habit id is required')
-  }
+  validateId(id)
 
   const { objectStore } = await getObjectStore('readonly')
-
-  return new Promise((resolve, reject) => {
-    const request = objectStore.get(id)
-
-    request.onsuccess = () => {
-      resolve(request.result)
-    }
-
-    request.onerror = () => {
-      reject(request.error || new Error('Failed to get habit'))
-    }
-  })
+  const request = objectStore.get(id)
+  return handleRequestError(request, 'Failed to get habit')
 }
 
 export async function getAllHabits() {
@@ -140,48 +146,19 @@ export async function getAllHabits() {
 }
 
 export async function updateHabit(habit) {
-  if (!habit || !habit.id) {
-    throw new Error('Habit must have an id')
-  }
+  validateHabit(habit)
 
   const { objectStore } = await getObjectStore('readwrite')
-
-  return new Promise((resolve, reject) => {
-    const request = objectStore.put(habit)
-
-    request.onsuccess = () => {
-      resolve(request.result)
-    }
-
-    request.onerror = () => {
-      const error = request.error || new Error('Failed to update habit')
-      if (isQuotaExceededError(error)) {
-        reject(new Error('Storage quota exceeded. Please free up some space.'))
-      } else {
-        reject(error)
-      }
-    }
-  })
+  const request = objectStore.put(habit)
+  return handleRequestError(request, 'Failed to update habit')
 }
 
 export async function deleteHabit(id) {
-  if (!id) {
-    throw new Error('Habit id is required')
-  }
+  validateId(id)
 
   const { objectStore } = await getObjectStore('readwrite')
-
-  return new Promise((resolve, reject) => {
-    const request = objectStore.delete(id)
-
-    request.onsuccess = () => {
-      resolve()
-    }
-
-    request.onerror = () => {
-      reject(request.error || new Error('Failed to delete habit'))
-    }
-  })
+  const request = objectStore.delete(id)
+  return handleRequestError(request, 'Failed to delete habit')
 }
 
 export function closeDB(db) {
@@ -193,6 +170,10 @@ export function closeDB(db) {
   }
 }
 
+/**
+ * Resets the database connection. Intended for testing purposes only.
+ * @internal
+ */
 export function resetDB() {
   if (dbInstance) {
     dbInstance.close()
