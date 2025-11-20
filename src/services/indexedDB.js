@@ -13,6 +13,11 @@ function isQuotaExceededError(error) {
   )
 }
 
+/**
+ * Validates habit object structure and data types.
+ * Ensures habit is an object with a valid string id, validates string fields
+ * are strings, and enforces size limits to prevent storage exhaustion.
+ */
 function validateHabit(habit) {
   if (!habit || typeof habit !== 'object') {
     throw new Error('Habit must be an object')
@@ -20,6 +25,16 @@ function validateHabit(habit) {
   if (!habit.id || typeof habit.id !== 'string' || habit.id.trim() === '') {
     throw new Error('Habit must have a non-empty string id')
   }
+  
+  // Validate that common string fields are strings (basic sanitization)
+  // This prevents storing non-string values that could cause issues when rendered
+  const stringFields = ['name', 'description', 'createdAt']
+  for (const field of stringFields) {
+    if (habit[field] !== undefined && typeof habit[field] !== 'string') {
+      throw new Error(`Habit field "${field}" must be a string if provided`)
+    }
+  }
+  
   // Add size limit check (100KB max per habit)
   const habitSize = JSON.stringify(habit).length
   if (habitSize > 100000) {
@@ -91,6 +106,11 @@ export function openDB() {
   })
 }
 
+/**
+ * Gets an object store for database operations.
+ * Note: A new transaction is created for each operation. For batch operations,
+ * consider reusing a single transaction to reduce overhead.
+ */
 function getObjectStore(mode = 'readonly') {
   return new Promise((resolve, reject) => {
     openDB()
@@ -129,20 +149,16 @@ export async function getHabit(id) {
   return handleRequestError(request, 'Failed to get habit')
 }
 
+/**
+ * Retrieves all habits from the database.
+ * Note: This loads all habits into memory at once. For large datasets (1000+ habits),
+ * consider implementing pagination or cursor-based iteration.
+ */
 export async function getAllHabits() {
   const { objectStore } = await getObjectStore('readonly')
-
-  return new Promise((resolve, reject) => {
-    const request = objectStore.getAll()
-
-    request.onsuccess = () => {
-      resolve(request.result || [])
-    }
-
-    request.onerror = () => {
-      reject(request.error || new Error('Failed to get all habits'))
-    }
-  })
+  const request = objectStore.getAll()
+  const result = await handleRequestError(request, 'Failed to get all habits')
+  return result || []
 }
 
 export async function updateHabit(habit) {
