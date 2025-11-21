@@ -1,13 +1,4 @@
-/**
- * Gets today's UTC date string (YYYY-MM-DD).
- */
-function getTodayUTCDateString(): string {
-  const now = new Date()
-  const year = now.getUTCFullYear()
-  const month = String(now.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(now.getUTCDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+import { getTodayUTCDateString } from '../date/dateHelpers'
 
 /**
  * Checks if a habit is completed for today.

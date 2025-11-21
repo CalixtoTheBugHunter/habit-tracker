@@ -3,6 +3,7 @@ import { screen } from '@testing-library/react'
 import { HabitList } from './HabitList'
 import { renderWithProviders } from '../test/utils/render-helpers'
 import { createMockHabit } from '../test/fixtures/habits'
+import { createDateString, createDateStrings } from '../test/utils/date-helpers'
 import { getAllHabits, openDB } from '../services/indexedDB'
 
 vi.mock('../services/indexedDB', () => ({
@@ -16,6 +17,7 @@ vi.mock('../services/indexedDB', () => ({
 describe('HabitList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // openDB is required because HabitContext calls it during initialization
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
   })
 
@@ -28,11 +30,7 @@ describe('HabitList', () => {
   })
 
   it('should render list of habits with name, description, and streak', async () => {
-    const today = new Date()
-    const todayStr = today.toISOString().split('T')[0] + 'T00:00:00.000Z'
-    const yesterday = new Date(today)
-    yesterday.setUTCDate(yesterday.getUTCDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0] + 'T00:00:00.000Z'
+    const [todayStr, yesterdayStr] = createDateStrings([0, 1])
 
     const habits = [
       createMockHabit({
@@ -60,14 +58,7 @@ describe('HabitList', () => {
   })
 
   it('should display streak count for each habit', async () => {
-    const today = new Date()
-    const todayStr = today.toISOString().split('T')[0] + 'T00:00:00.000Z'
-    const yesterday = new Date(today)
-    yesterday.setUTCDate(yesterday.getUTCDate() - 1)
-    const yesterdayStr = yesterday.toISOString().split('T')[0] + 'T00:00:00.000Z'
-    const twoDaysAgo = new Date(today)
-    twoDaysAgo.setUTCDate(twoDaysAgo.getUTCDate() - 2)
-    const twoDaysAgoStr = twoDaysAgo.toISOString().split('T')[0] + 'T00:00:00.000Z'
+    const [todayStr, yesterdayStr, twoDaysAgoStr] = createDateStrings([0, 1, 2])
 
     const habits = [
       createMockHabit({
@@ -85,8 +76,7 @@ describe('HabitList', () => {
   })
 
   it('should display completion status for today', async () => {
-    const today = new Date()
-    const todayStr = today.toISOString().split('T')[0] + 'T00:00:00.000Z'
+    const todayStr = createDateString(0)
 
     const habits = [
       createMockHabit({
@@ -113,8 +103,7 @@ describe('HabitList', () => {
   })
 
   it('should handle habits without name or description', async () => {
-    const today = new Date()
-    const todayStr = today.toISOString().split('T')[0] + 'T00:00:00.000Z'
+    const todayStr = createDateString(0)
 
     const habits = [
       createMockHabit({

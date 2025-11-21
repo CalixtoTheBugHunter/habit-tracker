@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useHabits } from '../contexts/HabitContext'
 import { calculateStreak } from '../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../utils/habit/isTodayCompleted'
@@ -5,6 +6,14 @@ import './HabitList.css'
 
 export function HabitList() {
   const { habits, isLoading, error } = useHabits()
+
+  const habitsWithCalculations = useMemo(() => {
+    return habits.map(habit => ({
+      ...habit,
+      streak: calculateStreak(habit.completionDates),
+      completedToday: isTodayCompleted(habit.completionDates),
+    }))
+  }, [habits])
 
   if (isLoading) {
     return (
@@ -32,29 +41,28 @@ export function HabitList() {
 
   return (
     <ul className="habit-list" aria-label="List of habits">
-      {habits.map(habit => {
-        const streak = calculateStreak(habit.completionDates)
-        const completedToday = isTodayCompleted(habit.completionDates)
-
-        return (
-          <li key={habit.id} className="habit-item">
-            <div className="habit-header">
-              <h3 className="habit-name">{habit.name || 'Unnamed Habit'}</h3>
-              <div className="habit-status">
-                <span className={`completion-badge ${completedToday ? 'completed' : 'not-completed'}`}>
-                  {completedToday ? 'Completed today' : 'Not completed today'}
-                </span>
-              </div>
+      {habitsWithCalculations.map(habit => (
+        <li key={habit.id} className="habit-item">
+          <div className="habit-header">
+            <h3 className="habit-name">{habit.name || 'Unnamed Habit'}</h3>
+            <div className="habit-status">
+              <span
+                className={`completion-badge ${habit.completedToday ? 'completed' : 'not-completed'}`}
+                role="status"
+                aria-label={habit.completedToday ? 'Completed today' : 'Not completed today'}
+              >
+                {habit.completedToday ? 'Completed today' : 'Not completed today'}
+              </span>
             </div>
-            {habit.description && (
-              <p className="habit-description">{habit.description}</p>
-            )}
-            <div className="habit-stats">
-              <span className="streak">Streak: {streak}</span>
-            </div>
-          </li>
-        )
-      })}
+          </div>
+          {habit.description && (
+            <p className="habit-description">{habit.description}</p>
+          )}
+          <div className="habit-stats">
+            <span className="streak">Streak: {habit.streak}</span>
+          </div>
+        </li>
+      ))}
     </ul>
   )
 }
