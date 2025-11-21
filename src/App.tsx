@@ -1,5 +1,6 @@
 import './App.css'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
+import { HabitList } from './components/HabitList'
 
 function AppContent() {
   const { habits, isLoading, error } = useHabits()
@@ -37,6 +38,9 @@ function AppContent() {
         <p>A simple, free and offline habit tracker</p>
         <p>Total habits: {habits.length}</p>
       </header>
+      <main className="app-main">
+        <HabitList />
+      </main>
     </div>
   )
 }
