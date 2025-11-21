@@ -285,7 +285,64 @@ Use codebase_search to:
   - Verify consistency with codebase patterns
 ```
 
-### Step 11: Remove Unnecessary Comments
+### Step 11: Check for Reusable Helpers and Utilities
+
+**Code Quality Check**: Identify opportunities to use or create reusable helpers/utils
+
+```
+For each changed file, analyze:
+
+1. **Existing Helper/Utility Usage**:
+   - Check if code duplicates functionality that already exists in:
+     * src/test/utils/ (test helpers)
+     * src/utils/ (general utilities)
+     * src/services/ (service layer utilities)
+     * Other helper directories in the codebase
+   - Identify patterns that match existing utilities:
+     * Test rendering helpers (e.g., renderWithProviders)
+     * Data validation functions
+     * Date/time utilities
+     * Error handling utilities
+     * Mock data factories
+   - Flag code that should use existing helpers instead of reimplementing
+
+2. **Opportunities for New Helpers**:
+   - Identify repeated code patterns that could be extracted:
+     * Similar test setup/teardown across multiple test files
+     * Repeated validation logic
+     * Common data transformation patterns
+     * Shared mock/fixture creation
+   - Look for:
+     * Three or more instances of similar code
+     * Complex logic that's duplicated
+     * Test utilities that could benefit other tests
+     * Helper functions that would improve readability
+
+3. **Test Helper Reusability**:
+   - Check if test files are using available test utilities:
+     * renderWithProviders or similar rendering helpers
+     * Mock data factories from fixtures
+     * Test setup/teardown utilities
+     * Custom matchers or assertions
+   - Identify test code that could be simplified with existing helpers
+   - Flag test files that create helpers inline that should be extracted
+
+4. **Utility Organization**:
+   - Verify new helpers are placed in appropriate directories:
+     * Test utilities in src/test/utils/
+     * General utilities in src/utils/
+     * Service-specific utilities in src/services/
+   - Check naming conventions match existing patterns
+   - Ensure helpers are properly exported and documented
+
+Use codebase_search to:
+  - Find existing helper/utility patterns in the codebase
+  - Check for similar utilities that might already exist
+  - Identify test helper patterns that should be reused
+  - Verify consistency with existing utility structure
+```
+
+### Step 12: Remove Unnecessary Comments
 
 **Code Quality Check**: Clean up redundant or outdated comments
 
@@ -316,7 +373,7 @@ Use codebase_search to:
 
 ## Phase 6: Test Quality Review
 
-### Step 12: Test Validation and Quality Analysis
+### Step 13: Test Validation and Quality Analysis
 
 **Test Quality Check**: Ensure tests are meaningful, maintainable, and follow best practices
 
@@ -390,7 +447,7 @@ Use codebase_search to:
   - Verify consistency with existing test structure
 ```
 
-### Step 13: Test Best Practices Verification
+### Step 14: Test Best Practices Verification
 
 **Test Quality Check**: Ensure tests follow testing best practices
 
@@ -429,7 +486,7 @@ Use codebase_search to:
 
 ## Phase 7: Review Summary and Recommendations
 
-### Step 14: Generate Review Report
+### Step 15: Generate Review Report
 
 **Security Check**: Compile comprehensive review findings
 
@@ -477,7 +534,7 @@ Create structured review report with:
    - Approval recommendation
 ```
 
-### Step 15: Create Review Comments
+### Step 16: Create Review Comments
 
 **Security Check**: Add actionable review comments to PR
 
@@ -519,6 +576,7 @@ Before completing review:
 - [ ] Performance issues analyzed with best practice references
 - [ ] Accessibility concerns checked against WCAG standards
 - [ ] Code smells identified with refactoring suggestions
+- [ ] Reusable helpers/utils checked for opportunities
 - [ ] Unnecessary comments flagged for removal
 - [ ] Test quality analyzed (substance, redundancy, patterns, mocks, utilities)
 - [ ] Review comments added to PR for critical issues

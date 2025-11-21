@@ -1,0 +1,111 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import { useHabits } from './HabitContext'
+import { openDB, getAllHabits } from '../services/indexedDB'
+import { testUtils } from '../services/indexedDB'
+import { createMockHabit } from '../test/fixtures/habits'
+import { renderWithProviders } from '../test/utils/render-helpers'
+
+vi.mock('../services/indexedDB', () => ({
+  openDB: vi.fn(),
+  getAllHabits: vi.fn(),
+  testUtils: {
+    resetDB: vi.fn(),
+  },
+}))
+
+const { resetDB } = testUtils
+
+function TestComponent() {
+  const { habits, isLoading, error } = useHabits()
+  return (
+    <div>
+      {isLoading && <div>Loading...</div>}
+      {error && <div>Error: {error}</div>}
+      {!isLoading && !error && <div>Habits: {habits.length}</div>}
+    </div>
+  )
+}
+
+describe('HabitContext', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    resetDB()
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('initializes IndexedDB connection on mount', async () => {
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    vi.mocked(getAllHabits).mockResolvedValue([])
+
+    renderWithProviders(<TestComponent />)
+
+    await waitFor(() => {
+      expect(openDB).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('loads habits from IndexedDB after initialization', async () => {
+    const mockHabits = [
+      createMockHabit({ id: '1', name: 'Exercise' }),
+      createMockHabit({ id: '2', name: 'Read' }),
+    ]
+
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    vi.mocked(getAllHabits).mockResolvedValue(mockHabits)
+
+    renderWithProviders(<TestComponent />)
+
+    await waitFor(() => {
+      expect(getAllHabits).toHaveBeenCalledTimes(1)
+      expect(screen.getByText(/habits: 2/i)).toBeInTheDocument()
+    })
+  })
+
+  it('provides loading state during initialization', () => {
+    vi.mocked(openDB).mockImplementation(
+      () => new Promise(() => {})
+    )
+
+    renderWithProviders(<TestComponent />)
+
+    expect(screen.getByText(/loading/i)).toBeInTheDocument()
+  })
+
+  it('handles IndexedDB initialization errors', async () => {
+    const errorMessage = 'IndexedDB is not supported in this browser'
+    vi.mocked(openDB).mockRejectedValue(new Error(errorMessage))
+
+    renderWithProviders(<TestComponent />)
+
+    await waitFor(() => {
+      expect(screen.getByText(new RegExp(errorMessage, 'i'))).toBeInTheDocument()
+    })
+  })
+
+  it('handles errors when loading habits', async () => {
+    const errorMessage = 'Failed to get all habits'
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    vi.mocked(getAllHabits).mockRejectedValue(new Error(errorMessage))
+
+    renderWithProviders(<TestComponent />)
+
+    await waitFor(() => {
+      expect(screen.getByText(new RegExp(errorMessage, 'i'))).toBeInTheDocument()
+    })
+  })
+
+  it('throws error when useHabits is used outside provider', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    
+    expect(() => {
+      render(<TestComponent />)
+    }).toThrow('useHabits must be used within a HabitProvider')
+
+    consoleError.mockRestore()
+  })
+})
+
