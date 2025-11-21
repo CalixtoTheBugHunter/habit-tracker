@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { screen, waitFor, act } from '@testing-library/react'
 import React from 'react'
 import { useHabits } from './HabitContext'
 import { openDB, getAllHabits } from '../services/indexedDB'
 import { testUtils } from '../services/indexedDB'
 import { createMockHabit } from '../test/fixtures/habits'
-import { renderWithProviders } from '../test/utils/render-helpers'
+import { renderWithProviders, renderWithErrorBoundary } from '../test/utils/render-helpers'
 
 vi.mock('../services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -110,9 +110,14 @@ describe('HabitContext', () => {
   it('throws error when useHabits is used outside provider', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     
-    expect(() => {
-      render(<TestComponent />)
-    }).toThrow('useHabits must be used within a HabitProvider')
+    let caughtError: Error | null = null
+    renderWithErrorBoundary(<TestComponent />, (error) => {
+      caughtError = error
+    })
+
+    expect(caughtError).toBeTruthy()
+    expect(caughtError).toBeInstanceOf(Error)
+    expect(caughtError!.message).toBe('useHabits must be used within a HabitProvider')
 
     consoleError.mockRestore()
   })
