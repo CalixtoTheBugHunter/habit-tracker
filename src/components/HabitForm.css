@@ -1,0 +1,172 @@
+.habit-form {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.habit-form-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.habit-form-field {
+  margin-bottom: 1rem;
+}
+
+.habit-form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.habit-form-label .required {
+  color: #d32f2f;
+}
+
+.habit-form-input,
+.habit-form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-family: inherit;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  caret-color: #1a1a1a;
+  cursor: text;
+}
+
+.habit-form-input:focus,
+.habit-form-textarea:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.habit-form-input.error {
+  border-color: #d32f2f;
+}
+
+.habit-form-input:disabled,
+.habit-form-textarea:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.habit-form-textarea {
+  resize: none;
+  min-height: 2.5rem;
+  max-height: 200px;
+  overflow-y: hidden;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+.habit-form-error {
+  display: block;
+  margin-top: 0.5rem;
+  color: #d32f2f;
+  font-size: 0.875rem;
+}
+
+.habit-form-message {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+.habit-form-error-message {
+  background-color: #ffebee;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+}
+
+.habit-form-success-message {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.habit-form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  align-items: center;
+}
+
+.habit-form-button {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.habit-form-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.habit-form-button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.habit-form-button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+.habit-form-button-primary {
+  background-color: #1976d2;
+  color: #ffffff;
+}
+
+.habit-form-button-primary:not(:disabled):hover {
+  background-color: #1565c0;
+}
+
+.habit-form-button-secondary {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.habit-form-button-secondary:not(:disabled):hover {
+  background-color: #e0e0e0;
+}
+
+@media (max-width: 600px) {
+  .habit-form {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .habit-form-title {
+    font-size: 1.125rem;
+  }
+
+  .habit-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .habit-form-button {
+    width: 100%;
+  }
+}
+
