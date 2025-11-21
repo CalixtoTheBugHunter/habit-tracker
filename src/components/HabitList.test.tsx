@@ -30,7 +30,7 @@ describe('HabitList', () => {
   })
 
   it('should render list of habits with name, description, and streak', async () => {
-    const [todayStr, yesterdayStr] = createDateStrings([0, 1])
+    const [todayStr, yesterdayStr]: [string, string] = createDateStrings([0, 1]) as [string, string]
 
     const habits = [
       createMockHabit({
@@ -58,7 +58,7 @@ describe('HabitList', () => {
   })
 
   it('should display streak count for each habit', async () => {
-    const [todayStr, yesterdayStr, twoDaysAgoStr] = createDateStrings([0, 1, 2])
+    const [todayStr, yesterdayStr, twoDaysAgoStr]: [string, string, string] = createDateStrings([0, 1, 2]) as [string, string, string]
 
     const habits = [
       createMockHabit({
