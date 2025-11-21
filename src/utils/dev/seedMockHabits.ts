@@ -90,7 +90,7 @@ export async function seedMockHabits(): Promise<void> {
       try {
         await addHabit(habit)
         console.log(`✓ Added habit: ${habit.name}`)
-      } catch (error) {
+      } catch {
         // If habit already exists, try to update it
         const { updateHabit } = await import('../../services/indexedDB')
         await updateHabit(habit)
