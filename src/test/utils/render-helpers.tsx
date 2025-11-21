@@ -1,16 +1,14 @@
-import { ReactElement } from 'react'
+import { ReactElement, ReactNode } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { HabitProvider } from '../../contexts/HabitContext'
 
-interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  // Future: Add more providers here as needed
-}
+type CustomRenderOptions = Omit<RenderOptions, 'wrapper'>
 
 export function renderWithProviders(
   ui: ReactElement,
   options?: CustomRenderOptions
 ) {
-  function Wrapper({ children }: { children: React.ReactNode }) {
+  function Wrapper({ children }: { children: ReactNode }) {
     return <HabitProvider>{children}</HabitProvider>
   }
 
