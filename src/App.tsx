@@ -9,7 +9,9 @@ function AppContent() {
       <div className="app">
         <header className="app-header">
           <h1>Habit Tracker</h1>
-          <p>Loading...</p>
+          <div role="status" aria-live="polite" aria-atomic="true">
+            <p>Loading...</p>
+          </div>
         </header>
       </div>
     )
@@ -20,7 +22,9 @@ function AppContent() {
       <div className="app">
         <header className="app-header">
           <h1>Habit Tracker</h1>
-          <p className="error">Error: {error}</p>
+          <div role="alert" aria-live="assertive" aria-atomic="true">
+            <p className="error">Error: {error}</p>
+          </div>
         </header>
       </div>
     )

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
 import { openDB, getAllHabits } from '../services/indexedDB'
 import type { Habit } from '../types/habit'
 
@@ -28,7 +28,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const refreshHabits = async () => {
+  const refreshHabits = useCallback(async () => {
     try {
       setError(null)
       const loadedHabits = await getAllHabits()
@@ -38,7 +38,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       setError(errorMessage)
       throw err
     }
-  }
+  }, [])
 
   useEffect(() => {
     async function initializeApp() {
@@ -56,14 +56,17 @@ export function HabitProvider({ children }: HabitProviderProps) {
     }
 
     initializeApp()
-  }, [])
+  }, [refreshHabits])
 
-  const value: HabitContextType = {
-    habits,
-    isLoading,
-    error,
-    refreshHabits,
-  }
+  const value: HabitContextType = useMemo(
+    () => ({
+      habits,
+      isLoading,
+      error,
+      refreshHabits,
+    }),
+    [habits, isLoading, error, refreshHabits]
+  )
 
   return <HabitContext.Provider value={value}>{children}</HabitContext.Provider>
 }

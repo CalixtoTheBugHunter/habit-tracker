@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
+import React from 'react'
 import { useHabits } from './HabitContext'
 import { openDB, getAllHabits } from '../services/indexedDB'
 import { testUtils } from '../services/indexedDB'
@@ -25,6 +26,14 @@ function TestComponent() {
       {!isLoading && !error && <div>Habits: {habits.length}</div>}
     </div>
   )
+}
+
+function TestComponentWithRefresh({ onRefresh }: { onRefresh: (refreshFn: () => Promise<void>) => void }) {
+  const { refreshHabits } = useHabits()
+  React.useEffect(() => {
+    onRefresh(refreshHabits)
+  }, [refreshHabits, onRefresh])
+  return <TestComponent />
 }
 
 describe('HabitContext', () => {
@@ -106,6 +115,38 @@ describe('HabitContext', () => {
     }).toThrow('useHabits must be used within a HabitProvider')
 
     consoleError.mockRestore()
+  })
+
+  it('allows refreshing habits after initial load', async () => {
+    const initialHabits = [createMockHabit({ id: '1', name: 'Exercise' })]
+    const updatedHabits = [
+      createMockHabit({ id: '1', name: 'Exercise' }),
+      createMockHabit({ id: '2', name: 'Read' }),
+    ]
+
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    vi.mocked(getAllHabits).mockResolvedValueOnce(initialHabits).mockResolvedValueOnce(updatedHabits)
+
+    let refreshFn: (() => Promise<void>) | null = null
+    const onRefresh = (fn: () => Promise<void>) => {
+      refreshFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithRefresh onRefresh={onRefresh} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+
+    expect(refreshFn).not.toBeNull()
+    await act(async () => {
+      await refreshFn!()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 2/i)).toBeInTheDocument()
+      expect(getAllHabits).toHaveBeenCalledTimes(2)
+    })
   })
 })
 
