@@ -107,19 +107,18 @@ describe('HabitContext', () => {
     })
   })
 
-  it('throws error when useHabits is used outside provider', () => {
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
-    
+  it('throws error when useHabits is used outside provider', async () => {
     let caughtError: Error | null = null
     renderWithErrorBoundary(<TestComponent />, (error) => {
       caughtError = error
     })
 
-    expect(caughtError).toBeTruthy()
+    await waitFor(() => {
+      expect(caughtError).toBeTruthy()
+    })
+
     expect(caughtError).toBeInstanceOf(Error)
     expect(caughtError!.message).toBe('useHabits must be used within a HabitProvider')
-
-    consoleError.mockRestore()
   })
 
   it('allows refreshing habits after initial load', async () => {
