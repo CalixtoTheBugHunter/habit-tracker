@@ -2,9 +2,14 @@ import { useMemo } from 'react'
 import { useHabits } from '../contexts/HabitContext'
 import { calculateStreak } from '../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../utils/habit/isTodayCompleted'
+import type { Habit } from '../types/habit'
 import './HabitList.css'
 
-export function HabitList() {
+interface HabitListProps {
+  onEdit?: (habit: Habit) => void
+}
+
+export function HabitList({ onEdit }: HabitListProps) {
   const { habits, isLoading, error } = useHabits()
 
   const habitsWithCalculations = useMemo(() => {
@@ -53,6 +58,16 @@ export function HabitList() {
               >
                 {habit.completedToday ? 'Completed today' : 'Not completed today'}
               </span>
+              {onEdit && (
+                <button
+                  type="button"
+                  className="habit-edit-button"
+                  onClick={() => onEdit(habit)}
+                  aria-label={`Edit ${habit.name || 'habit'}`}
+                >
+                  Edit
+                </button>
+              )}
             </div>
           </div>
           {habit.description && (

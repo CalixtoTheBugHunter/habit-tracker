@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import './App.css'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
 import { HabitList } from './components/HabitList'
+import { HabitForm } from './components/HabitForm'
+import type { Habit } from './types/habit'
 
 function AppContent() {
   const { habits, isLoading, error } = useHabits()
+  const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined)
 
   if (isLoading) {
     return (
@@ -39,7 +43,12 @@ function AppContent() {
         <p>Total habits: {habits.length}</p>
       </header>
       <main className="app-main">
-        <HabitList />
+        <HabitForm 
+          habit={editingHabit}
+          onSuccess={() => setEditingHabit(undefined)}
+          onCancel={() => setEditingHabit(undefined)}
+        />
+        <HabitList onEdit={setEditingHabit} />
       </main>
     </div>
   )
