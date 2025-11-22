@@ -198,7 +198,7 @@ describe('HabitForm', () => {
       const submitButton = screen.getByRole('button', { name: /create habit/i })
       await user.click(submitButton)
 
-      expect(await screen.findByText(/database error/i)).toBeInTheDocument()
+      expect(await screen.findByText(/failed to save habit. please try again./i)).toBeInTheDocument()
     })
 
     it('should call refreshHabits after successful creation', async () => {
@@ -414,7 +414,7 @@ describe('HabitForm', () => {
       const submitButton = screen.getByRole('button', { name: /update habit/i })
       await user.click(submitButton)
 
-      expect(await screen.findByText(/update failed/i)).toBeInTheDocument()
+      expect(await screen.findByText(/failed to save habit. please try again./i)).toBeInTheDocument()
     })
 
     it('should call refreshHabits after successful update', async () => {

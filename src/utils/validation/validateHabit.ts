@@ -1,8 +1,8 @@
 import type { Habit } from '../../types/habit'
 import { isValidISO8601 } from '../date/isValidISO8601'
 
-const MAX_NAME_LENGTH = 255
-const MAX_DESCRIPTION_LENGTH = 5000
+export const MAX_NAME_LENGTH = 255
+export const MAX_DESCRIPTION_LENGTH = 5000
 const MAX_HABIT_SIZE = 100000
 
 /**

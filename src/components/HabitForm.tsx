@@ -2,7 +2,10 @@ import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useHabits } from '../contexts/HabitContext'
 import { addHabit, updateHabit } from '../services/indexedDB'
 import type { Habit } from '../types/habit'
+import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../utils/validation/validateHabit'
 import './HabitForm.css'
+
+const TEXTAREA_MAX_HEIGHT = 200
 
 interface HabitFormProps {
   habit?: Habit
@@ -41,7 +44,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       textarea.style.height = 'auto'
       const newHeight = textarea.scrollHeight
       textarea.style.height = `${newHeight}px`
-      if (newHeight >= 200) {
+      if (newHeight >= TEXTAREA_MAX_HEIGHT) {
         textarea.style.overflowY = 'auto'
       } else {
         textarea.style.overflowY = 'hidden'
@@ -99,7 +102,9 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
         onSuccess()
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to save habit'
+      const errorMessage = err instanceof Error 
+        ? 'Failed to save habit. Please try again.' 
+        : 'Failed to save habit'
       setSubmitError(errorMessage)
     } finally {
       setIsSubmitting(false)
@@ -137,6 +142,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
           type="text"
           className={`habit-form-input ${nameError ? 'error' : ''}`}
           value={name}
+          maxLength={MAX_NAME_LENGTH}
           onChange={(e) => {
             setName(e.target.value)
             if (nameError) {
@@ -170,6 +176,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
             id="habit-description"
             className="habit-form-textarea"
             value={description}
+            maxLength={MAX_DESCRIPTION_LENGTH}
             onChange={(e) => setDescription(e.target.value)}
             rows={1}
             disabled={isSubmitting}
