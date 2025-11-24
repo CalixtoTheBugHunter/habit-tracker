@@ -92,6 +92,7 @@ export function HabitList({ onEdit }: HabitListProps) {
         message={`Are you sure you want to delete "${habitDisplayName}"? This action cannot be undone.`}
         confirmLabel="Delete"
         cancelLabel="Cancel"
+        confirmingLabel="Deleting..."
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
         isConfirming={deletingId !== null}

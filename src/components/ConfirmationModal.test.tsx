@@ -121,16 +121,28 @@ describe('ConfirmationModal', () => {
 
   it('should disable buttons when isConfirming is true', () => {
     render(<ConfirmationModal {...defaultProps} isConfirming={true} />)
-    const confirmButton = screen.getByRole('button', { name: /deleting/i })
+    const confirmButton = screen.getByRole('button', { name: /processing/i })
     const cancelButton = screen.getByRole('button', { name: 'Cancel' })
 
     expect(confirmButton).toBeDisabled()
     expect(cancelButton).toBeDisabled()
   })
 
-  it('should show loading state on confirm button when isConfirming is true', () => {
+  it('should show default loading state on confirm button when isConfirming is true', () => {
     render(<ConfirmationModal {...defaultProps} isConfirming={true} />)
-    const confirmButton = screen.getByRole('button', { name: /deleting/i })
+    const confirmButton = screen.getByRole('button', { name: /processing/i })
+    expect(confirmButton).toBeInTheDocument()
+  })
+
+  it('should show custom confirmingLabel when isConfirming is true', () => {
+    render(
+      <ConfirmationModal
+        {...defaultProps}
+        isConfirming={true}
+        confirmingLabel="Deleting..."
+      />
+    )
+    const confirmButton = screen.getByRole('button', { name: 'Deleting...' })
     expect(confirmButton).toBeInTheDocument()
   })
 })

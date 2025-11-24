@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef, type MouseEvent } from 'react'
 import './ConfirmationModal.css'
 
 interface ConfirmationModalProps {
@@ -7,6 +7,7 @@ interface ConfirmationModalProps {
   message: string
   confirmLabel?: string
   cancelLabel?: string
+  confirmingLabel?: string
   onConfirm: () => void
   onCancel: () => void
   isConfirming?: boolean
@@ -18,12 +19,25 @@ export function ConfirmationModal({
   message,
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
+  confirmingLabel,
   onConfirm,
   onCancel,
   isConfirming = false,
 }: ConfirmationModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
-  const titleId = `confirmation-modal-title-${Math.random().toString(36).substr(2, 9)}`
+  const titleId = useId()
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!isOpen) return
+
+    const originalStyle = window.getComputedStyle(document.body).overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = originalStyle
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
@@ -40,10 +54,44 @@ export function ConfirmationModal({
     }
   }, [isOpen, isConfirming, onCancel])
 
+  // Focus trap: prevent tabbing out of modal
+  useEffect(() => {
+    if (!isOpen || !modalRef.current) return
+
+    const modal = modalRef.current
+    const focusableElements = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    const firstElement = focusableElements[0] as HTMLElement
+    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement.focus()
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement.focus()
+        }
+      }
+    }
+
+    modal.addEventListener('keydown', handleTab)
+    return () => modal.removeEventListener('keydown', handleTab)
+  }, [isOpen])
+
+  // Focus cancel button (safer default) when modal opens
   useEffect(() => {
     if (isOpen && modalRef.current) {
-      const firstButton = modalRef.current.querySelector('button') as HTMLButtonElement | null
-      firstButton?.focus()
+      const cancelButton = modalRef.current.querySelector(
+        '.confirmation-modal-button-secondary'
+      ) as HTMLButtonElement | null
+      cancelButton?.focus()
     }
   }, [isOpen])
 
@@ -51,7 +99,7 @@ export function ConfirmationModal({
     return null
   }
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isConfirming) {
       onCancel()
     }
@@ -85,7 +133,7 @@ export function ConfirmationModal({
             onClick={onConfirm}
             disabled={isConfirming}
           >
-            {isConfirming ? 'Deleting...' : confirmLabel}
+            {isConfirming ? (confirmingLabel || 'Processing...') : confirmLabel}
           </button>
         </div>
       </div>
