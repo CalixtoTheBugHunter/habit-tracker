@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useHabits } from '../contexts/HabitContext'
 import { calculateStreak } from '../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../utils/habit/isTodayCompleted'
+import { AnnualCalendar } from './AnnualCalendar'
 import type { Habit } from '../types/habit'
 import './HabitList.css'
 
@@ -92,6 +93,7 @@ export function HabitList({ onEdit }: HabitListProps) {
           <div className="habit-stats">
             <span className="streak">Streak: {habit.streak}</span>
           </div>
+          <AnnualCalendar habit={habit} />
         </li>
       ))}
     </ul>
