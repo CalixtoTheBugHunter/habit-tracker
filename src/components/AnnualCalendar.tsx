@@ -45,22 +45,48 @@ export function AnnualCalendar({ habit }: AnnualCalendarProps) {
   const todayRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const SMALL_SCREEN_BREAKPOINT = 900
+
   // Scroll to today on small screens
   useEffect(() => {
-    if (todayRef.current && containerRef.current) {
-      const isSmallScreen = window.innerWidth <= 900
-      if (isSmallScreen) {
-        // Small delay to ensure layout is complete
-        const timer = setTimeout(() => {
-          if (todayRef.current && containerRef.current) {
-            todayRef.current.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'center',
-            })
+    let timer: ReturnType<typeof setTimeout> | null = null
+
+    const scrollToToday = () => {
+      if (todayRef.current && containerRef.current) {
+        const isSmallScreen = window.innerWidth <= SMALL_SCREEN_BREAKPOINT
+        if (isSmallScreen) {
+          // Clear any existing timer
+          if (timer) {
+            clearTimeout(timer)
           }
-        }, 100)
-        return () => clearTimeout(timer)
+          // Small delay to ensure layout is complete
+          timer = setTimeout(() => {
+            if (todayRef.current && containerRef.current) {
+              todayRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center',
+              })
+            }
+            timer = null
+          }, 100)
+        }
+      }
+    }
+
+    // Initial scroll
+    scrollToToday()
+
+    // Handle window resize
+    const handleResize = () => {
+      scrollToToday()
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (timer) {
+        clearTimeout(timer)
       }
     }
   }, [habit.id])
