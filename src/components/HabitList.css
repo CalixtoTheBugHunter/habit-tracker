@@ -1,54 +1,55 @@
 .habit-list {
   list-style: none;
   padding: 0;
-  margin: 2rem 0;
+  margin: var(--spacing-3xl) 0;
   width: 100%;
   max-width: 800px;
 }
 
 .habit-list > .empty-state {
   text-align: center;
-  padding: 2rem;
-  color: #666;
-  font-size: 1.1rem;
+  padding: var(--spacing-3xl);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
 }
 
 .habit-list > .error {
-  color: #d32f2f;
-  padding: 1rem;
-  background-color: #ffebee;
-  border-radius: 4px;
-  margin: 1rem 0;
+  color: var(--color-error);
+  padding: var(--spacing-lg);
+  background-color: var(--color-error-bg);
+  border-radius: var(--radius-sm);
+  margin: var(--spacing-lg) 0;
 }
 
 .habit-item {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .habit-item:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-hover);
 }
 
 .habit-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .habit-name {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: var(--font-size-3xl);
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   flex: 1;
   min-width: 200px;
 }
@@ -56,54 +57,54 @@
 .habit-status {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--spacing-md);
 }
 
 .completion-badge {
-  padding: 0.375rem 0.75rem;
-  border-radius: 16px;
-  font-size: 0.875rem;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
   font-weight: 500;
   white-space: nowrap;
 }
 
 .completion-badge.completed {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
 }
 
 .completion-badge.not-completed {
-  background-color: #fff3e0;
-  color: #e65100;
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
 }
 
 .completion-toggle {
-  padding: 0.375rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
   border: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color var(--transition-base), color var(--transition-base);
   white-space: nowrap;
 }
 
 .completion-toggle.completed {
-  background-color: #1976d2;
+  background-color: var(--color-primary);
   color: #ffffff;
 }
 
 .completion-toggle.completed:hover {
-  background-color: #1565c0;
+  background-color: var(--color-primary-hover);
 }
 
 .completion-toggle.not-completed {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--color-text-primary);
+  color: var(--color-surface);
 }
 
 .completion-toggle.not-completed:hover {
-  background-color: #333333;
+  background-color: var(--color-text-secondary);
 }
 
 .completion-toggle:disabled {
@@ -112,49 +113,49 @@
 }
 
 .habit-description {
-  margin: 0.5rem 0;
-  color: #666;
-  font-size: 1rem;
+  margin: var(--spacing-sm) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
   line-height: 1.5;
 }
 
 .habit-stats {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
 }
 
 .streak {
-  font-size: 0.95rem;
+  font-size: var(--font-size-base);
   font-weight: 500;
-  color: #1976d2;
+  color: var(--color-primary);
 }
 
 .habit-edit-button {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.875rem;
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
   font-weight: 500;
-  color: #1976d2;
+  color: var(--color-primary);
   background-color: transparent;
-  border: 1px solid #1976d2;
-  border-radius: 4px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color var(--transition-base), color var(--transition-base);
   white-space: nowrap;
 }
 
 .habit-edit-button:hover {
-  background-color: #1976d2;
+  background-color: var(--color-primary);
   color: #ffffff;
 }
 
 @media (max-width: 600px) {
   .habit-list {
-    margin: 1rem 0;
+    margin: var(--spacing-lg) 0;
   }
 
   .habit-item {
-    padding: 1rem;
+    padding: var(--spacing-lg);
   }
 
   .habit-header {
@@ -163,18 +164,18 @@
   }
 
   .habit-name {
-    font-size: 1.25rem;
+    font-size: var(--font-size-2xl);
     min-width: unset;
   }
 
   .completion-badge {
-    font-size: 0.8125rem;
-    padding: 0.25rem 0.625rem;
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
   }
 
   .completion-toggle {
-    font-size: 0.875rem;
-    padding: 0.375rem 0.75rem;
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
   }
 }
 
