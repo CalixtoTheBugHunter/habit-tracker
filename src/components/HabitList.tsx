@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useHabits } from '../contexts/HabitContext'
 import { calculateStreak } from '../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../utils/habit/isTodayCompleted'
@@ -10,7 +10,8 @@ interface HabitListProps {
 }
 
 export function HabitList({ onEdit }: HabitListProps) {
-  const { habits, isLoading, error } = useHabits()
+  const { habits, isLoading, error, toggleHabitCompletion } = useHabits()
+  const [togglingId, setTogglingId] = useState<string | null>(null)
 
   const habitsWithCalculations = useMemo(() => {
     return habits.map(habit => ({
@@ -19,6 +20,17 @@ export function HabitList({ onEdit }: HabitListProps) {
       completedToday: isTodayCompleted(habit.completionDates),
     }))
   }, [habits])
+
+  const handleToggle = async (habitId: string) => {
+    setTogglingId(habitId)
+    try {
+      await toggleHabitCompletion(habitId)
+    } catch {
+      // Error is already handled in context, but we catch to prevent unhandled promise rejection
+    } finally {
+      setTogglingId(null)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -51,13 +63,17 @@ export function HabitList({ onEdit }: HabitListProps) {
           <div className="habit-header">
             <h3 className="habit-name">{habit.name || 'Unnamed Habit'}</h3>
             <div className="habit-status">
-              <span
-                className={`completion-badge ${habit.completedToday ? 'completed' : 'not-completed'}`}
-                role="status"
-                aria-label={habit.completedToday ? 'Completed today' : 'Not completed today'}
+              <button
+                type="button"
+                className={`completion-toggle ${habit.completedToday ? 'completed' : 'not-completed'}`}
+                onClick={() => handleToggle(habit.id)}
+                disabled={togglingId === habit.id}
+                aria-label={habit.completedToday ? 'Mark as not completed today' : 'Mark as completed today'}
+                aria-pressed={habit.completedToday}
+                aria-busy={togglingId === habit.id}
               >
-                {habit.completedToday ? 'Completed today' : 'Not completed today'}
-              </span>
+                {togglingId === habit.id ? 'Updating...' : habit.completedToday ? '✓ Completed' : 'Mark as done'}
+              </button>
               {onEdit && (
                 <button
                   type="button"

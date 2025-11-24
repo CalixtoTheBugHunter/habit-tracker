@@ -77,6 +77,40 @@
   color: #e65100;
 }
 
+.completion-toggle {
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+
+.completion-toggle.completed {
+  background-color: #1976d2;
+  color: #ffffff;
+}
+
+.completion-toggle.completed:hover {
+  background-color: #1565c0;
+}
+
+.completion-toggle.not-completed {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.completion-toggle.not-completed:hover {
+  background-color: #333333;
+}
+
+.completion-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .habit-description {
   margin: 0.5rem 0;
   color: #666;
@@ -136,6 +170,11 @@
   .completion-badge {
     font-size: 0.8125rem;
     padding: 0.25rem 0.625rem;
+  }
+
+  .completion-toggle {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
   }
 }
 
