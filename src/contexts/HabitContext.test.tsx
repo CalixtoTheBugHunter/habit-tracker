@@ -2,14 +2,16 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor, act } from '@testing-library/react'
 import React from 'react'
 import { useHabits } from './HabitContext'
-import { openDB, getAllHabits } from '../services/indexedDB'
+import { openDB, getAllHabits, updateHabit } from '../services/indexedDB'
 import { testUtils } from '../services/indexedDB'
 import { createMockHabit } from '../test/fixtures/habits'
+import { createDateString } from '../test/utils/date-helpers'
 import { renderWithProviders, renderWithErrorBoundary } from '../test/utils/render-helpers'
 
 vi.mock('../services/indexedDB', () => ({
   openDB: vi.fn(),
   getAllHabits: vi.fn(),
+  updateHabit: vi.fn(),
   testUtils: {
     resetDB: vi.fn(),
   },
@@ -33,6 +35,14 @@ function TestComponentWithRefresh({ onRefresh }: { onRefresh: (refreshFn: () => 
   React.useEffect(() => {
     onRefresh(refreshHabits)
   }, [refreshHabits, onRefresh])
+  return <TestComponent />
+}
+
+function TestComponentWithToggle({ onToggle }: { onToggle: (toggleFn: (id: string) => Promise<void>) => void }) {
+  const { toggleHabitCompletion } = useHabits()
+  React.useEffect(() => {
+    onToggle(toggleHabitCompletion)
+  }, [toggleHabitCompletion, onToggle])
   return <TestComponent />
 }
 
@@ -150,6 +160,119 @@ describe('HabitContext', () => {
     await waitFor(() => {
       expect(screen.getByText(/habits: 2/i)).toBeInTheDocument()
       expect(getAllHabits).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  it('toggles habit completion and refreshes habits', async () => {
+    const habit = createMockHabit({
+      id: '1',
+      name: 'Exercise',
+      completionDates: [],
+    })
+
+    const updatedHabit = createMockHabit({
+      id: '1',
+      name: 'Exercise',
+      completionDates: [createDateString(0)],
+    })
+
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    vi.mocked(getAllHabits)
+      .mockResolvedValueOnce([habit])
+      .mockResolvedValueOnce([updatedHabit])
+    vi.mocked(updateHabit).mockResolvedValue('1')
+
+    let toggleFn: ((id: string) => Promise<void>) | null = null
+    const onToggle = (fn: (id: string) => Promise<void>) => {
+      toggleFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithToggle onToggle={onToggle} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+
+    expect(toggleFn).not.toBeNull()
+    
+    await act(async () => {
+      await toggleFn!('1')
+    })
+
+    await waitFor(() => {
+      expect(updateHabit).toHaveBeenCalledTimes(1)
+    })
+
+    await waitFor(() => {
+      expect(getAllHabits).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  it('handles errors when toggling completion for non-existent habit', async () => {
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    const habits = [createMockHabit({ id: '1', name: 'Exercise' })]
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    let toggleFn: ((id: string) => Promise<void>) | null = null
+    const onToggle = (fn: (id: string) => Promise<void>) => {
+      toggleFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithToggle onToggle={onToggle} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+
+    expect(toggleFn).not.toBeNull()
+    
+    await act(async () => {
+      try {
+        await toggleFn!('non-existent')
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error)
+      }
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/habit with id non-existent not found/i)).toBeInTheDocument()
+    })
+  })
+
+  it('handles errors when updateHabit fails', async () => {
+    const habit = createMockHabit({
+      id: '1',
+      name: 'Exercise',
+      completionDates: [],
+    })
+
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    vi.mocked(getAllHabits).mockResolvedValue([habit])
+    vi.mocked(updateHabit).mockRejectedValue(new Error('Failed to update habit'))
+
+    let toggleFn: ((id: string) => Promise<void>) | null = null
+    const onToggle = (fn: (id: string) => Promise<void>) => {
+      toggleFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithToggle onToggle={onToggle} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+
+    expect(toggleFn).not.toBeNull()
+    
+    await act(async () => {
+      try {
+        await toggleFn!('1')
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error)
+      }
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/failed to update habit/i)).toBeInTheDocument()
     })
   })
 })

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
-import { openDB, getAllHabits } from '../services/indexedDB'
+import { openDB, getAllHabits, updateHabit } from '../services/indexedDB'
+import { toggleCompletion } from '../utils/habit/toggleCompletion'
 import type { Habit } from '../types/habit'
 
 interface HabitContextType {
@@ -7,6 +8,7 @@ interface HabitContextType {
   isLoading: boolean
   error: string | null
   refreshHabits: () => Promise<void>
+  toggleHabitCompletion: (habitId: string) => Promise<void>
 }
 
 const HabitContext = createContext<HabitContextType | undefined>(undefined)
@@ -40,6 +42,24 @@ export function HabitProvider({ children }: HabitProviderProps) {
     }
   }, [])
 
+  const toggleHabitCompletion = useCallback(async (habitId: string) => {
+    try {
+      setError(null)
+      const habit = habits.find(h => h.id === habitId)
+      if (!habit) {
+        throw new Error(`Habit with id ${habitId} not found`)
+      }
+
+      const updatedHabit = toggleCompletion(habit)
+      await updateHabit(updatedHabit)
+      await refreshHabits()
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to toggle habit completion'
+      setError(errorMessage)
+      throw err
+    }
+  }, [habits, refreshHabits])
+
   useEffect(() => {
     async function initializeApp() {
       try {
@@ -64,8 +84,9 @@ export function HabitProvider({ children }: HabitProviderProps) {
       isLoading,
       error,
       refreshHabits,
+      toggleHabitCompletion,
     }),
-    [habits, isLoading, error, refreshHabits]
+    [habits, isLoading, error, refreshHabits, toggleHabitCompletion]
   )
 
   return <HabitContext.Provider value={value}>{children}</HabitContext.Provider>

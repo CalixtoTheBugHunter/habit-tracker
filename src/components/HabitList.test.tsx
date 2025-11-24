@@ -95,11 +95,11 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />)
 
-    const completedBadges = await screen.findAllByText(/completed today/i)
-    const notCompletedBadges = await screen.findAllByText(/not completed today/i)
+    const completedButton = await screen.findByRole('button', { name: /mark as not completed today/i })
+    const notCompletedButton = await screen.findByRole('button', { name: /mark as completed today/i })
     
-    expect(completedBadges.length).toBeGreaterThan(0)
-    expect(notCompletedBadges.length).toBeGreaterThan(0)
+    expect(completedButton).toBeInTheDocument()
+    expect(notCompletedButton).toBeInTheDocument()
   })
 
   it('should handle habits without name or description', async () => {
@@ -136,6 +136,67 @@ describe('HabitList', () => {
     renderWithProviders(<HabitList />)
 
     expect(await screen.findByText(/streak: 0/i)).toBeInTheDocument()
+  })
+
+  it('should render toggle completion button for each habit', async () => {
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'Exercise',
+        completionDates: [],
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    const toggleButton = await screen.findByRole('button', { name: /mark as completed today/i })
+    expect(toggleButton).toBeInTheDocument()
+  })
+
+  it('should display completed state when habit is completed today', async () => {
+    const todayStr = createDateString(0)
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'Exercise',
+        completionDates: [todayStr],
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    const completedButton = await screen.findByRole('button', { name: /completed/i })
+    expect(completedButton).toBeInTheDocument()
+    expect(completedButton).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('should have accessible toggle button with correct aria attributes', async () => {
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'Exercise',
+        completionDates: [],
+      }),
+      createMockHabit({
+        id: '2',
+        name: 'Read',
+        completionDates: [createDateString(0)],
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    const notCompletedButton = await screen.findByRole('button', { name: /mark as completed today/i })
+    expect(notCompletedButton).toHaveAttribute('aria-pressed', 'false')
+
+    const completedButton = await screen.findByRole('button', { name: /mark as not completed today/i })
+    expect(completedButton).toHaveAttribute('aria-pressed', 'true')
   })
 })
 
