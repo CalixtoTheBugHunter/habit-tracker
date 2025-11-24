@@ -1,14 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { HabitList } from './HabitList'
 import { renderWithProviders } from '../test/utils/render-helpers'
 import { createMockHabit } from '../test/fixtures/habits'
 import { createDateString, createDateStrings } from '../test/utils/date-helpers'
-import { getAllHabits, openDB } from '../services/indexedDB'
+import { getAllHabits, openDB, deleteHabit } from '../services/indexedDB'
 
 vi.mock('../services/indexedDB', () => ({
   openDB: vi.fn(),
   getAllHabits: vi.fn(),
+  deleteHabit: vi.fn(),
   testUtils: {
     resetDB: vi.fn(),
   },
@@ -197,6 +199,149 @@ describe('HabitList', () => {
 
     const completedButton = await screen.findByRole('button', { name: /mark as not completed today/i })
     expect(completedButton).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('should render delete button for each habit', async () => {
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'Exercise',
+        completionDates: [],
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
+    expect(deleteButton).toBeInTheDocument()
+  })
+
+  it('should show confirmation modal when delete button is clicked', async () => {
+    const user = userEvent.setup()
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'Exercise',
+        completionDates: [],
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
+    await user.click(deleteButton)
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Delete Habit')).toBeInTheDocument()
+    expect(screen.getByText(/are you sure you want to delete "exercise"/i)).toBeInTheDocument()
+  })
+
+  it('should delete habit when confirmed in modal', async () => {
+    const user = userEvent.setup()
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'Exercise',
+        completionDates: [],
+      }),
+    ]
+
+    vi.mocked(getAllHabits)
+      .mockResolvedValueOnce(habits)
+      .mockResolvedValueOnce([])
+    vi.mocked(deleteHabit).mockResolvedValue()
+
+    renderWithProviders(<HabitList />)
+
+    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
+    await user.click(deleteButton)
+
+    const confirmButton = await screen.findByRole('button', { name: 'Delete' })
+    await user.click(confirmButton)
+
+    await waitFor(() => {
+      expect(deleteHabit).toHaveBeenCalledWith('1')
+    })
+  })
+
+  it('should not delete habit when modal is cancelled', async () => {
+    const user = userEvent.setup()
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'Exercise',
+        completionDates: [],
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
+    await user.click(deleteButton)
+
+    const cancelButton = await screen.findByRole('button', { name: 'Cancel' })
+    await user.click(cancelButton)
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    expect(deleteHabit).not.toHaveBeenCalled()
+  })
+
+  it('should handle delete errors', async () => {
+    const user = userEvent.setup()
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'Exercise',
+        completionDates: [],
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+    vi.mocked(deleteHabit).mockRejectedValue(new Error('Failed to delete habit'))
+
+    renderWithProviders(<HabitList />)
+
+    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
+    await user.click(deleteButton)
+
+    const confirmButton = await screen.findByRole('button', { name: 'Delete' })
+    await user.click(confirmButton)
+
+    await waitFor(() => {
+      expect(screen.getByText(/failed to delete habit/i)).toBeInTheDocument()
+    })
+  })
+
+  it('should handle delete button for habit without name', async () => {
+    const user = userEvent.setup()
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: undefined,
+        completionDates: [],
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    const deleteButton = await screen.findByRole('button', { name: /delete habit/i })
+    expect(deleteButton).toBeInTheDocument()
+
+    await user.click(deleteButton)
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText(/are you sure you want to delete "this habit"/i)).toBeInTheDocument()
   })
 })
 
