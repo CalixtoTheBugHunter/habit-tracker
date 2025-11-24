@@ -91,7 +91,7 @@
 
 .completion-toggle.completed {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-button-primary-text);
 }
 
 .completion-toggle.completed:hover {
@@ -146,7 +146,7 @@
 
 .habit-edit-button:hover {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-button-primary-text);
 }
 
 @media (max-width: 600px) {
