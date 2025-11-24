@@ -1,210 +1,165 @@
-# habit-tracker
+# Habit Tracker
 
-A simple, free and offline habit tracker
+A simple, free, and offline habit tracker built with React and TypeScript. Track your daily habits with streak counting, all stored locally in your browser using IndexedDB.
+
+## Features
+
+- **Create and manage habits** - Add, edit, and delete habits with optional descriptions
+- **Streak tracking** - Automatically calculates consecutive completion days
+- **Daily completion** - Mark habits as completed for today
+- **Offline-first** - All data stored locally in your browser (IndexedDB)
+- **Clean UI** - Simple, intuitive interface built with React
+- **Accessible** - Built with accessibility best practices
+- **Well-tested** - Comprehensive test coverage with Vitest
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
-- npm (v11 or higher)
+- **Node.js** v18 or higher
+- **npm** v11 or higher
 
 ### Installation
 
+1. Clone the repository:
+```bash
+git clone https://github.com/CalixtoTheBugHunter/habit-tracker.git
+cd habit-tracker
+```
+
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-### Development
-
-Start the development server:
-
+3. Start the development server:
 ```bash
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`
+The application will be available at `http://localhost:5173`
 
-### Testing
+## Development
 
-Run tests:
+### Available Scripts
 
-```bash
-npm test
-```
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm test` - Run tests in watch mode
+- `npm run test:ui` - Run tests with UI
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues automatically
 
-Run tests with UI:
-
-```bash
-npm run test:ui
-```
-
-Run tests with coverage:
-
-```bash
-npm run test:coverage
-```
-
-### Linting
-
-This project uses ESLint with strict rules for code quality and consistency. ESLint is configured with React and TypeScript support.
-
-Run linting:
-
-```bash
-npm run lint
-```
-
-Fix linting issues automatically:
-
-```bash
-npm run lint:fix
-```
-
-The linting check runs automatically in CI/CD for all pull requests to ensure code quality standards are maintained.
-
-### Build
-
-Build for production:
-
-```bash
-npm run build
-```
-
-Preview production build:
-
-```bash
-npm run preview
-```
-
-## Main Dependencies
-
-### Runtime Dependencies
-
-- **react** (^18.3.1) - React library for building user interfaces
-- **react-dom** (^18.3.1) - React DOM renderer
-
-### Development Dependencies
-
-- **vite** (^6.0.5) - Next generation frontend tooling
-- **@vitejs/plugin-react** (^4.3.3) - Vite plugin for React support
-- **vitest** (^2.1.8) - Fast unit test framework
-- **@testing-library/react** (^16.1.0) - React testing utilities
-- **@testing-library/jest-dom** (^6.6.3) - Custom jest matchers for DOM
-- **@testing-library/user-event** (^14.5.2) - User interaction simulation
-- **jsdom** (^25.0.1) - DOM implementation for Node.js (used in tests)
-- **eslint** - JavaScript and TypeScript linter
-- **eslint-plugin-react** - React-specific linting rules
-- **eslint-plugin-react-hooks** - React Hooks linting rules
-- **@typescript-eslint/eslint-plugin** - TypeScript-specific linting rules
-- **@typescript-eslint/parser** - TypeScript parser for ESLint
-
-## Project Structure
+### Project Structure
 
 ```
 habit-tracker/
 ├── src/
-│   ├── App.jsx          # Main App component
-│   ├── App.css          # App styles
-│   ├── App.test.jsx     # App component tests
-│   ├── main.jsx         # Application entry point
-│   ├── index.css        # Global styles
-│   ├── services/
-│   │   ├── indexedDB.js      # IndexedDB service for offline storage
-│   │   └── indexedDB.test.js # IndexedDB service tests
-│   └── test/
-│       └── setup.js     # Test setup configuration
-├── index.html           # HTML template
-├── vite.config.js       # Vite configuration
-├── vitest.config.js     # Vitest configuration
-├── eslint.config.js     # ESLint configuration
-└── package.json         # Project dependencies
+│   ├── components/          # React components
+│   │   ├── HabitForm.tsx    # Form for creating/editing habits
+│   │   └── HabitList.tsx    # List of habits with completion toggle
+│   ├── contexts/            # React contexts
+│   │   └── HabitContext.tsx # Habit state management
+│   ├── services/            # Data layer
+│   │   └── indexedDB.ts     # IndexedDB service for offline storage
+│   ├── types/               # TypeScript type definitions
+│   │   └── habit.ts         # Habit data model
+│   ├── utils/               # Utility functions
+│   │   ├── date/            # Date manipulation helpers
+│   │   ├── habit/           # Habit-specific utilities (streak, completion)
+│   │   └── validation/      # Validation functions
+│   ├── test/                # Test utilities and fixtures
+│   ├── App.tsx              # Main application component
+│   └── main.tsx             # Application entry point
+├── index.html               # HTML template
+├── vite.config.ts           # Vite configuration
+├── vitest.config.ts         # Vitest test configuration
+└── eslint.config.js         # ESLint configuration
 ```
 
-## Styling
+### Tech Stack
 
-This project uses **plain CSS** for styling. No CSS frameworks or preprocessors are used.
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Vitest** - Testing framework
+- **IndexedDB** - Offline storage
+- **ESLint** - Code linting
 
-## Offline Storage (IndexedDB)
+## Testing
 
-The app uses IndexedDB for offline storage, allowing users to track habits without an internet connection. All data is stored locally in the browser.
+This project follows Test-Driven Development (TDD) principles. All features are thoroughly tested.
 
-### IndexedDB Service
+### Running Tests
 
-The IndexedDB service (`src/services/indexedDB.js`) provides a complete CRUD API for managing habit objects:
+```bash
+# Run tests in watch mode
+npm test
 
-#### Database Schema
+# Run tests with UI
+npm run test:ui
 
-- **Database Name**: `habit-tracker`
-- **Version**: `1`
-- **Object Store**: `habits`
-- **Key Path**: `id` (primary key)
-
-#### Habit Object Structure
-
-```javascript
-{
-  id: string,              // Unique identifier (required)
-  name: string,            // Habit name
-  description: string,     // Optional description
-  createdAt: string,      // ISO timestamp
-  // ... other custom fields
-}
+# Run tests with coverage
+npm run test:coverage
 ```
 
-#### API Methods
+### Test Structure
 
-- **`openDB()`** - Opens the database connection and creates object stores if needed
-- **`addHabit(habit)`** - Adds a new habit to the database
-- **`getHabit(id)`** - Retrieves a habit by its ID
-- **`getAllHabits()`** - Retrieves all habits from the database
-- **`updateHabit(habit)`** - Updates an existing habit
-- **`deleteHabit(id)`** - Deletes a habit by its ID
-- **`closeDB(db)`** - Closes the database connection
+Tests are co-located with their source files using the `.test.ts` or `.test.tsx` naming convention. The project includes:
 
-#### Error Handling
+- Unit tests for utility functions
+- Component tests using React Testing Library
+- Integration tests for IndexedDB operations
+- Test fixtures and helpers in `src/test/`
 
-The service includes comprehensive error handling for:
+## Usage
 
-- **Quota Exceeded**: When browser storage quota is exceeded, a user-friendly error message is returned
-- **Version Upgrades**: Database schema upgrades are handled automatically during database initialization
-- **Transaction Errors**: All database operations handle transaction failures gracefully
+1. **Create a habit**: Enter a name (required) and optional description, then click "Create Habit"
+2. **Mark as complete**: Click "Mark as done" on any habit to record today's completion
+3. **View streak**: Each habit displays its current consecutive day streak
+4. **Edit habit**: Click "Edit" to modify a habit's name or description
+5. **Delete habit**: Use the edit form to delete habits
 
-#### Usage Example
+All data is automatically saved to your browser's local storage and persists across sessions.
 
-```javascript
-import { openDB, addHabit, getAllHabits, updateHabit, deleteHabit } from './services/indexedDB'
+## Contributing
 
-// Open database (usually done once at app startup)
-await openDB()
+Contributions are welcome! Please follow these guidelines:
 
-// Add a new habit
-const habitId = await addHabit({
-  id: '1',
-  name: 'Exercise',
-  description: 'Daily exercise routine',
-  createdAt: new Date().toISOString()
-})
+### Development Workflow
 
-// Get all habits
-const habits = await getAllHabits()
+1. **Fork the repository** and create a feature branch
+2. **Follow TDD**: Write tests first, then implement the feature
+3. **Run tests**: Ensure all tests pass before submitting
+4. **Lint code**: Run `npm run lint:fix` to fix formatting issues
+5. **Commit changes**: Use clear, descriptive commit messages
+6. **Submit PR**: Create a pull request with a detailed description
 
-// Update a habit
-await updateHabit({
-  id: '1',
-  name: 'Exercise Updated',
-  description: 'Updated description',
-  createdAt: new Date().toISOString()
-})
+### Code Quality Standards
 
-// Delete a habit
-await deleteHabit('1')
-```
+- All code must pass ESLint checks
+- Maintain or improve test coverage
+- Follow existing code patterns and structure
+- Write self-documenting code (minimal comments)
+- Ensure TypeScript types are properly defined
 
-#### Browser Support
+### Pull Request Process
 
-IndexedDB is supported in all modern browsers. The service includes a check for IndexedDB availability and will throw a descriptive error if it's not supported.
+1. Ensure all tests pass: `npm test`
+2. Run linting: `npm run lint`
+3. Update documentation if needed
+4. Create a clear PR description explaining changes
+5. Reference any related issues
 
 ## License
 
-See [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## Browser Support
+
+This application requires a modern browser with IndexedDB support:
+- Chrome/Edge (latest)
+- Firefox (latest)
+- Safari (latest)
