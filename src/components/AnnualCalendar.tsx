@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect } from 'react'
+import { useMemo } from 'react'
 import { getYearGrid, getDateString, isDateCompleted } from '../utils/date/annualCalendarHelpers'
 import { getTodayUTCDateString } from '../utils/date/dateHelpers'
 import type { Habit } from '../types/habit'
@@ -42,57 +42,8 @@ export function AnnualCalendar({ habit }: AnnualCalendarProps) {
     return isDateCompleted(dateStr, habit.completionDates)
   }
 
-  const todayRef = useRef<HTMLDivElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  const SMALL_SCREEN_BREAKPOINT = 900
-
-  // Scroll to today on small screens
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | null = null
-
-    const scrollToToday = () => {
-      if (todayRef.current && containerRef.current) {
-        const isSmallScreen = window.innerWidth <= SMALL_SCREEN_BREAKPOINT
-        if (isSmallScreen) {
-          // Clear any existing timer
-          if (timer) {
-            clearTimeout(timer)
-          }
-          // Small delay to ensure layout is complete
-          timer = setTimeout(() => {
-            if (todayRef.current && containerRef.current) {
-              todayRef.current.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'center',
-              })
-            }
-            timer = null
-          }, 100)
-        }
-      }
-    }
-
-    // Initial scroll
-    scrollToToday()
-
-    // Handle window resize
-    const handleResize = () => {
-      scrollToToday()
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      if (timer) {
-        clearTimeout(timer)
-      }
-    }
-  }, [habit.id])
-
   return (
-    <div className="annual-calendar" aria-label={`Annual completion calendar for ${habit.name || 'habit'}`} ref={containerRef}>
+    <div className="annual-calendar" aria-label={`Annual completion calendar for ${habit.name || 'habit'}`}>
       <div className="annual-calendar-grid" role="grid">
         {transposedGrid.map((dayRow, dayIndex) => (
           <div key={dayIndex} className="annual-calendar-day-row" role="row">
@@ -105,7 +56,6 @@ export function AnnualCalendar({ habit }: AnnualCalendarProps) {
               return (
                 <div
                   key={weekIndex}
-                  ref={isTodayDate ? todayRef : null}
                   className={`annual-calendar-day ${completed ? 'completed' : ''} ${isTodayDate ? 'today' : ''} ${!isCurrentYear ? 'other-year' : ''}`}
                   role="gridcell"
                   aria-label={isTodayDate ? `Today, ${dateStr}` : dateStr}
