@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import {
   getDaysInMonth,
   getFirstDayOfMonth,
@@ -63,20 +63,25 @@ describe('calendarHelpers', () => {
 
     it('should start with correct first day of month', () => {
       const grid = getCalendarGrid(2025, 1) // January 2025 starts on Wednesday
-      expect(grid[0][3].getUTCDate()).toBe(1) // First day is in position 3 (Wednesday)
+      const firstWeek = grid[0]
+      expect(firstWeek).toBeDefined()
+      expect(firstWeek![3]?.getUTCDate()).toBe(1) // First day is in position 3 (Wednesday)
     })
 
     it('should include days from previous month in first week', () => {
       const grid = getCalendarGrid(2025, 1) // January 2025
+      const firstWeek = grid[0]
+      expect(firstWeek).toBeDefined()
       // First week should include days from December 2024
-      expect(grid[0][0].getUTCMonth()).toBe(11) // December (0-indexed)
+      expect(firstWeek![0]?.getUTCMonth()).toBe(11) // December (0-indexed)
     })
 
     it('should include days from next month in last week', () => {
       const grid = getCalendarGrid(2025, 1) // January 2025
       const lastWeek = grid[grid.length - 1]
+      expect(lastWeek).toBeDefined()
       // Last week should include days from February 2025
-      const hasNextMonth = lastWeek.some(day => day.getUTCMonth() === 1) // February (0-indexed)
+      const hasNextMonth = lastWeek!.some(day => day.getUTCMonth() === 1) // February (0-indexed)
       expect(hasNextMonth).toBe(true)
     })
 

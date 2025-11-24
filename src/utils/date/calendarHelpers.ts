@@ -32,7 +32,6 @@ export function getFirstDayOfMonth(year: number, month: number): number {
  */
 export function getCalendarGrid(year: number, month: number): Date[][] {
   const firstDay = getFirstDayOfMonth(year, month)
-  const daysInMonth = getDaysInMonth(year, month)
   
   const grid: Date[][] = []
   let currentDate = new Date(Date.UTC(year, month - 1, 1))
@@ -41,8 +40,6 @@ export function getCalendarGrid(year: number, month: number): Date[][] {
   currentDate.setUTCDate(currentDate.getUTCDate() - firstDay)
   
   // Always show 6 weeks for consistency (42 days)
-  const totalDays = 42
-  
   for (let weekIndex = 0; weekIndex < 6; weekIndex++) {
     const week: Date[] = []
     for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
@@ -65,6 +62,7 @@ export function getCalendarGrid(year: number, month: number): Date[][] {
  */
 export function isDateInMonth(dateStr: string, year: number, month: number): boolean {
   const datePart = dateStr.split('T')[0]
+  if (!datePart) return false
   const [dateYear, dateMonth] = datePart.split('-').map(Number)
   return dateYear === year && dateMonth === month
 }

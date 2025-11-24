@@ -62,12 +62,14 @@ describe('annualCalendarHelpers', () => {
     it('should start with the first Sunday of the year', () => {
       const grid = getYearGrid(2025)
       const firstWeek = grid[0]
-      const firstDay = firstWeek[0]
+      expect(firstWeek).toBeDefined()
+      const firstDay = firstWeek?.[0]
+      expect(firstDay).toBeDefined()
       // Jan 1, 2025 is a Wednesday, so first Sunday should be Dec 29, 2024
-      expect(firstDay.getUTCFullYear()).toBe(2024)
-      expect(firstDay.getUTCMonth()).toBe(11) // December (0-indexed)
-      expect(firstDay.getUTCDate()).toBe(29)
-      expect(firstDay.getUTCDay()).toBe(0) // Sunday
+      expect(firstDay!.getUTCFullYear()).toBe(2024)
+      expect(firstDay!.getUTCMonth()).toBe(11) // December (0-indexed)
+      expect(firstDay!.getUTCDate()).toBe(29)
+      expect(firstDay!.getUTCDay()).toBe(0) // Sunday
     })
 
     it('should have consecutive dates', () => {
@@ -76,9 +78,11 @@ describe('annualCalendarHelpers', () => {
       for (let i = 1; i < allDays.length; i++) {
         const prev = allDays[i - 1]
         const curr = allDays[i]
-        const expectedNext = new Date(prev)
+        expect(prev).toBeDefined()
+        expect(curr).toBeDefined()
+        const expectedNext = new Date(prev!)
         expectedNext.setUTCDate(expectedNext.getUTCDate() + 1)
-        expect(curr.getTime()).toBe(expectedNext.getTime())
+        expect(curr!.getTime()).toBe(expectedNext.getTime())
       }
     })
   })
