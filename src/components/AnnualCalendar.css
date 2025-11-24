@@ -1,0 +1,155 @@
+.annual-calendar {
+  width: 100%;
+  margin: var(--spacing-lg) 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 1200px) {
+  .annual-calendar {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.annual-calendar-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  max-width: 100%;
+  align-items: flex-start;
+}
+
+.annual-calendar-day-row {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.annual-calendar-day {
+  flex: 0 0 calc((100% - (52 * 3px)) / 53);
+  max-width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  background-color: #ebedf0;
+  border: 1px solid rgba(27, 31, 35, 0.06);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.annual-calendar-day:hover {
+  border-color: rgba(27, 31, 35, 0.2);
+  transform: scale(1.1);
+}
+
+.annual-calendar-day.completed {
+  background-color: #40c463;
+  border-color: transparent;
+}
+
+.annual-calendar-day.today {
+  border: 2px solid #0969da;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.annual-calendar-day.today.completed {
+  background-color: #40c463;
+  border-color: #0969da;
+}
+
+.annual-calendar-day.other-year {
+  opacity: 0.2;
+}
+
+@media (prefers-color-scheme: dark) {
+  .annual-calendar-day {
+    background-color: #21262d;
+    border-color: rgba(240, 246, 252, 0.1);
+  }
+
+  .annual-calendar-day.completed {
+    background-color: #26a641;
+    border-color: transparent;
+  }
+
+  .annual-calendar-day.completed:hover {
+    background-color: #39d353;
+  }
+
+  .annual-calendar-day.today {
+    border-color: #58a6ff;
+  }
+
+  .annual-calendar-day.today.completed {
+    background-color: #26a641;
+    border-color: #58a6ff;
+  }
+}
+
+@media (max-width: 1200px) {
+  .annual-calendar-day {
+    max-width: 10px;
+    height: 10px;
+    flex: 0 0 calc((100% - (52 * 3px)) / 53);
+  }
+}
+
+@media (max-width: 900px) {
+  .annual-calendar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overflow-y: hidden;
+  }
+
+  .annual-calendar-day-row {
+    min-width: max-content;
+  }
+
+  .annual-calendar-day {
+    max-width: 9px;
+    height: 9px;
+    flex: 0 0 9px;
+    min-width: 9px;
+  }
+
+  .annual-calendar-grid,
+  .annual-calendar-day-row {
+    gap: 2px;
+  }
+}
+
+@media (max-width: 600px) {
+  .annual-calendar-day {
+    max-width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+    min-width: 8px;
+  }
+
+  .annual-calendar-grid,
+  .annual-calendar-day-row {
+    gap: 2px;
+  }
+}
+
+@media (max-width: 400px) {
+  .annual-calendar-day {
+    max-width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    min-width: 7px;
+  }
+
+  .annual-calendar-grid,
+  .annual-calendar-day-row {
+    gap: 1px;
+  }
+}
