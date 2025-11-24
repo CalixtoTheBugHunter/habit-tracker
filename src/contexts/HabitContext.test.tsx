@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor, act } from '@testing-library/react'
 import React from 'react'
 import { useHabits } from './HabitContext'
-import { openDB, getAllHabits, updateHabit } from '../services/indexedDB'
+import { openDB, getAllHabits, updateHabit, deleteHabit } from '../services/indexedDB'
 import { testUtils } from '../services/indexedDB'
 import { createMockHabit } from '../test/fixtures/habits'
 import { createDateString } from '../test/utils/date-helpers'
@@ -12,6 +12,7 @@ vi.mock('../services/indexedDB', () => ({
   openDB: vi.fn(),
   getAllHabits: vi.fn(),
   updateHabit: vi.fn(),
+  deleteHabit: vi.fn(),
   testUtils: {
     resetDB: vi.fn(),
   },
@@ -43,6 +44,14 @@ function TestComponentWithToggle({ onToggle }: { onToggle: (toggleFn: (id: strin
   React.useEffect(() => {
     onToggle(toggleHabitCompletion)
   }, [toggleHabitCompletion, onToggle])
+  return <TestComponent />
+}
+
+function TestComponentWithDelete({ onDelete }: { onDelete: (deleteFn: (id: string) => Promise<void>) => void }) {
+  const { deleteHabit } = useHabits()
+  React.useEffect(() => {
+    onDelete(deleteHabit)
+  }, [deleteHabit, onDelete])
   return <TestComponent />
 }
 
@@ -273,6 +282,79 @@ describe('HabitContext', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/failed to update habit/i)).toBeInTheDocument()
+    })
+  })
+
+  it('deletes a habit and refreshes habits', async () => {
+    const habits = [
+      createMockHabit({ id: '1', name: 'Exercise' }),
+      createMockHabit({ id: '2', name: 'Read' }),
+    ]
+
+    const remainingHabits = [createMockHabit({ id: '2', name: 'Read' })]
+
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    vi.mocked(getAllHabits)
+      .mockResolvedValueOnce(habits)
+      .mockResolvedValueOnce(remainingHabits)
+    vi.mocked(deleteHabit).mockResolvedValue()
+
+    let deleteFn: ((id: string) => Promise<void>) | null = null
+    const onDelete = (fn: (id: string) => Promise<void>) => {
+      deleteFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithDelete onDelete={onDelete} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 2/i)).toBeInTheDocument()
+    })
+
+    expect(deleteFn).not.toBeNull()
+    
+    await act(async () => {
+      await deleteFn!('1')
+    })
+
+    await waitFor(() => {
+      expect(deleteHabit).toHaveBeenCalledWith('1')
+    })
+
+    await waitFor(() => {
+      expect(getAllHabits).toHaveBeenCalledTimes(2)
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+  })
+
+  it('handles errors when deleting a non-existent habit', async () => {
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    const habits = [createMockHabit({ id: '1', name: 'Exercise' })]
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+    vi.mocked(deleteHabit).mockRejectedValue(new Error('Failed to delete habit'))
+
+    let deleteFn: ((id: string) => Promise<void>) | null = null
+    const onDelete = (fn: (id: string) => Promise<void>) => {
+      deleteFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithDelete onDelete={onDelete} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+
+    expect(deleteFn).not.toBeNull()
+    
+    await act(async () => {
+      try {
+        await deleteFn!('1')
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error)
+      }
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/failed to delete habit/i)).toBeInTheDocument()
     })
   })
 })

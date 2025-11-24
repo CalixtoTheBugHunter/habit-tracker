@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
-import { openDB, getAllHabits, updateHabit } from '../services/indexedDB'
+import { openDB, getAllHabits, updateHabit, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
 import type { Habit } from '../types/habit'
 
@@ -9,6 +9,7 @@ interface HabitContextType {
   error: string | null
   refreshHabits: () => Promise<void>
   toggleHabitCompletion: (habitId: string) => Promise<void>
+  deleteHabit: (habitId: string) => Promise<void>
 }
 
 const HabitContext = createContext<HabitContextType | undefined>(undefined)
@@ -60,6 +61,18 @@ export function HabitProvider({ children }: HabitProviderProps) {
     }
   }, [habits, refreshHabits])
 
+  const deleteHabit = useCallback(async (habitId: string) => {
+    try {
+      setError(null)
+      await deleteHabitFromDB(habitId)
+      await refreshHabits()
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete habit'
+      setError(errorMessage)
+      throw err
+    }
+  }, [refreshHabits])
+
   useEffect(() => {
     async function initializeApp() {
       try {
@@ -85,8 +98,9 @@ export function HabitProvider({ children }: HabitProviderProps) {
       error,
       refreshHabits,
       toggleHabitCompletion,
+      deleteHabit,
     }),
-    [habits, isLoading, error, refreshHabits, toggleHabitCompletion]
+    [habits, isLoading, error, refreshHabits, toggleHabitCompletion, deleteHabit]
   )
 
   return <HabitContext.Provider value={value}>{children}</HabitContext.Provider>

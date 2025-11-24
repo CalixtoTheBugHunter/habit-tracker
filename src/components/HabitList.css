@@ -149,6 +149,29 @@
   color: var(--color-button-primary-text);
 }
 
+.habit-delete-button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-error);
+  background-color: transparent;
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-base), color var(--transition-base);
+  white-space: nowrap;
+}
+
+.habit-delete-button:hover:not(:disabled) {
+  background-color: var(--color-error);
+  color: var(--color-button-primary-text);
+}
+
+.habit-delete-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .habit-list {
     margin: var(--spacing-lg) 0;
