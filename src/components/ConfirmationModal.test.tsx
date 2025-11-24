@@ -29,14 +29,12 @@ describe('ConfirmationModal', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
-  it('should display title', () => {
+  it.each([
+    { prop: 'title', text: 'Confirm Delete' },
+    { prop: 'message', text: 'Are you sure you want to delete this item?' },
+  ])('should display $prop', ({ text }) => {
     render(<ConfirmationModal {...defaultProps} />)
-    expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
-  })
-
-  it('should display message', () => {
-    render(<ConfirmationModal {...defaultProps} />)
-    expect(screen.getByText('Are you sure you want to delete this item?')).toBeInTheDocument()
+    expect(screen.getByText(text)).toBeInTheDocument()
   })
 
   it('should display confirm and cancel buttons', () => {
