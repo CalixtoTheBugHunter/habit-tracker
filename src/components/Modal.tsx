@@ -1,10 +1,10 @@
-import { useEffect, useId, useRef, type MouseEvent } from 'react'
+import { useEffect, useId, useRef, type MouseEvent, type ReactNode } from 'react'
 import './Modal.css'
 
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
-  children: React.ReactNode
+  children: ReactNode
   title?: string
   titleId?: string
   closeOnBackdropClick?: boolean
