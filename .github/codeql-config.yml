@@ -1,0 +1,19 @@
+name: "CodeQL Config"
+
+paths:
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.ts"
+  - "**/*.tsx"
+
+paths-ignore:
+  - "**/node_modules"
+  - "**/dist"
+  - "**/build"
+  - "**/*.test.js"
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.js"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+
