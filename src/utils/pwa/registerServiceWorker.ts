@@ -37,7 +37,9 @@ function register(options: ServiceWorkerRegistrationOptions): void {
     navigator.serviceWorker
       .register(swPath)
       .then((registration) => {
-        console.log('Service Worker registered successfully:', registration.scope)
+        if (import.meta.env.DEV) {
+          console.log('Service Worker registered successfully:', registration.scope)
+        }
 
         options.onSuccess?.(registration)
 
@@ -66,6 +68,8 @@ function register(options: ServiceWorkerRegistrationOptions): void {
         return
       }
       refreshing = true
+      // TODO: Consider showing a notification to users before reloading
+      // to allow them to choose when to reload, preventing potential data loss
       window.location.reload()
     })
   }

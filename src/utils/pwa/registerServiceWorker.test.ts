@@ -1,6 +1,26 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { registerServiceWorker, unregisterServiceWorker } from './registerServiceWorker'
 
+function withMockedEnv(
+  env: { DEV: boolean },
+  fn: () => void | Promise<void>
+): void | Promise<void> {
+  const originalEnv = import.meta.env.DEV
+  Object.defineProperty(import.meta, 'env', {
+    writable: true,
+    value: { ...import.meta.env, ...env },
+  })
+
+  try {
+    return fn()
+  } finally {
+    Object.defineProperty(import.meta, 'env', {
+      writable: true,
+      value: { ...import.meta.env, DEV: originalEnv },
+    })
+  }
+}
+
 describe('registerServiceWorker', () => {
   let originalServiceWorker: ServiceWorkerContainer | undefined
   let originalReadyState: string
@@ -76,65 +96,38 @@ describe('registerServiceWorker', () => {
   })
 
   it('should register service worker when supported', async () => {
-    const originalEnv = import.meta.env.DEV
-    Object.defineProperty(import.meta, 'env', {
-      writable: true,
-      value: { ...import.meta.env, DEV: false },
-    })
+    await withMockedEnv({ DEV: false }, async () => {
+      registerServiceWorker()
 
-    registerServiceWorker()
-
-    await vi.waitFor(() => {
-      expect(mockRegister).toHaveBeenCalledWith('/sw.js')
-    })
-
-    Object.defineProperty(import.meta, 'env', {
-      writable: true,
-      value: { ...import.meta.env, DEV: originalEnv },
+      await vi.waitFor(() => {
+        expect(mockRegister).toHaveBeenCalledWith('/sw.js')
+      })
     })
   })
 
   it('should unregister existing service workers in dev mode', async () => {
-    const originalEnv = import.meta.env.DEV
-    Object.defineProperty(import.meta, 'env', {
-      writable: true,
-      value: { ...import.meta.env, DEV: true },
-    })
+    await withMockedEnv({ DEV: true }, async () => {
+      registerServiceWorker()
 
-    registerServiceWorker()
-
-    await vi.waitFor(() => {
-      expect(mockGetRegistrations).toHaveBeenCalled()
-    })
-
-    Object.defineProperty(import.meta, 'env', {
-      writable: true,
-      value: { ...import.meta.env, DEV: originalEnv },
+      await vi.waitFor(() => {
+        expect(mockGetRegistrations).toHaveBeenCalled()
+      })
     })
   })
 
   it('should call onSuccess when registration succeeds', async () => {
-    const originalEnv = import.meta.env.DEV
-    Object.defineProperty(import.meta, 'env', {
-      writable: true,
-      value: { ...import.meta.env, DEV: false },
-    })
+    await withMockedEnv({ DEV: false }, async () => {
+      const onSuccess = vi.fn()
+      const onError = vi.fn()
 
-    const onSuccess = vi.fn()
-    const onError = vi.fn()
+      registerServiceWorker({
+        onSuccess,
+        onError,
+      })
 
-    registerServiceWorker({
-      onSuccess,
-      onError,
-    })
-
-    await vi.waitFor(() => {
-      expect(onSuccess).toHaveBeenCalled()
-    })
-
-    Object.defineProperty(import.meta, 'env', {
-      writable: true,
-      value: { ...import.meta.env, DEV: originalEnv },
+      await vi.waitFor(() => {
+        expect(onSuccess).toHaveBeenCalled()
+      })
     })
   })
 
@@ -142,35 +135,26 @@ describe('registerServiceWorker', () => {
     const error = new Error('Registration failed')
     mockRegister.mockRejectedValue(error)
 
-    const originalEnv = import.meta.env.DEV
-    Object.defineProperty(import.meta, 'env', {
-      writable: true,
-      value: { ...import.meta.env, DEV: false },
-    })
+    await withMockedEnv({ DEV: false }, async () => {
+      const onSuccess = vi.fn()
+      const onError = vi.fn()
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-    const onSuccess = vi.fn()
-    const onError = vi.fn()
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      registerServiceWorker({
+        onSuccess,
+        onError,
+      })
 
-    registerServiceWorker({
-      onSuccess,
-      onError,
-    })
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledWith(error)
+      })
 
-    await vi.waitFor(() => {
-      expect(onError).toHaveBeenCalledWith(error)
-    })
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Service Worker registration failed:',
+        error
+      )
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Service Worker registration failed:',
-      error
-    )
-
-    consoleErrorSpy.mockRestore()
-
-    Object.defineProperty(import.meta, 'env', {
-      writable: true,
-      value: { ...import.meta.env, DEV: originalEnv },
+      consoleErrorSpy.mockRestore()
     })
   })
 })

@@ -17,10 +17,14 @@ createRoot(rootElement).render(
 // Register service worker for PWA functionality
 registerServiceWorker({
   onSuccess: () => {
-    console.log('Service Worker registered successfully')
+    if (import.meta.env.DEV) {
+      console.log('Service Worker registered successfully')
+    }
   },
   onError: (error) => {
-    console.error('Service Worker registration failed:', error)
+    if (import.meta.env.DEV) {
+      console.error('Service Worker registration failed:', error)
+    }
   },
 })
 

@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Download } from 'lucide-react'
 import './InstallPrompt.css'
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
-}
+import type { BeforeInstallPromptEvent } from '../types/pwa'
 
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)

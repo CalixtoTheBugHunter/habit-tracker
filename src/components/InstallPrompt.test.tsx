@@ -2,10 +2,17 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor, act } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import { InstallPrompt } from './InstallPrompt'
+import type { BeforeInstallPromptEvent } from '../types/pwa'
 
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+function createBeforeInstallPromptEvent(
+  mockPrompt: () => Promise<void>,
+  mockUserChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+): BeforeInstallPromptEvent {
+  const event = new Event('beforeinstallprompt') as BeforeInstallPromptEvent
+  event.preventDefault = vi.fn()
+  event.prompt = mockPrompt
+  event.userChoice = mockUserChoice
+  return event
 }
 
 describe('InstallPrompt', () => {
@@ -85,10 +92,7 @@ describe('InstallPrompt', () => {
   it('should render install button when beforeinstallprompt event is fired', async () => {
     render(<InstallPrompt />)
 
-    const event = new Event('beforeinstallprompt') as BeforeInstallPromptEvent
-    event.preventDefault = vi.fn()
-    event.prompt = mockPrompt
-    event.userChoice = mockUserChoice
+    const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 
     act(() => {
       window.dispatchEvent(event)
@@ -102,10 +106,7 @@ describe('InstallPrompt', () => {
   it('should call prompt when install button is clicked', async () => {
     render(<InstallPrompt />)
 
-    const event = new Event('beforeinstallprompt') as BeforeInstallPromptEvent
-    event.preventDefault = vi.fn()
-    event.prompt = mockPrompt
-    event.userChoice = mockUserChoice
+    const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 
     act(() => {
       window.dispatchEvent(event)
@@ -126,10 +127,10 @@ describe('InstallPrompt', () => {
   it('should hide install button after successful installation', async () => {
     render(<InstallPrompt />)
 
-    const event = new Event('beforeinstallprompt') as BeforeInstallPromptEvent
-    event.preventDefault = vi.fn()
-    event.prompt = mockPrompt
-    event.userChoice = Promise.resolve({ outcome: 'accepted' as const })
+    const event = createBeforeInstallPromptEvent(
+      mockPrompt,
+      Promise.resolve({ outcome: 'accepted' as const })
+    )
 
     act(() => {
       window.dispatchEvent(event)
@@ -153,10 +154,7 @@ describe('InstallPrompt', () => {
   it('should hide install button when appinstalled event is fired', async () => {
     render(<InstallPrompt />)
 
-    const event = new Event('beforeinstallprompt') as BeforeInstallPromptEvent
-    event.preventDefault = vi.fn()
-    event.prompt = mockPrompt
-    event.userChoice = mockUserChoice
+    const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 
     act(() => {
       window.dispatchEvent(event)
@@ -178,10 +176,7 @@ describe('InstallPrompt', () => {
   it('should have proper accessibility attributes', async () => {
     render(<InstallPrompt />)
 
-    const event = new Event('beforeinstallprompt') as BeforeInstallPromptEvent
-    event.preventDefault = vi.fn()
-    event.prompt = mockPrompt
-    event.userChoice = mockUserChoice
+    const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 
     act(() => {
       window.dispatchEvent(event)
