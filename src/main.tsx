@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
+import { registerServiceWorker } from './utils/pwa/registerServiceWorker'
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {
@@ -12,6 +13,16 @@ createRoot(rootElement).render(
     <App />
   </StrictMode>,
 )
+
+// Register service worker for PWA functionality
+registerServiceWorker({
+  onSuccess: () => {
+    console.log('Service Worker registered successfully')
+  },
+  onError: (error) => {
+    console.error('Service Worker registration failed:', error)
+  },
+})
 
 // Expose dev utilities in development mode
 if (import.meta.env.DEV) {

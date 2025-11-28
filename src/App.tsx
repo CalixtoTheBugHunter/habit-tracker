@@ -4,6 +4,7 @@ import { HabitProvider, useHabits } from './contexts/HabitContext'
 import { HabitList } from './components/HabitList'
 import { HabitForm } from './components/HabitForm'
 import { OfflineIndicator } from './components/OfflineIndicator'
+import { InstallPrompt } from './components/InstallPrompt'
 import type { Habit } from './types/habit'
 
 function AppContent() {
@@ -42,9 +43,14 @@ function AppContent() {
     <div className="app">
       <OfflineIndicator />
       <header className="app-header">
-        <h1>Habit Tracker</h1>
-        <p>A simple, free and offline habit tracker</p>
-        <p>Total habits: {habits.length}</p>
+        <div className="app-header__content">
+          <div>
+            <h1>Habit Tracker</h1>
+            <p>A simple, free and offline habit tracker</p>
+            <p>Total habits: {habits.length}</p>
+          </div>
+        </div>
+        <InstallPrompt />
       </header>
       <main className="app-main">
         <HabitForm 

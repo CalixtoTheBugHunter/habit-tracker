@@ -1,0 +1,54 @@
+.install-prompt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-primary);
+  color: var(--color-button-primary-text);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: var(--font-family);
+  transition: background-color var(--transition-base), box-shadow var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  margin-top: var(--spacing-lg);
+}
+
+.install-prompt:hover {
+  background-color: var(--color-primary-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.install-prompt:active {
+  transform: scale(0.98);
+}
+
+.install-prompt:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.install-prompt__icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.install-prompt__text {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .install-prompt {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-xs);
+  }
+
+  .install-prompt__icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+}
+
