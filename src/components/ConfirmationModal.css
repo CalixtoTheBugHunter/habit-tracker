@@ -1,46 +1,3 @@
-.confirmation-modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: var(--spacing-lg);
-}
-
-.confirmation-modal {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-2xl);
-  max-width: 500px;
-  width: 100%;
-  box-shadow: var(--shadow-md);
-  position: relative;
-  animation: modalFadeIn var(--transition-base);
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.confirmation-modal-title {
-  margin: 0 0 var(--spacing-lg) 0;
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
 .confirmation-modal-message {
   margin: 0 0 var(--spacing-2xl) 0;
   font-size: var(--font-size-base);
@@ -72,13 +29,43 @@
 }
 
 .confirmation-modal-button-primary {
+  background-color: var(--color-primary);
+  color: var(--color-button-primary-text);
+  border-color: var(--color-primary);
+}
+
+.confirmation-modal-button-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.confirmation-modal-button-alert {
   background-color: var(--color-error);
   color: var(--color-button-primary-text);
   border-color: var(--color-error);
 }
 
-.confirmation-modal-button-primary:hover:not(:disabled) {
-  background-color: #b71c1c;
+.confirmation-modal-button-alert:hover:not(:disabled) {
+  background-color: var(--color-error-bg);
+}
+
+.confirmation-modal-button-warning {
+  background-color: var(--color-warning);
+  color: var(--color-button-primary-text);
+  border-color: var(--color-warning);
+}
+
+.confirmation-modal-button-warning:hover:not(:disabled) {
+  background-color: var(--color-warning-bg);
+}
+
+.confirmation-modal-button-success {
+  background-color: var(--color-success);
+  color: var(--color-button-primary-text);
+  border-color: var(--color-success);
+}
+
+.confirmation-modal-button-success:hover:not(:disabled) {
+  background-color: var(--color-success-bg);
 }
 
 .confirmation-modal-button-secondary {
@@ -92,11 +79,6 @@
 }
 
 @media (max-width: 600px) {
-  .confirmation-modal {
-    padding: var(--spacing-xl);
-    margin: var(--spacing-lg);
-  }
-
   .confirmation-modal-actions {
     flex-direction: column-reverse;
   }
@@ -105,4 +87,3 @@
     width: 100%;
   }
 }
-
