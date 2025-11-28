@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor, act } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import { OfflineIndicator } from './OfflineIndicator'
+import { setNavigatorOnline, triggerNetworkEvent } from '../test/utils/navigator-test-helpers'
 
 describe('OfflineIndicator', () => {
   let originalOnLine: boolean
@@ -22,19 +23,6 @@ describe('OfflineIndicator', () => {
     })
     vi.restoreAllMocks()
   })
-
-  const setNavigatorOnline = (value: boolean) => {
-    Object.defineProperty(globalThis.navigator, 'onLine', {
-      writable: true,
-      configurable: true,
-      value,
-    })
-  }
-
-  const triggerEvent = (eventType: 'online' | 'offline') => {
-    const event = new Event(eventType)
-    window.dispatchEvent(event)
-  }
 
   it('should not render when device is online', () => {
     setNavigatorOnline(true)
@@ -84,7 +72,7 @@ describe('OfflineIndicator', () => {
 
     act(() => {
       setNavigatorOnline(true)
-      triggerEvent('online')
+      triggerNetworkEvent('online')
     })
 
     await waitFor(() => {
@@ -101,7 +89,7 @@ describe('OfflineIndicator', () => {
 
     act(() => {
       setNavigatorOnline(false)
-      triggerEvent('offline')
+      triggerNetworkEvent('offline')
     })
 
     await waitFor(() => {
@@ -148,7 +136,7 @@ describe('OfflineIndicator', () => {
 
     act(() => {
       setNavigatorOnline(true)
-      triggerEvent('online')
+      triggerNetworkEvent('online')
     })
 
     await waitFor(() => {
@@ -157,7 +145,7 @@ describe('OfflineIndicator', () => {
 
     act(() => {
       setNavigatorOnline(false)
-      triggerEvent('offline')
+      triggerNetworkEvent('offline')
     })
 
     await waitFor(() => {
@@ -166,7 +154,7 @@ describe('OfflineIndicator', () => {
 
     act(() => {
       setNavigatorOnline(true)
-      triggerEvent('online')
+      triggerNetworkEvent('online')
     })
 
     await waitFor(() => {
