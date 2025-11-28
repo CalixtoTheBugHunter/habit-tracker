@@ -59,7 +59,7 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
-        project: ['./tsconfig.json', './tsconfig.node.json'],
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
       globals: {
@@ -68,6 +68,7 @@ export default [
         console: 'readonly',
         global: 'readonly',
         globalThis: 'readonly',
+        navigator: 'readonly',
         DOMException: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
@@ -95,6 +96,21 @@ export default [
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
+    },
+  },
+  {
+    files: ['**/sw.js', '**/service-worker.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        location: 'readonly',
+        Response: 'readonly',
+        Request: 'readonly',
+        console: 'readonly',
+      },
     },
   },
 ];

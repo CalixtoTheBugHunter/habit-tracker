@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { render } from '@testing-library/react'
 import { ConfirmationModal } from './ConfirmationModal'
 
+type ButtonVariant = 'primary' | 'alert' | 'warning' | 'success'
+
 describe('ConfirmationModal', () => {
   const defaultProps = {
     isOpen: true,
@@ -191,7 +193,7 @@ describe('ConfirmationModal', () => {
     { variant: 'warning', expectedClass: 'confirmation-modal-button-warning' },
     { variant: 'success', expectedClass: 'confirmation-modal-button-success' },
   ])('should apply $variant button variant when specified', ({ variant, expectedClass }) => {
-    render(<ConfirmationModal {...defaultProps} buttonVariant={variant as any} />)
+    render(<ConfirmationModal {...defaultProps} buttonVariant={variant as ButtonVariant} />)
     const confirmButton = screen.getByRole('button', { name: 'Delete' })
     expect(confirmButton).toHaveClass(expectedClass)
   })
