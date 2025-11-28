@@ -5,12 +5,16 @@ import type { BeforeInstallPromptEvent } from '../types/pwa'
 
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [isInstalled, setIsInstalled] = useState(false)
+  const [isInstalled, setIsInstalled] = useState(() => {
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+      return true
+    }
+    return false
+  })
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true)
+    if (isInstalled) {
       return
     }
 
@@ -25,7 +29,7 @@ export function InstallPrompt() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
-  }, [])
+  }, [isInstalled])
 
   useEffect(() => {
     const handleAppInstalled = () => {
