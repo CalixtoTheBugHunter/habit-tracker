@@ -8,7 +8,7 @@
   max-width: 800px;
   box-shadow: var(--shadow-sm);
   position: relative;
-  z-index: 1;
+  z-index: var(--z-index-base);
 }
 
 .habit-form-title {

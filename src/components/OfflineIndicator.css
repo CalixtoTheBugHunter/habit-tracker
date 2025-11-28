@@ -12,7 +12,7 @@
   position: fixed;
   top: var(--spacing-md);
   right: var(--spacing-md);
-  z-index: 1000;
+  z-index: var(--z-index-indicator);
   box-shadow: var(--shadow-md);
   transition: opacity var(--transition-base), transform var(--transition-base);
   animation: slideDown var(--transition-base) ease-out;
