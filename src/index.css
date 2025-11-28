@@ -70,6 +70,11 @@
   /* Transitions */
   --transition-fast: 0.1s ease;
   --transition-base: 0.2s ease;
+  
+  /* Z-Index Layers */
+  --z-index-base: 1;
+  --z-index-indicator: 999;
+  --z-index-modal: 1000;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -3,6 +3,7 @@ import './App.css'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
 import { HabitList } from './components/HabitList'
 import { HabitForm } from './components/HabitForm'
+import { OfflineIndicator } from './components/OfflineIndicator'
 import type { Habit } from './types/habit'
 
 function AppContent() {
@@ -12,6 +13,7 @@ function AppContent() {
   if (isLoading) {
     return (
       <div className="app">
+        <OfflineIndicator />
         <header className="app-header">
           <h1>Habit Tracker</h1>
           <div role="status" aria-live="polite" aria-atomic="true">
@@ -25,6 +27,7 @@ function AppContent() {
   if (error) {
     return (
       <div className="app">
+        <OfflineIndicator />
         <header className="app-header">
           <h1>Habit Tracker</h1>
           <div role="alert" aria-live="assertive" aria-atomic="true">
@@ -37,6 +40,7 @@ function AppContent() {
 
   return (
     <div className="app">
+      <OfflineIndicator />
       <header className="app-header">
         <h1>Habit Tracker</h1>
         <p>A simple, free and offline habit tracker</p>

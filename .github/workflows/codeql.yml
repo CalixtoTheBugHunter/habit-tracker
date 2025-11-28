@@ -1,5 +1,9 @@
 name: "CodeQL"
 
+# NOTE: This custom CodeQL workflow requires that the default CodeQL setup
+# be disabled in repository settings. Go to Settings > Code security and analysis
+# > Code scanning and disable "Set up this workflow" if it's enabled.
+
 on:
   push:
     branches: [ "main" ]
@@ -30,6 +34,7 @@ jobs:
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
+        config-file: .github/codeql-config.yml
 
     - name: Autobuild
       uses: github/codeql-action/autobuild@v3
