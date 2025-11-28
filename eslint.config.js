@@ -24,6 +24,7 @@ export default [
         document: 'readonly',
         console: 'readonly',
         global: 'readonly',
+        navigator: 'readonly',
         DOMException: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
