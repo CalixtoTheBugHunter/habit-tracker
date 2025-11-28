@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen } from '@testing-library/react'
+import { screen, render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { render } from '@testing-library/react'
 import { Modal } from './Modal'
 
 describe('Modal', () => {
@@ -122,8 +121,8 @@ describe('Modal', () => {
   })
 
   it('should restore body scroll when modal is closed', () => {
-    const originalOverflow = document.body.style.overflow
     document.body.style.overflow = 'auto'
+    const originalOverflow = window.getComputedStyle(document.body).overflow
 
     const { rerender } = render(<Modal {...defaultProps} />)
     expect(document.body.style.overflow).toBe('hidden')

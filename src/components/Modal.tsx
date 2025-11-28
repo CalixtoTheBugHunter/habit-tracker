@@ -7,6 +7,7 @@ interface ModalProps {
   children: ReactNode
   title?: string
   titleId?: string
+  ariaDescribedBy?: string
   closeOnBackdropClick?: boolean
   closeOnEscape?: boolean
 }
@@ -17,6 +18,7 @@ export function Modal({
   children,
   title,
   titleId,
+  ariaDescribedBy,
   closeOnBackdropClick = true,
   closeOnEscape = true,
 }: ModalProps) {
@@ -28,7 +30,7 @@ export function Modal({
   useEffect(() => {
     if (!isOpen) return
 
-    const originalStyle = document.body.style.overflow
+    const originalStyle = window.getComputedStyle(document.body).overflow
     document.body.style.overflow = 'hidden'
 
     return () => {
@@ -114,6 +116,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={finalTitleId}
+        aria-describedby={ariaDescribedBy}
       >
         {title && (
           <h2 id={finalTitleId} className="modal-title">

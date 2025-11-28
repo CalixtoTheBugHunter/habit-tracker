@@ -186,21 +186,13 @@ describe('ConfirmationModal', () => {
     expect(confirmButton).toHaveClass('confirmation-modal-button-alert')
   })
 
-  it('should apply primary button variant when specified', () => {
-    render(<ConfirmationModal {...defaultProps} buttonVariant="primary" />)
+  it.each([
+    { variant: 'primary', expectedClass: 'confirmation-modal-button-primary' },
+    { variant: 'warning', expectedClass: 'confirmation-modal-button-warning' },
+    { variant: 'success', expectedClass: 'confirmation-modal-button-success' },
+  ])('should apply $variant button variant when specified', ({ variant, expectedClass }) => {
+    render(<ConfirmationModal {...defaultProps} buttonVariant={variant as any} />)
     const confirmButton = screen.getByRole('button', { name: 'Delete' })
-    expect(confirmButton).toHaveClass('confirmation-modal-button-primary')
-  })
-
-  it('should apply warning button variant when specified', () => {
-    render(<ConfirmationModal {...defaultProps} buttonVariant="warning" />)
-    const confirmButton = screen.getByRole('button', { name: 'Delete' })
-    expect(confirmButton).toHaveClass('confirmation-modal-button-warning')
-  })
-
-  it('should apply success button variant when specified', () => {
-    render(<ConfirmationModal {...defaultProps} buttonVariant="success" />)
-    const confirmButton = screen.getByRole('button', { name: 'Delete' })
-    expect(confirmButton).toHaveClass('confirmation-modal-button-success')
+    expect(confirmButton).toHaveClass(expectedClass)
   })
 })

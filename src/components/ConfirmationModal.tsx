@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { Modal } from './Modal'
 import './Modal.css'
 import './ConfirmationModal.css'
@@ -29,15 +30,19 @@ export function ConfirmationModal({
   onCancel,
   isConfirming = false,
 }: ConfirmationModalProps) {
+  const messageId = useId()
   return (
     <Modal
       isOpen={isOpen}
       onClose={onCancel}
       title={title}
+      ariaDescribedBy={messageId}
       closeOnBackdropClick={!isConfirming}
       closeOnEscape={!isConfirming}
     >
-      <p className="confirmation-modal-message">{message}</p>
+      <p id={messageId} className="confirmation-modal-message">
+        {message}
+      </p>
       <div className="confirmation-modal-actions">
         <button
           type="button"

@@ -45,7 +45,7 @@
 }
 
 .confirmation-modal-button-alert:hover:not(:disabled) {
-  background-color: #b71c1c;
+  background-color: var(--color-error-bg);
 }
 
 .confirmation-modal-button-warning {
@@ -55,7 +55,7 @@
 }
 
 .confirmation-modal-button-warning:hover:not(:disabled) {
-  background-color: #e65100;
+  background-color: var(--color-warning-bg);
 }
 
 .confirmation-modal-button-success {
@@ -65,7 +65,7 @@
 }
 
 .confirmation-modal-button-success:hover:not(:disabled) {
-  background-color: #1b5e20;
+  background-color: var(--color-success-bg);
 }
 
 .confirmation-modal-button-secondary {
