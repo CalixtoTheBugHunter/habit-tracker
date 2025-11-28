@@ -10,12 +10,12 @@ interface BeforeInstallPromptEvent extends Event {
 
 describe('InstallPrompt', () => {
   let originalMatchMedia: typeof window.matchMedia
-  let mockPrompt: ReturnType<typeof vi.fn>
+  let mockPrompt: () => Promise<void>
   let mockUserChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 
   beforeEach(() => {
     originalMatchMedia = window.matchMedia
-    mockPrompt = vi.fn().mockResolvedValue(undefined)
+    mockPrompt = vi.fn().mockResolvedValue(undefined) as () => Promise<void>
     mockUserChoice = Promise.resolve({ outcome: 'accepted' as const })
 
     Object.defineProperty(window, 'matchMedia', {

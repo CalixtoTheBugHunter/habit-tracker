@@ -86,7 +86,7 @@ export function unregisterServiceWorker(): Promise<boolean> {
     .getRegistrations()
     .then((registrations) => {
       if (registrations.length === 0) {
-        return false
+        return Promise.resolve([])
       }
       return Promise.all(registrations.map((registration) => registration.unregister()))
     })
