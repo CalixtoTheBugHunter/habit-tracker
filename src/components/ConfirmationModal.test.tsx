@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ConfirmationModal } from './ConfirmationModal'
 import { render } from '@testing-library/react'
+import { ConfirmationModal } from './ConfirmationModal'
 
 describe('ConfirmationModal', () => {
   const defaultProps = {
@@ -98,6 +98,28 @@ describe('ConfirmationModal', () => {
     expect(onCancel).toHaveBeenCalledTimes(1)
   })
 
+  it('should not call onCancel when Escape is pressed if isConfirming is true', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    render(<ConfirmationModal {...defaultProps} onCancel={onCancel} isConfirming={true} />)
+
+    await user.keyboard('{Escape}')
+
+    expect(onCancel).not.toHaveBeenCalled()
+  })
+
+  it('should not call onCancel when backdrop is clicked if isConfirming is true', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    render(<ConfirmationModal {...defaultProps} onCancel={onCancel} isConfirming={true} />)
+
+    const backdrop = screen.getByRole('dialog').parentElement
+    if (backdrop) {
+      await user.click(backdrop)
+      expect(onCancel).not.toHaveBeenCalled()
+    }
+  })
+
   it('should have proper ARIA attributes', () => {
     render(<ConfirmationModal {...defaultProps} />)
     const dialog = screen.getByRole('dialog')
@@ -115,6 +137,20 @@ describe('ConfirmationModal', () => {
     )
     expect(screen.getByRole('button', { name: 'Yes, delete it' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'No, keep it' })).toBeInTheDocument()
+  })
+
+  it('should use default labels when not provided', () => {
+    render(
+      <ConfirmationModal
+        isOpen={true}
+        title="Test"
+        message="Test message"
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    )
+    expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument()
   })
 
   it('should disable buttons when isConfirming is true', () => {
@@ -143,5 +179,28 @@ describe('ConfirmationModal', () => {
     const confirmButton = screen.getByRole('button', { name: 'Deleting...' })
     expect(confirmButton).toBeInTheDocument()
   })
-})
 
+  it('should use alert button variant by default', () => {
+    render(<ConfirmationModal {...defaultProps} />)
+    const confirmButton = screen.getByRole('button', { name: 'Delete' })
+    expect(confirmButton).toHaveClass('confirmation-modal-button-alert')
+  })
+
+  it('should apply primary button variant when specified', () => {
+    render(<ConfirmationModal {...defaultProps} buttonVariant="primary" />)
+    const confirmButton = screen.getByRole('button', { name: 'Delete' })
+    expect(confirmButton).toHaveClass('confirmation-modal-button-primary')
+  })
+
+  it('should apply warning button variant when specified', () => {
+    render(<ConfirmationModal {...defaultProps} buttonVariant="warning" />)
+    const confirmButton = screen.getByRole('button', { name: 'Delete' })
+    expect(confirmButton).toHaveClass('confirmation-modal-button-warning')
+  })
+
+  it('should apply success button variant when specified', () => {
+    render(<ConfirmationModal {...defaultProps} buttonVariant="success" />)
+    const confirmButton = screen.getByRole('button', { name: 'Delete' })
+    expect(confirmButton).toHaveClass('confirmation-modal-button-success')
+  })
+})
