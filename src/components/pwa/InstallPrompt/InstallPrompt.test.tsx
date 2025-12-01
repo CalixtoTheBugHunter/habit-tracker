@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor, act } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import { InstallPrompt } from './InstallPrompt'
-import type { BeforeInstallPromptEvent } from '../types/pwa'
+import type { BeforeInstallPromptEvent } from '../../../types/pwa'
 
 function createBeforeInstallPromptEvent(
   mockPrompt: () => Promise<void>,

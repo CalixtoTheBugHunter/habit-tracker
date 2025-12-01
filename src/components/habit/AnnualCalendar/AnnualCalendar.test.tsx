@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from '@testing-library/react'
 import { AnnualCalendar } from './AnnualCalendar'
-import { createMockHabit } from '../test/fixtures/habits'
-import { createDateString } from '../test/utils/date-helpers'
+import { createMockHabit } from '../../../test/fixtures/habits'
+import { createDateString } from '../../../test/utils/date-helpers'
 
 describe('AnnualCalendar', () => {
   beforeEach(() => {

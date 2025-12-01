@@ -9,6 +9,7 @@
 .app-header {
   width: 100%;
   padding: var(--spacing-lg);
+  padding-top: calc(var(--spacing-lg) + env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
   align-items: center;

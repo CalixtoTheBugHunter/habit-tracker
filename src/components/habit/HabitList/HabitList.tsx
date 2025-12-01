@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import { useHabits } from '../contexts/HabitContext'
-import { calculateStreak } from '../utils/habit/calculateStreak'
-import { isTodayCompleted } from '../utils/habit/isTodayCompleted'
-import { AnnualCalendar } from './AnnualCalendar'
-import { ConfirmationModal } from './ConfirmationModal'
-import type { Habit } from '../types/habit'
+import { useHabits } from '../../../contexts/HabitContext'
+import { calculateStreak } from '../../../utils/habit/calculateStreak'
+import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
+import { AnnualCalendar } from '../AnnualCalendar/AnnualCalendar'
+import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
+import type { Habit } from '../../../types/habit'
 import './HabitList.css'
 
 interface HabitListProps {

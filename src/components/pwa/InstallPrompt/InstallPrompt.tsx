@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Download } from 'lucide-react'
 import './InstallPrompt.css'
-import type { BeforeInstallPromptEvent } from '../types/pwa'
+import type { BeforeInstallPromptEvent } from '../../../types/pwa'
 
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)

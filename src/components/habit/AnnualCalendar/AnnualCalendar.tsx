@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { getYearGrid, getDateString, isDateCompleted } from '../utils/date/annualCalendarHelpers'
-import { getTodayUTCDateString } from '../utils/date/dateHelpers'
-import type { Habit } from '../types/habit'
+import { getYearGrid, getDateString, isDateCompleted } from '../../../utils/date/annualCalendarHelpers'
+import { getTodayUTCDateString } from '../../../utils/date/dateHelpers'
+import type { Habit } from '../../../types/habit'
 import './AnnualCalendar.css'
 
 interface AnnualCalendarProps {

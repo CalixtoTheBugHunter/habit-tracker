@@ -2,11 +2,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HabitForm } from './HabitForm'
-import { renderWithProviders } from '../test/utils/render-helpers'
-import { createMockHabit } from '../test/fixtures/habits'
-import { addHabit, updateHabit, openDB, getAllHabits } from '../services/indexedDB'
+import { renderWithProviders } from '../../../test/utils/render-helpers'
+import { createMockHabit } from '../../../test/fixtures/habits'
+import { addHabit, updateHabit, openDB, getAllHabits } from '../../../services/indexedDB'
 
-vi.mock('../services/indexedDB', () => ({
+vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
   getAllHabits: vi.fn(),
   addHabit: vi.fn(),

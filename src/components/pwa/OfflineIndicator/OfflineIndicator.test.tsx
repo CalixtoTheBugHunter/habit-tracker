@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor, act } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import { OfflineIndicator } from './OfflineIndicator'
-import { setNavigatorOnline, triggerNetworkEvent } from '../test/utils/navigator-test-helpers'
+import { setNavigatorOnline, triggerNetworkEvent } from '../../../test/utils/navigator-test-helpers'
 
 describe('OfflineIndicator', () => {
   let originalOnLine: boolean

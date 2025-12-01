@@ -10,8 +10,8 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   position: fixed;
-  top: var(--spacing-md);
-  right: var(--spacing-md);
+  top: calc(var(--spacing-md) + env(safe-area-inset-top));
+  right: calc(var(--spacing-md) + env(safe-area-inset-right));
   z-index: var(--z-index-indicator);
   box-shadow: var(--shadow-md);
   transition: opacity var(--transition-base), transform var(--transition-base);
@@ -45,8 +45,8 @@
   .offline-indicator {
     font-size: var(--font-size-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
-    top: var(--spacing-sm);
-    right: var(--spacing-sm);
+    top: calc(var(--spacing-sm) + env(safe-area-inset-top));
+    right: calc(var(--spacing-sm) + env(safe-area-inset-right));
   }
 
   .offline-indicator__icon {

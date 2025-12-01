@@ -2,12 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HabitList } from './HabitList'
-import { renderWithProviders } from '../test/utils/render-helpers'
-import { createMockHabit } from '../test/fixtures/habits'
-import { createDateString, createDateStrings } from '../test/utils/date-helpers'
-import { getAllHabits, openDB, deleteHabit } from '../services/indexedDB'
+import { renderWithProviders } from '../../../test/utils/render-helpers'
+import { createMockHabit } from '../../../test/fixtures/habits'
+import { createDateString, createDateStrings } from '../../../test/utils/date-helpers'
+import { getAllHabits, openDB, deleteHabit } from '../../../services/indexedDB'
 
-vi.mock('../services/indexedDB', () => ({
+vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
   getAllHabits: vi.fn(),
   deleteHabit: vi.fn(),

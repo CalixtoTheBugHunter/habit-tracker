@@ -1,8 +1,8 @@
 import { useState, FormEvent, useEffect, useRef } from 'react'
-import { useHabits } from '../contexts/HabitContext'
-import { addHabit, updateHabit } from '../services/indexedDB'
-import type { Habit } from '../types/habit'
-import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../utils/validation/validateHabit'
+import { useHabits } from '../../../contexts/HabitContext'
+import { addHabit, updateHabit } from '../../../services/indexedDB'
+import type { Habit } from '../../../types/habit'
+import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../../utils/validation/validateHabit'
 import './HabitForm.css'
 
 const TEXTAREA_MAX_HEIGHT = 200

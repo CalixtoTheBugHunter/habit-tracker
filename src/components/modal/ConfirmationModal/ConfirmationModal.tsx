@@ -1,6 +1,6 @@
 import { useId } from 'react'
-import { Modal } from './Modal'
-import './Modal.css'
+import { Modal } from '../Modal/Modal'
+import '../Modal/Modal.css'
 import './ConfirmationModal.css'
 
 type ButtonVariant = 'primary' | 'alert' | 'warning' | 'success'
