@@ -6,4 +6,3 @@ export { Modal, ConfirmationModal } from './modal'
 
 // PWA components
 export { OfflineIndicator, InstallPrompt } from './pwa'
-
