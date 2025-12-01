@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
-import { HabitList } from './components/HabitList'
-import { HabitForm } from './components/HabitForm'
-import { OfflineIndicator } from './components/OfflineIndicator'
-import { InstallPrompt } from './components/InstallPrompt'
+import { HabitList, HabitForm, OfflineIndicator, InstallPrompt } from './components'
 import type { Habit } from './types/habit'
 
 function AppContent() {
