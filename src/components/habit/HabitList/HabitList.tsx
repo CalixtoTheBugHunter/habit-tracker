@@ -102,39 +102,6 @@ export function HabitList({ onEdit }: HabitListProps) {
           <li key={habit.id} className="habit-item">
             <div className="habit-header">
               <h3 className="habit-name">{habit.name || 'Unnamed Habit'}</h3>
-              <div className="habit-status">
-                <button
-                  type="button"
-                  className={`completion-toggle ${habit.completedToday ? 'completed' : 'not-completed'}`}
-                  onClick={() => handleToggle(habit.id)}
-                  disabled={togglingId === habit.id}
-                  aria-label={habit.completedToday ? 'Mark as not completed today' : 'Mark as completed today'}
-                  aria-pressed={habit.completedToday}
-                  aria-busy={togglingId === habit.id}
-                >
-                  {togglingId === habit.id ? 'Updating...' : habit.completedToday ? '✓ Completed' : 'Mark as done'}
-                </button>
-                {onEdit && (
-                  <button
-                    type="button"
-                    className="habit-edit-button"
-                    onClick={() => onEdit(habit)}
-                    aria-label={`Edit ${habit.name || 'habit'}`}
-                  >
-                    Edit
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="habit-delete-button"
-                  onClick={() => handleDeleteClick(habit.id, habit.name)}
-                  disabled={deletingId === habit.id}
-                  aria-label={`Delete ${habit.name || 'habit'}`}
-                  aria-busy={deletingId === habit.id}
-                >
-                  Delete
-                </button>
-              </div>
             </div>
             {habit.description && (
               <p className="habit-description">{habit.description}</p>
@@ -143,6 +110,39 @@ export function HabitList({ onEdit }: HabitListProps) {
               <span className="streak">Streak: {habit.streak}</span>
             </div>
             <AnnualCalendar habit={habit} />
+            <div className="habit-actions">
+              <button
+                type="button"
+                className={`completion-toggle ${habit.completedToday ? 'completed' : 'not-completed'}`}
+                onClick={() => handleToggle(habit.id)}
+                disabled={togglingId === habit.id}
+                aria-label={habit.completedToday ? 'Mark as not completed today' : 'Mark as completed today'}
+                aria-pressed={habit.completedToday}
+                aria-busy={togglingId === habit.id}
+              >
+                {togglingId === habit.id ? 'Updating...' : habit.completedToday ? '✓ Completed' : 'Mark as done'}
+              </button>
+              {onEdit && (
+                <button
+                  type="button"
+                  className="habit-edit-button"
+                  onClick={() => onEdit(habit)}
+                  aria-label={`Edit ${habit.name || 'habit'}`}
+                >
+                  Edit
+                </button>
+              )}
+              <button
+                type="button"
+                className="habit-delete-button"
+                onClick={() => handleDeleteClick(habit.id, habit.name)}
+                disabled={deletingId === habit.id}
+                aria-label={`Delete ${habit.name || 'habit'}`}
+                aria-busy={deletingId === habit.id}
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>
