@@ -38,7 +38,7 @@
 
 .habit-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
@@ -52,12 +52,6 @@
   color: var(--color-text-primary);
   flex: 1;
   min-width: 200px;
-}
-
-.habit-status {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
 }
 
 .completion-badge {
@@ -131,6 +125,16 @@
   color: var(--color-primary);
 }
 
+.habit-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
 .habit-edit-button {
   padding: var(--spacing-xs) var(--spacing-md);
   font-size: var(--font-size-sm);
@@ -199,6 +203,11 @@
   .completion-toggle {
     font-size: var(--font-size-sm);
     padding: var(--spacing-xs) var(--spacing-md);
+  }
+
+  .habit-actions {
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
   }
 }
 
