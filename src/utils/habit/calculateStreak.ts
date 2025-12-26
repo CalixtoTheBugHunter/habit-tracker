@@ -1,8 +1,8 @@
 import {
-  getUTCDateString,
-  getTodayUTCDateString,
-  getYesterdayUTCDateString,
-  getPreviousDayUTCDateString,
+  getDateString,
+  getTodayLocalDateString,
+  getYesterdayLocalDateString,
+  getPreviousDayDateString,
 } from '../date/dateHelpers'
 
 /**
@@ -20,7 +20,7 @@ export function calculateStreak(completionDates: string[]): number {
   }
 
   const dateOnlyStrings = completionDates
-    .map(getUTCDateString)
+    .map(getDateString)
     .filter((dateStr, index, self) => self.indexOf(dateStr) === index)
     .sort()
     .reverse()
@@ -29,8 +29,8 @@ export function calculateStreak(completionDates: string[]): number {
     return 0
   }
 
-  const todayStr = getTodayUTCDateString()
-  const yesterdayStr = getYesterdayUTCDateString()
+  const todayStr = getTodayLocalDateString()
+  const yesterdayStr = getYesterdayLocalDateString()
 
   const hasToday = dateOnlyStrings.includes(todayStr)
   const hasYesterday = dateOnlyStrings.includes(yesterdayStr)
@@ -44,7 +44,7 @@ export function calculateStreak(completionDates: string[]): number {
 
   while (dateOnlyStrings.includes(currentDateStr)) {
     streak++
-    currentDateStr = getPreviousDayUTCDateString(currentDateStr)
+    currentDateStr = getPreviousDayDateString(currentDateStr)
   }
 
   return streak

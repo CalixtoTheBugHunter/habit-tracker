@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { getYearGrid, getDateString, isDateCompleted } from '../../../utils/date/annualCalendarHelpers'
-import { getTodayUTCDateString } from '../../../utils/date/dateHelpers'
+import { getTodayLocalDateString } from '../../../utils/date/dateHelpers'
 import type { Habit } from '../../../types/habit'
 import './AnnualCalendar.css'
 
@@ -9,8 +9,8 @@ interface AnnualCalendarProps {
 }
 
 export function AnnualCalendar({ habit }: AnnualCalendarProps) {
-  const currentYear = new Date().getUTCFullYear()
-  const today = getTodayUTCDateString()
+  const currentYear = new Date().getFullYear()
+  const today = getTodayLocalDateString()
 
   const yearGrid = useMemo(() => {
     return getYearGrid(currentYear)
@@ -51,7 +51,7 @@ export function AnnualCalendar({ habit }: AnnualCalendarProps) {
               const dateStr = getDateString(date)
               const completed = isCompleted(date)
               const isTodayDate = isToday(date)
-              const isCurrentYear = date.getUTCFullYear() === currentYear
+              const isCurrentYear = date.getFullYear() === currentYear
 
               return (
                 <div

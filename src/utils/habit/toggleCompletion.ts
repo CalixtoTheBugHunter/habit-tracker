@@ -1,4 +1,4 @@
-import { getTodayUTCDateString, getUTCDateString } from '../date/dateHelpers'
+import { getTodayLocalDateString, getDateString } from '../date/dateHelpers'
 import { isTodayCompleted } from './isTodayCompleted'
 import type { Habit } from '../../types/habit'
 
@@ -13,14 +13,14 @@ import type { Habit } from '../../types/habit'
  * @returns A new habit object with updated completionDates
  */
 export function toggleCompletion(habit: Habit): Habit {
-  const todayStr = getTodayUTCDateString()
+  const todayStr = getTodayLocalDateString()
   const todayISO = `${todayStr}T00:00:00.000Z`
   
   const isCompleted = isTodayCompleted(habit.completionDates)
   
   if (isCompleted) {
     const updatedCompletionDates = habit.completionDates.filter(dateStr => {
-      return getUTCDateString(dateStr) !== todayStr
+      return getDateString(dateStr) !== todayStr
     })
     
     return {

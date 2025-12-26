@@ -44,5 +44,18 @@ describe('isTodayCompleted', () => {
     const today2 = '2025-01-15T20:00:00.000Z'
     expect(isTodayCompleted([today1, today2])).toBe(true)
   })
+
+  describe('timezone handling', () => {
+    it('should correctly compare dates using local timezone', () => {
+      vi.setSystemTime(new Date('2025-01-15T12:00:00.000Z'))
+      const today = '2025-01-15T00:00:00.000Z'
+      const yesterday = '2025-01-14T00:00:00.000Z'
+      const tomorrow = '2025-01-16T00:00:00.000Z'
+
+      expect(isTodayCompleted([today])).toBe(true)
+      expect(isTodayCompleted([yesterday])).toBe(false)
+      expect(isTodayCompleted([tomorrow])).toBe(false)
+    })
+  })
 })
 

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { toggleCompletion } from './toggleCompletion'
 import { createMockHabit } from '../../test/fixtures/habits'
 import { createDateString } from '../../test/utils/date-helpers'
+import { getTodayLocalDateString } from '../date/dateHelpers'
 
 describe('toggleCompletion', () => {
   beforeEach(() => {
@@ -126,6 +127,27 @@ describe('toggleCompletion', () => {
     expect(result.name).toBe(habit.name)
     expect(result.description).toBe(habit.description)
     expect(result.createdDate).toBe(habit.createdDate)
+  })
+
+  describe('timezone handling', () => {
+    it('should store completions with date matching local timezone', () => {
+      vi.setSystemTime(new Date('2025-01-15T12:00:00.000Z'))
+      const habit = createMockHabit({
+        id: '1',
+        completionDates: [],
+      })
+
+      const result = toggleCompletion(habit)
+
+      expect(result.completionDates).toHaveLength(1)
+      const completionDate = result.completionDates[0]!
+      // Should be in ISO format with date part matching today's local date
+      expect(completionDate).toMatch(/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/)
+      // Verify the date part matches what getTodayLocalDateString() would return
+      const expectedDate = completionDate.split('T')[0]
+      const todayLocal = getTodayLocalDateString()
+      expect(expectedDate).toBe(todayLocal)
+    })
   })
 })
 

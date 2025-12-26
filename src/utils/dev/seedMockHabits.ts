@@ -11,8 +11,8 @@ export async function seedMockHabits(): Promise<void> {
   // Helper to create date strings
   const getDateString = (daysAgo: number): string => {
     const date = new Date(now)
-    date.setUTCDate(date.getUTCDate() - daysAgo)
-    date.setUTCHours(0, 0, 0, 0)
+    date.setDate(date.getDate() - daysAgo)
+    date.setHours(0, 0, 0, 0)
     return date.toISOString()
   }
 
