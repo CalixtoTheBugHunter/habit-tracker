@@ -12,6 +12,7 @@ describe('StreakBadge', () => {
       observe = vi.fn()
       disconnect = vi.fn()
       unobserve = vi.fn()
+      takeRecords = vi.fn(() => [])
       root = null
       rootMargin = ''
       thresholds = []
@@ -22,11 +23,11 @@ describe('StreakBadge', () => {
       ) {}
     }
 
-    global.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver
+    window.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver
   })
 
   afterEach(() => {
-    delete (global as { IntersectionObserver?: typeof IntersectionObserver }).IntersectionObserver
+    delete (window as { IntersectionObserver?: typeof IntersectionObserver }).IntersectionObserver
   })
 
   it('should return null when streak is 0', () => {
