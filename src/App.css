@@ -12,21 +12,24 @@
   padding-top: calc(var(--spacing-lg) + env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .app-header__content {
   max-width: 1200px;
   width: 100%;
-  text-align: center;
+  text-align: left;
+  padding: 0 var(--spacing-lg);
 }
 
-.app-header h1 {
-  margin: 0 0 var(--spacing-lg) 0;
-  font-size: var(--font-size-4xl);
-  color: var(--color-text-primary);
+.app-header__logo {
+  font-family: 'Sansita Swashed', cursive;
   font-weight: 600;
+  font-size: var(--font-size-4xl);
+  letter-spacing: 0px;
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--color-text-primary);
 }
 
 .app-header p {
@@ -56,6 +59,16 @@
 @media (min-width: 768px) {
   .app-main {
     padding: 0 var(--spacing-3xl);
+  }
+
+  .app-header__content {
+    padding: 0 var(--spacing-3xl);
+  }
+}
+
+@media (max-width: 767px) {
+  .app-header__logo {
+    font-size: var(--font-size-3xl);
   }
 }
 
