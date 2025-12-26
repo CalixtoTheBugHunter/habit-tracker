@@ -60,7 +60,7 @@ describe('HabitList', () => {
     expect(await screen.findByText('Read for 30 minutes')).toBeInTheDocument()
   })
 
-  it('should display streak count for each habit', async () => {
+  it('should display streak badge for each habit', async () => {
     const [todayStr, yesterdayStr, twoDaysAgoStr]: [string, string, string] = createDateStrings([0, 1, 2]) as [string, string, string]
 
     const habits = [
@@ -75,7 +75,7 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />)
 
-    expect(await screen.findByText(/streak: 3/i)).toBeInTheDocument()
+    expect(await screen.findByText('3-day streak')).toBeInTheDocument()
   })
 
   it('should display completion status for today', async () => {
@@ -125,7 +125,7 @@ describe('HabitList', () => {
     expect(habitItems.length).toBeGreaterThan(0)
   })
 
-  it('should display zero streak when habit has no completions', async () => {
+  it('should not display streak badge when habit has no completions', async () => {
     const habits = [
       createMockHabit({
         id: '1',
@@ -138,7 +138,8 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />)
 
-    expect(await screen.findByText(/streak: 0/i)).toBeInTheDocument()
+    await screen.findByText('Exercise')
+    expect(screen.queryByText(/streak/i)).not.toBeInTheDocument()
   })
 
   it('should render toggle completion button for each habit', async () => {
@@ -421,7 +422,6 @@ describe('HabitList', () => {
 
       const nameHeading = screen.getByRole('heading', { name: 'Exercise' })
       const description = screen.getByText('Daily workout')
-      const streak = screen.getByText(/streak: 0/i)
       const calendar = screen.getByLabelText(/annual completion calendar/i)
       const toggleButton = screen.getByRole('button', { name: /mark as completed today/i })
 
@@ -431,14 +431,12 @@ describe('HabitList', () => {
       
       const nameIndex = allChildren.findIndex(el => el.contains(nameHeading))
       const descriptionIndex = allChildren.findIndex(el => el.contains(description))
-      const statsIndex = allChildren.findIndex(el => el.contains(streak))
       const calendarIndex = allChildren.findIndex(el => el.contains(calendar))
       const actionsIndex = allChildren.findIndex(el => el.contains(toggleButton))
 
-      // Verify logical order: name → description → stats → calendar → buttons
+      // Verify logical order: name → description → calendar → buttons
       expect(nameIndex).toBeLessThan(descriptionIndex)
-      expect(descriptionIndex).toBeLessThan(statsIndex)
-      expect(statsIndex).toBeLessThan(calendarIndex)
+      expect(descriptionIndex).toBeLessThan(calendarIndex)
       expect(calendarIndex).toBeLessThan(actionsIndex)
     })
 
@@ -459,6 +457,76 @@ describe('HabitList', () => {
       expect(actionsContainer).toBeInTheDocument()
       expect(actionsContainer).toHaveClass('habit-actions')
       // CSS alignment verified via visual regression or E2E tests
+    })
+  })
+
+  describe('Streak badge', () => {
+    it('should render streak badge with simple styling for streaks 1-7', async () => {
+      const [todayStr, yesterdayStr, twoDaysAgoStr, threeDaysAgoStr]: [string, string, string, string] = createDateStrings([0, 1, 2, 3]) as [string, string, string, string]
+
+      const habits = [
+        createMockHabit({
+          id: '1',
+          name: 'Exercise',
+          completionDates: [todayStr, yesterdayStr, twoDaysAgoStr, threeDaysAgoStr],
+        }),
+      ]
+
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      const { container } = renderWithProviders(<HabitList />)
+
+      await screen.findByText('4-day streak')
+      const badge = container.querySelector('.streak-badge-simple')
+      expect(badge).toBeInTheDocument()
+      expect(badge).not.toHaveClass('streak-badge-colorful')
+    })
+
+    it('should render streak badge with colorful styling for streaks 7+', async () => {
+      const dateStrings = createDateStrings([0, 1, 2, 3, 4, 5, 6, 7, 8])
+
+      const habits = [
+        createMockHabit({
+          id: '1',
+          name: 'Exercise',
+          completionDates: dateStrings,
+        }),
+      ]
+
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      const { container } = renderWithProviders(<HabitList />)
+
+      await screen.findByText('9-day streak')
+      const badge = container.querySelector('.streak-badge-colorful')
+      expect(badge).toBeInTheDocument()
+      expect(badge).not.toHaveClass('streak-badge-simple')
+    })
+
+    it('should position streak badge next to habit name in header', async () => {
+      const [todayStr, yesterdayStr]: [string, string] = createDateStrings([0, 1]) as [string, string]
+
+      const habits = [
+        createMockHabit({
+          id: '1',
+          name: 'Exercise',
+          completionDates: [todayStr, yesterdayStr],
+        }),
+      ]
+
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      const { container } = renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      const header = container.querySelector('.habit-header')
+      expect(header).toBeInTheDocument()
+
+      const habitName = screen.getByRole('heading', { name: 'Exercise' })
+      const badge = screen.getByText('2-day streak')
+
+      expect(header).toContainElement(habitName)
+      expect(header).toContainElement(badge)
     })
   })
 })
