@@ -24,6 +24,12 @@
   animation: streakHighlight 0.6s ease-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .streak-badge-animated {
+    animation: none;
+  }
+}
+
 @keyframes streakHighlight {
   0% {
     opacity: 0;

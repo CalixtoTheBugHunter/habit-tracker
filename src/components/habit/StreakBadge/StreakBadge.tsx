@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import './StreakBadge.css'
 
+const COLORFUL_STREAK_THRESHOLD = 7
+
 interface StreakBadgeProps {
   streak: number
 }
@@ -46,7 +48,7 @@ export function StreakBadge({ streak }: StreakBadgeProps) {
   }
 
   const badgeClass =
-    streak > 7
+    streak > COLORFUL_STREAK_THRESHOLD
       ? 'streak-badge streak-badge-colorful'
       : 'streak-badge streak-badge-simple'
 

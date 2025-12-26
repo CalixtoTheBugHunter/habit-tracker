@@ -1,33 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { StreakBadge } from './StreakBadge'
+import {
+  setupIntersectionObserverMock,
+  teardownIntersectionObserverMock,
+} from '../../../test/utils/intersection-observer-test-helpers'
 
 describe('StreakBadge', () => {
-  let mockIntersectionObserver: typeof IntersectionObserver
-
   beforeEach(() => {
     vi.clearAllMocks()
-
-    mockIntersectionObserver = class IntersectionObserver {
-      observe = vi.fn()
-      disconnect = vi.fn()
-      unobserve = vi.fn()
-      takeRecords = vi.fn(() => [])
-      root = null
-      rootMargin = ''
-      thresholds = []
-
-      constructor(
-        public callback: IntersectionObserverCallback,
-        public options?: IntersectionObserverInit
-      ) {}
-    }
-
-    window.IntersectionObserver = mockIntersectionObserver as unknown as typeof IntersectionObserver
+    setupIntersectionObserverMock()
   })
 
   afterEach(() => {
-    delete (window as { IntersectionObserver?: typeof IntersectionObserver }).IntersectionObserver
+    teardownIntersectionObserverMock()
   })
 
   it('should return null when streak is 0', () => {
@@ -45,25 +31,17 @@ describe('StreakBadge', () => {
     expect(screen.getByText('5-day streak')).toBeInTheDocument()
   })
 
-  it('should apply simple styling for streaks 1-7', () => {
-    const { container } = render(<StreakBadge streak={3} />)
+  it.each([
+    { streak: 1, expectedClass: 'streak-badge-simple', notExpectedClass: 'streak-badge-colorful' },
+    { streak: 3, expectedClass: 'streak-badge-simple', notExpectedClass: 'streak-badge-colorful' },
+    { streak: 7, expectedClass: 'streak-badge-simple', notExpectedClass: 'streak-badge-colorful' },
+    { streak: 8, expectedClass: 'streak-badge-colorful', notExpectedClass: 'streak-badge-simple' },
+    { streak: 15, expectedClass: 'streak-badge-colorful', notExpectedClass: 'streak-badge-simple' },
+  ])('should apply $expectedClass styling for streak $streak', ({ streak, expectedClass, notExpectedClass }) => {
+    const { container } = render(<StreakBadge streak={streak} />)
     const badge = container.querySelector('.streak-badge')
-    expect(badge).toHaveClass('streak-badge-simple')
-    expect(badge).not.toHaveClass('streak-badge-colorful')
-  })
-
-  it('should apply simple styling for streak 7', () => {
-    const { container } = render(<StreakBadge streak={7} />)
-    const badge = container.querySelector('.streak-badge')
-    expect(badge).toHaveClass('streak-badge-simple')
-    expect(badge).not.toHaveClass('streak-badge-colorful')
-  })
-
-  it('should apply colorful styling for streaks greater than 7', () => {
-    const { container } = render(<StreakBadge streak={8} />)
-    const badge = container.querySelector('.streak-badge')
-    expect(badge).toHaveClass('streak-badge-colorful')
-    expect(badge).not.toHaveClass('streak-badge-simple')
+    expect(badge).toHaveClass(expectedClass)
+    expect(badge).not.toHaveClass(notExpectedClass)
   })
 
   it('should have correct aria-label', () => {
