@@ -23,19 +23,12 @@
   padding: 0 var(--spacing-lg);
 }
 
-.app-header h1 {
-  margin: 0 0 var(--spacing-lg) 0;
-  font-size: var(--font-size-4xl);
-  color: var(--color-text-primary);
-  font-weight: 600;
-}
-
 .app-header__logo {
   font-family: 'Sansita Swashed', cursive;
-  font-weight: 700;
+  font-weight: 600;
   font-size: var(--font-size-4xl);
   letter-spacing: 0px;
-  margin: 0 0 var(--spacing-md) 0;
+  margin: 0 0 var(--spacing-lg) 0;
   color: var(--color-text-primary);
 }
 

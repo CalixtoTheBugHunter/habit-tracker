@@ -36,6 +36,7 @@ describe('App', () => {
     await waitFor(() => {
       const element = screen.getByRole(role, { name: text })
       expect(element).toBeInTheDocument()
+      expect(element).toHaveClass('app-header__logo')
     })
   })
 
