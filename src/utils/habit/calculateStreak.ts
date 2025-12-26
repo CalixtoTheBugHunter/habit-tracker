@@ -2,7 +2,7 @@ import {
   getDateString,
   getTodayLocalDateString,
   getYesterdayLocalDateString,
-  getPreviousDayUTCDateString,
+  getPreviousDayDateString,
 } from '../date/dateHelpers'
 
 /**
@@ -44,7 +44,7 @@ export function calculateStreak(completionDates: string[]): number {
 
   while (dateOnlyStrings.includes(currentDateStr)) {
     streak++
-    currentDateStr = getPreviousDayUTCDateString(currentDateStr)
+    currentDateStr = getPreviousDayDateString(currentDateStr)
   }
 
   return streak

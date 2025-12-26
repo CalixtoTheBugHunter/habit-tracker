@@ -41,13 +41,17 @@ export function getYesterdayLocalDateString(): string {
 }
 
 /**
- * Gets the previous day's UTC date string from a given date string.
+ * Gets the previous day's date string from a given date string.
+ * 
+ * Works with date strings in YYYY-MM-DD format (timezone-agnostic).
+ * Uses UTC methods internally for date arithmetic to ensure consistent
+ * behavior regardless of the local timezone.
  * 
  * @param dateStr - Date string in YYYY-MM-DD format
  * @returns Previous day's date in YYYY-MM-DD format
  * @throws Error if the date string format is invalid
  */
-export function getPreviousDayUTCDateString(dateStr: string): string {
+export function getPreviousDayDateString(dateStr: string): string {
   const parts = dateStr.split('-')
   if (parts.length !== 3) {
     throw new Error(`Invalid date string format: ${dateStr}`)
@@ -67,6 +71,8 @@ export function getPreviousDayUTCDateString(dateStr: string): string {
   ) {
     throw new Error(`Invalid date string: ${dateStr}`)
   }
+  // Use UTC methods for date arithmetic to ensure consistent behavior
+  // with timezone-agnostic YYYY-MM-DD date strings
   const previousDay = new Date(Date.UTC(year, month - 1, day - 1))
   const prevYear = previousDay.getUTCFullYear()
   const prevMonth = String(previousDay.getUTCMonth() + 1).padStart(2, '0')
