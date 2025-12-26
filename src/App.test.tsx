@@ -25,34 +25,17 @@ describe('App', () => {
     vi.clearAllMocks()
   })
 
-  it.each([
-    { scenario: 'title', text: /habit tracker/i, role: 'heading' },
-    { scenario: 'description', text: /A simple, free and offline habit tracker/ },
-  ])('renders $scenario after initialization', async ({ text, role }) => {
+  it('renders title after initialization', async () => {
+    const text = /habit tracker/i
+    const role = 'heading'
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
     vi.mocked(getAllHabits).mockResolvedValue([])
 
     renderWithProviders(<App />)
 
     await waitFor(() => {
-      if (role) {
-        const element = screen.getByRole(role, { name: text })
-        expect(element).toBeInTheDocument()
-      } else {
-        const element = screen.getByText(text)
-        expect(element).toBeInTheDocument()
-      }
-    })
-  })
-
-  it('renders total habits count after initialization', async () => {
-    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
-    vi.mocked(getAllHabits).mockResolvedValue([])
-
-    renderWithProviders(<App />)
-
-    await waitFor(() => {
-      expect(screen.getByText(/total habits: 0/i)).toBeInTheDocument()
+      const element = screen.getByRole(role, { name: text })
+      expect(element).toBeInTheDocument()
     })
   })
 

@@ -5,7 +5,7 @@ import { HabitList, HabitForm, OfflineIndicator, InstallPrompt } from './compone
 import type { Habit } from './types/habit'
 
 function AppContent() {
-  const { habits, isLoading, error } = useHabits()
+  const { isLoading, error } = useHabits()
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined)
 
   if (isLoading) {
@@ -13,7 +13,7 @@ function AppContent() {
       <div className="app">
         <OfflineIndicator />
         <header className="app-header">
-          <h1>Habit Tracker</h1>
+          <h1 className="app-header__logo">Habit Tracker</h1>
           <div role="status" aria-live="polite" aria-atomic="true">
             <p>Loading...</p>
           </div>
@@ -27,7 +27,7 @@ function AppContent() {
       <div className="app">
         <OfflineIndicator />
         <header className="app-header">
-          <h1>Habit Tracker</h1>
+          <h1 className="app-header__logo">Habit Tracker</h1>
           <div role="alert" aria-live="assertive" aria-atomic="true">
             <p className="error">Error: {error}</p>
           </div>
@@ -42,9 +42,7 @@ function AppContent() {
       <header className="app-header">
         <div className="app-header__content">
           <div>
-            <h1>Habit Tracker</h1>
-            <p>A simple, free and offline habit tracker</p>
-            <p>Total habits: {habits.length}</p>
+            <h1 className="app-header__logo">Habit Tracker</h1>
           </div>
         </div>
         <InstallPrompt />
