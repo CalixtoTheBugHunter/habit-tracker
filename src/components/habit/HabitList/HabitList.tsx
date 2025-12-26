@@ -4,6 +4,7 @@ import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { AnnualCalendar } from '../AnnualCalendar/AnnualCalendar'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
+import { StreakBadge } from '../StreakBadge/StreakBadge'
 import type { Habit } from '../../../types/habit'
 import './HabitList.css'
 
@@ -102,13 +103,11 @@ export function HabitList({ onEdit }: HabitListProps) {
           <li key={habit.id} className="habit-item">
             <div className="habit-header">
               <h3 className="habit-name">{habit.name || 'Unnamed Habit'}</h3>
+              <StreakBadge streak={habit.streak} />
             </div>
             {habit.description && (
               <p className="habit-description">{habit.description}</p>
             )}
-            <div className="habit-stats">
-              <span className="streak">Streak: {habit.streak}</span>
-            </div>
             <AnnualCalendar habit={habit} />
             <div className="habit-actions">
               <button

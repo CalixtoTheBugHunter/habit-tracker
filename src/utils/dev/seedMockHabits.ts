@@ -49,6 +49,10 @@ export async function seedMockHabits(): Promise<void> {
         getDateString(8),
         getDateString(9),
         getDateString(10),
+        getDateString(11),
+        getDateString(12),
+        getDateString(13),
+        getDateString(14),
       ],
     },
     {
