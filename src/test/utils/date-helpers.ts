@@ -7,9 +7,11 @@
  */
 export function createDateString(daysAgo: number = 0, baseDate: Date = new Date()): string {
   const date = new Date(baseDate)
-  date.setUTCDate(date.getUTCDate() - daysAgo)
-  const dateStr = date.toISOString().split('T')[0]
-  return `${dateStr}T00:00:00.000Z`
+  date.setDate(date.getDate() - daysAgo)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}T00:00:00.000Z`
 }
 
 /**

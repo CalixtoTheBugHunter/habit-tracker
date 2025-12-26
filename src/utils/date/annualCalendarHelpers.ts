@@ -2,12 +2,12 @@
  * Formats a Date object as YYYY-MM-DD string.
  * 
  * @param date - Date object
- * @returns Date string in YYYY-MM-DD format
+ * @returns Date string in YYYY-MM-DD format based on local timezone
  */
 export function getDateString(date: Date): string {
-  const year = date.getUTCFullYear()
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(date.getUTCDate()).padStart(2, '0')
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
 
@@ -15,12 +15,12 @@ export function getDateString(date: Date): string {
  * Gets the Sunday (start of week) for a given date.
  * 
  * @param date - Date object
- * @returns Date object representing the Sunday of that week
+ * @returns Date object representing the Sunday of that week based on local timezone
  */
 export function getWeekStartDate(date: Date): Date {
   const sunday = new Date(date)
-  const dayOfWeek = sunday.getUTCDay()
-  sunday.setUTCDate(sunday.getUTCDate() - dayOfWeek)
+  const dayOfWeek = sunday.getDay()
+  sunday.setDate(sunday.getDate() - dayOfWeek)
   return sunday
 }
 
@@ -30,13 +30,13 @@ export function getWeekStartDate(date: Date): Date {
  * Returns 53 weeks to ensure the entire year is covered.
  * 
  * @param year - The year (e.g., 2025)
- * @returns Array of weeks, each containing 7 Date objects
+ * @returns Array of weeks, each containing 7 Date objects based on local timezone
  */
 export function getYearGrid(year: number): Date[][] {
   const grid: Date[][] = []
   
   // Start from January 1st of the year
-  const jan1 = new Date(Date.UTC(year, 0, 1))
+  const jan1 = new Date(year, 0, 1)
   const firstSunday = getWeekStartDate(jan1)
   
   // Generate 53 weeks (some years need 53 weeks)
@@ -46,7 +46,7 @@ export function getYearGrid(year: number): Date[][] {
     const weekDays: Date[] = []
     for (let day = 0; day < 7; day++) {
       weekDays.push(new Date(currentDate))
-      currentDate.setUTCDate(currentDate.getUTCDate() + 1)
+      currentDate.setDate(currentDate.getDate() + 1)
     }
     grid.push(weekDays)
   }

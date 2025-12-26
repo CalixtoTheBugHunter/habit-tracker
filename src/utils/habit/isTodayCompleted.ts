@@ -1,4 +1,4 @@
-import { getTodayUTCDateString } from '../date/dateHelpers'
+import { getTodayLocalDateString } from '../date/dateHelpers'
 
 /**
  * Checks if a habit is completed for today.
@@ -11,7 +11,7 @@ export function isTodayCompleted(completionDates: string[]): boolean {
     return false
   }
 
-  const todayStr = getTodayUTCDateString()
+  const todayStr = getTodayLocalDateString()
 
   return completionDates.some(dateStr => {
     const dateOnlyStr = dateStr.split('T')[0]

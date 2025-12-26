@@ -18,32 +18,34 @@ describe('annualCalendarHelpers', () => {
 
   describe('getDateString', () => {
     it('should format date as YYYY-MM-DD', () => {
-      const date = new Date(Date.UTC(2025, 0, 15))
+      const date = new Date(2025, 0, 15)
       expect(getDateString(date)).toBe('2025-01-15')
     })
 
     it('should handle month and day padding', () => {
-      const date = new Date(Date.UTC(2025, 0, 5))
+      const date = new Date(2025, 0, 5)
       expect(getDateString(date)).toBe('2025-01-05')
     })
+
   })
 
   describe('getWeekStartDate', () => {
     it('should return the Sunday of the week for a given date', () => {
       // Wednesday, Jan 15, 2025
-      const date = new Date(Date.UTC(2025, 0, 15))
+      const date = new Date(2025, 0, 15)
       const weekStart = getWeekStartDate(date)
       // Should be Sunday, Jan 12, 2025
-      expect(weekStart.getUTCDate()).toBe(12)
-      expect(weekStart.getUTCDay()).toBe(0) // Sunday
+      expect(weekStart.getDate()).toBe(12)
+      expect(weekStart.getDay()).toBe(0) // Sunday
     })
 
     it('should return the same date if it is already Sunday', () => {
-      const date = new Date(Date.UTC(2025, 0, 12)) // Sunday
+      const date = new Date(2025, 0, 12) // Sunday
       const weekStart = getWeekStartDate(date)
-      expect(weekStart.getUTCDate()).toBe(12)
-      expect(weekStart.getUTCDay()).toBe(0)
+      expect(weekStart.getDate()).toBe(12)
+      expect(weekStart.getDay()).toBe(0)
     })
+
   })
 
   describe('getYearGrid', () => {
@@ -66,10 +68,10 @@ describe('annualCalendarHelpers', () => {
       const firstDay = firstWeek?.[0]
       expect(firstDay).toBeDefined()
       // Jan 1, 2025 is a Wednesday, so first Sunday should be Dec 29, 2024
-      expect(firstDay!.getUTCFullYear()).toBe(2024)
-      expect(firstDay!.getUTCMonth()).toBe(11) // December (0-indexed)
-      expect(firstDay!.getUTCDate()).toBe(29)
-      expect(firstDay!.getUTCDay()).toBe(0) // Sunday
+      expect(firstDay!.getFullYear()).toBe(2024)
+      expect(firstDay!.getMonth()).toBe(11) // December (0-indexed)
+      expect(firstDay!.getDate()).toBe(29)
+      expect(firstDay!.getDay()).toBe(0) // Sunday
     })
 
     it('should have consecutive dates', () => {
@@ -81,10 +83,11 @@ describe('annualCalendarHelpers', () => {
         expect(prev).toBeDefined()
         expect(curr).toBeDefined()
         const expectedNext = new Date(prev!)
-        expectedNext.setUTCDate(expectedNext.getUTCDate() + 1)
+        expectedNext.setDate(expectedNext.getDate() + 1)
         expect(curr!.getTime()).toBe(expectedNext.getTime())
       }
     })
+
   })
 
   describe('isDateCompleted', () => {

@@ -1,11 +1,11 @@
 /**
- * Gets the UTC date string (YYYY-MM-DD) from an ISO 8601 date string.
+ * Gets the date string (YYYY-MM-DD) from an ISO 8601 date string.
  * 
  * @param dateStr - ISO 8601 date string
- * @returns UTC date string in YYYY-MM-DD format
+ * @returns Date string in YYYY-MM-DD format
  * @throws Error if the date string is invalid
  */
-export function getUTCDateString(dateStr: string): string {
+export function getDateString(dateStr: string): string {
   const datePart = dateStr.split('T')[0]
   if (!datePart || !datePart.match(/^\d{4}-\d{2}-\d{2}$/)) {
     throw new Error(`Invalid date string: ${dateStr}`)
@@ -14,29 +14,29 @@ export function getUTCDateString(dateStr: string): string {
 }
 
 /**
- * Gets today's UTC date string (YYYY-MM-DD).
+ * Gets today's local date string (YYYY-MM-DD).
  * 
- * @returns Today's date in YYYY-MM-DD format
+ * @returns Today's date in YYYY-MM-DD format based on local timezone
  */
-export function getTodayUTCDateString(): string {
+export function getTodayLocalDateString(): string {
   const now = new Date()
-  const year = now.getUTCFullYear()
-  const month = String(now.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(now.getUTCDate()).padStart(2, '0')
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
 
 /**
- * Gets yesterday's UTC date string (YYYY-MM-DD).
+ * Gets yesterday's local date string (YYYY-MM-DD).
  * 
- * @returns Yesterday's date in YYYY-MM-DD format
+ * @returns Yesterday's date in YYYY-MM-DD format based on local timezone
  */
-export function getYesterdayUTCDateString(): string {
+export function getYesterdayLocalDateString(): string {
   const now = new Date()
-  const yesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1))
-  const year = yesterday.getUTCFullYear()
-  const month = String(yesterday.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(yesterday.getUTCDate()).padStart(2, '0')
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+  const year = yesterday.getFullYear()
+  const month = String(yesterday.getMonth() + 1).padStart(2, '0')
+  const day = String(yesterday.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
 

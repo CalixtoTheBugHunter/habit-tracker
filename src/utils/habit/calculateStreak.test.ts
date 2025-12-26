@@ -97,5 +97,18 @@ describe('calculateStreak', () => {
     }
     expect(calculateStreak(completionDates)).toBe(10)
   })
+
+  describe('timezone handling', () => {
+    it('should calculate streaks based on local timezone dates', () => {
+      vi.setSystemTime(new Date('2025-01-15T12:00:00.000Z'))
+      const completionDates = [
+        '2025-01-13T00:00:00.000Z',
+        '2025-01-14T00:00:00.000Z',
+        '2025-01-15T00:00:00.000Z',
+      ]
+      // Should calculate streak based on local timezone, not UTC
+      expect(calculateStreak(completionDates)).toBe(3)
+    })
+  })
 })
 
