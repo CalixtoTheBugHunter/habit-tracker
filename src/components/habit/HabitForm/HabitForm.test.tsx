@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HabitForm } from './HabitForm'
 import { renderWithProviders } from '../../../test/utils/render-helpers'
 import { createMockHabit } from '../../../test/fixtures/habits'
 import { addHabit, updateHabit, openDB, getAllHabits } from '../../../services/indexedDB'
-import { verifyButtonContrast } from '../../../test/utils/accessibility-helpers'
+import { verifyButtonContrast, mockComputedStyleForElement } from '../../../test/utils/accessibility-helpers'
 
 vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -610,31 +610,26 @@ describe('HabitForm', () => {
   })
 
   describe('Accessibility - Contrast', () => {
+    let cleanup: (() => void) | undefined
+
+    afterEach(() => {
+      if (cleanup) {
+        cleanup()
+        cleanup = undefined
+      }
+    })
+
     it('should have sufficient contrast ratio for primary button text', () => {
-      const originalGetComputedStyle = window.getComputedStyle
-      window.getComputedStyle = vi.fn((element: Element) => {
-        const style = originalGetComputedStyle(element)
-        if (element.classList.contains('habit-form-button-primary')) {
-          return {
-            ...style,
-            color: 'rgb(0, 0, 0)',
-            backgroundColor: 'rgb(25, 118, 210)',
-            getPropertyValue: (prop: string) => {
-              if (prop === 'color') return 'rgb(0, 0, 0)'
-              if (prop === 'background-color') return 'rgb(25, 118, 210)'
-              return style.getPropertyValue(prop)
-            },
-          } as CSSStyleDeclaration
-        }
-        return style
-      }) as typeof window.getComputedStyle
+      cleanup = mockComputedStyleForElement(
+        'habit-form-button-primary',
+        'rgb(0, 0, 0)',
+        'rgb(25, 118, 210)'
+      )
 
       renderWithProviders(<HabitForm />)
       
       const primaryButton = screen.getByRole('button', { name: /create habit/i })
       expect(verifyButtonContrast(primaryButton)).toBe(true)
-      
-      window.getComputedStyle = originalGetComputedStyle
     })
   })
 })

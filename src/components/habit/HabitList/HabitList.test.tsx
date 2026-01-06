@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HabitList } from './HabitList'
@@ -7,7 +7,7 @@ import { createMockHabit } from '../../../test/fixtures/habits'
 import { createDateString, createDateStrings } from '../../../test/utils/date-helpers'
 import { getAllHabits, openDB, deleteHabit } from '../../../services/indexedDB'
 import type { Habit } from '../../../types/habit'
-import { verifyButtonContrast } from '../../../test/utils/accessibility-helpers'
+import { verifyButtonContrast, mockComputedStyleForElement } from '../../../test/utils/accessibility-helpers'
 
 vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -532,118 +532,81 @@ describe('HabitList', () => {
   })
 
   describe('Accessibility - Contrast', () => {
-    it('should have sufficient contrast for completed toggle button', async () => {
-      const todayStr = createDateString(0)
-      const habits = [
-        createMockHabit({
-          id: '1',
-          name: 'Exercise',
-          completionDates: [todayStr],
-        }),
-      ]
+    let cleanup: (() => void) | undefined
 
-      vi.mocked(getAllHabits).mockResolvedValue(habits)
-
-      const originalGetComputedStyle = window.getComputedStyle
-      window.getComputedStyle = vi.fn((element: Element) => {
-        const style = originalGetComputedStyle(element)
-        if (element.classList.contains('completion-toggle') && element.classList.contains('completed')) {
-          return {
-            ...style,
-            color: 'rgb(0, 0, 0)',
-            backgroundColor: 'rgb(25, 118, 210)',
-            getPropertyValue: (prop: string) => {
-              if (prop === 'color') return 'rgb(0, 0, 0)'
-              if (prop === 'background-color') return 'rgb(25, 118, 210)'
-              return style.getPropertyValue(prop)
-            },
-          } as CSSStyleDeclaration
-        }
-        return style
-      }) as typeof window.getComputedStyle
-
-      renderWithProviders(<HabitList />)
-
-      await screen.findByText('Exercise')
-      const toggleButton = screen.getByRole('button', { name: /mark as done|completed/i })
-      expect(verifyButtonContrast(toggleButton)).toBe(true)
-      
-      window.getComputedStyle = originalGetComputedStyle
+    afterEach(() => {
+      if (cleanup) {
+        cleanup()
+        cleanup = undefined
+      }
     })
 
-    it('should have sufficient contrast for edit button on hover', async () => {
-      const habits = [
-        createMockHabit({
-          id: '1',
-          name: 'Exercise',
-        }),
-      ]
-
+    it.each([
+      {
+        name: 'completed toggle button',
+        matcher: (el: Element) => el.classList.contains('completion-toggle') && el.classList.contains('completed'),
+        bgColor: 'rgb(25, 118, 210)',
+        minRatio: 4.5,
+        buttonName: /mark as done|completed/i,
+        setupHabits: () => {
+          const todayStr = createDateString(0)
+          return [
+            createMockHabit({
+              id: '1',
+              name: 'Exercise',
+              completionDates: [todayStr],
+            }),
+          ]
+        },
+        renderOptions: undefined,
+      },
+      {
+        name: 'edit button on hover',
+        matcher: 'habit-edit-button',
+        bgColor: 'rgb(25, 118, 210)',
+        minRatio: 4.5,
+        buttonName: /edit/i,
+        setupHabits: () => [
+          createMockHabit({
+            id: '1',
+            name: 'Exercise',
+          }),
+        ],
+        renderOptions: { onEdit: vi.fn() },
+      },
+      {
+        name: 'delete button on hover',
+        matcher: 'habit-delete-button',
+        bgColor: 'rgb(211, 47, 47)',
+        minRatio: 4.0,
+        buttonName: /delete/i,
+        setupHabits: () => [
+          createMockHabit({
+            id: '1',
+            name: 'Exercise',
+          }),
+        ],
+        renderOptions: undefined,
+      },
+    ])('should have sufficient contrast for $name', async ({ matcher, bgColor, minRatio, buttonName, setupHabits, renderOptions }) => {
+      const habits = setupHabits()
       vi.mocked(getAllHabits).mockResolvedValue(habits)
 
-      const originalGetComputedStyle = window.getComputedStyle
-      window.getComputedStyle = vi.fn((element: Element) => {
-        const style = originalGetComputedStyle(element)
-        if (element.classList.contains('habit-edit-button')) {
-          return {
-            ...style,
-            color: 'rgb(0, 0, 0)',
-            backgroundColor: 'rgb(25, 118, 210)',
-            getPropertyValue: (prop: string) => {
-              if (prop === 'color') return 'rgb(0, 0, 0)'
-              if (prop === 'background-color') return 'rgb(25, 118, 210)'
-              return style.getPropertyValue(prop)
-            },
-          } as CSSStyleDeclaration
-        }
-        return style
-      }) as typeof window.getComputedStyle
+      cleanup = mockComputedStyleForElement(
+        matcher as string | ((element: Element) => boolean),
+        'rgb(0, 0, 0)',
+        bgColor
+      )
 
-      const onEdit = vi.fn()
-      renderWithProviders(<HabitList onEdit={onEdit} />)
+      if (renderOptions?.onEdit) {
+        renderWithProviders(<HabitList onEdit={renderOptions.onEdit} />)
+      } else {
+        renderWithProviders(<HabitList />)
+      }
 
       await screen.findByText('Exercise')
-      const editButton = screen.getByRole('button', { name: /edit/i })
-      expect(verifyButtonContrast(editButton)).toBe(true)
-      
-      window.getComputedStyle = originalGetComputedStyle
-    })
-
-    it('should have sufficient contrast for delete button on hover', async () => {
-      const habits = [
-        createMockHabit({
-          id: '1',
-          name: 'Exercise',
-        }),
-      ]
-
-      vi.mocked(getAllHabits).mockResolvedValue(habits)
-
-      const originalGetComputedStyle = window.getComputedStyle
-      window.getComputedStyle = vi.fn((element: Element) => {
-        const style = originalGetComputedStyle(element)
-        if (element.classList.contains('habit-delete-button')) {
-          return {
-            ...style,
-            color: 'rgb(0, 0, 0)',
-            backgroundColor: 'rgb(211, 47, 47)',
-            getPropertyValue: (prop: string) => {
-              if (prop === 'color') return 'rgb(0, 0, 0)'
-              if (prop === 'background-color') return 'rgb(211, 47, 47)'
-              return style.getPropertyValue(prop)
-            },
-          } as CSSStyleDeclaration
-        }
-        return style
-      }) as typeof window.getComputedStyle
-
-      renderWithProviders(<HabitList />)
-
-      await screen.findByText('Exercise')
-      const deleteButton = screen.getByRole('button', { name: /delete/i })
-      expect(verifyButtonContrast(deleteButton, 4.0)).toBe(true)
-      
-      window.getComputedStyle = originalGetComputedStyle
+      const button = screen.getByRole('button', { name: buttonName })
+      expect(verifyButtonContrast(button, minRatio)).toBe(true)
     })
   })
 })

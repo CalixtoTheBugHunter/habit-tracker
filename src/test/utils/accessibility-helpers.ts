@@ -1,4 +1,67 @@
+import { vi } from 'vitest'
 import { getContrastRatio } from '../../utils/accessibility/contrastRatio'
+
+/**
+ * Mocks window.getComputedStyle for testing contrast ratios.
+ * 
+ * This helper function sets up a mock for getComputedStyle that returns
+ * specific color values for elements matching the given className or predicate.
+ * 
+ * @param matcher - CSS class name (string) or function that returns true if the element should be mocked
+ * @param color - Text color value (e.g., "rgb(0, 0, 0)")
+ * @param backgroundColor - Background color value (e.g., "rgb(25, 118, 210)")
+ * @returns Cleanup function to restore the original getComputedStyle
+ * 
+ * @example
+ * ```typescript
+ * // Using a class name
+ * const cleanup = mockComputedStyleForElement(
+ *   'habit-form-button-primary',
+ *   'rgb(0, 0, 0)',
+ *   'rgb(25, 118, 210)'
+ * )
+ * 
+ * // Using a predicate function
+ * const cleanup2 = mockComputedStyleForElement(
+ *   (el) => el.classList.contains('completion-toggle') && el.classList.contains('completed'),
+ *   'rgb(0, 0, 0)',
+ *   'rgb(25, 118, 210)'
+ * )
+ * 
+ * // ... test code ...
+ * 
+ * cleanup() // Restore original
+ * ```
+ */
+export function mockComputedStyleForElement(
+  matcher: string | ((element: Element) => boolean),
+  color: string,
+  backgroundColor: string
+): () => void {
+  const original = window.getComputedStyle
+  const matches = typeof matcher === 'string' 
+    ? (element: Element) => element.classList.contains(matcher)
+    : matcher
+  
+  window.getComputedStyle = vi.fn((element: Element) => {
+    const style = original(element)
+    if (matches(element)) {
+      return {
+        ...style,
+        color,
+        backgroundColor,
+        getPropertyValue: (prop: string) => {
+          if (prop === 'color') return color
+          if (prop === 'background-color') return backgroundColor
+          return style.getPropertyValue(prop)
+        },
+      } as CSSStyleDeclaration
+    }
+    return style
+  }) as typeof window.getComputedStyle
+  
+  return () => { window.getComputedStyle = original }
+}
 
 /**
  * Converts RGB/RGBA color string to hex format
