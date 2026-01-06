@@ -137,6 +137,7 @@
 .habit-form-button-primary {
   background-color: var(--color-primary);
   color: var(--color-button-primary-text);
+  font-weight: bold;
 }
 
 .habit-form-button-primary:not(:disabled):hover {

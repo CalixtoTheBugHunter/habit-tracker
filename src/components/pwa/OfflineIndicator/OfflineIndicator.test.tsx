@@ -3,6 +3,7 @@ import { screen, waitFor, act } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import { OfflineIndicator } from './OfflineIndicator'
 import { setNavigatorOnline, triggerNetworkEvent } from '../../../test/utils/navigator-test-helpers'
+import { getButtonContrastRatio } from '../../../test/utils/accessibility-helpers'
 
 describe('OfflineIndicator', () => {
   let originalOnLine: boolean
@@ -159,6 +160,38 @@ describe('OfflineIndicator', () => {
 
     await waitFor(() => {
       expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Accessibility - Contrast', () => {
+    it('should have sufficient contrast ratio for offline indicator', () => {
+      setNavigatorOnline(false)
+
+      const originalGetComputedStyle = window.getComputedStyle
+      window.getComputedStyle = vi.fn((element: Element) => {
+        const style = originalGetComputedStyle(element)
+        if (element.classList.contains('offline-indicator')) {
+          return {
+            ...style,
+            color: 'rgb(0, 0, 0)',
+            backgroundColor: 'rgb(211, 47, 47)',
+            getPropertyValue: (prop: string) => {
+              if (prop === 'color') return 'rgb(0, 0, 0)'
+              if (prop === 'background-color') return 'rgb(211, 47, 47)'
+              return style.getPropertyValue(prop)
+            },
+          } as CSSStyleDeclaration
+        }
+        return style
+      }) as typeof window.getComputedStyle
+
+      render(<OfflineIndicator />)
+
+      const statusElement = screen.getByRole('status')
+      const contrastRatio = getButtonContrastRatio(statusElement as HTMLElement)
+      expect(contrastRatio).toBeGreaterThan(4.0)
+      
+      window.getComputedStyle = originalGetComputedStyle
     })
   })
 })

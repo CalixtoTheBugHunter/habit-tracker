@@ -86,6 +86,7 @@
 .completion-toggle.completed {
   background-color: var(--color-primary);
   color: var(--color-button-primary-text);
+  font-weight: bold;
 }
 
 .completion-toggle.completed:hover {
@@ -139,6 +140,7 @@
 .habit-edit-button:hover {
   background-color: var(--color-primary);
   color: var(--color-button-primary-text);
+  font-weight: bold;
 }
 
 .habit-delete-button {
@@ -157,6 +159,7 @@
 .habit-delete-button:hover:not(:disabled) {
   background-color: var(--color-error);
   color: var(--color-button-primary-text);
+  font-weight: bold;
 }
 
 .habit-delete-button:disabled {

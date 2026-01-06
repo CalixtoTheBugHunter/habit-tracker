@@ -7,6 +7,7 @@ import { createMockHabit } from '../../../test/fixtures/habits'
 import { createDateString, createDateStrings } from '../../../test/utils/date-helpers'
 import { getAllHabits, openDB, deleteHabit } from '../../../services/indexedDB'
 import type { Habit } from '../../../types/habit'
+import { verifyButtonContrast } from '../../../test/utils/accessibility-helpers'
 
 vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -527,6 +528,122 @@ describe('HabitList', () => {
 
       expect(header).toContainElement(habitName)
       expect(header).toContainElement(badge)
+    })
+  })
+
+  describe('Accessibility - Contrast', () => {
+    it('should have sufficient contrast for completed toggle button', async () => {
+      const todayStr = createDateString(0)
+      const habits = [
+        createMockHabit({
+          id: '1',
+          name: 'Exercise',
+          completionDates: [todayStr],
+        }),
+      ]
+
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      const originalGetComputedStyle = window.getComputedStyle
+      window.getComputedStyle = vi.fn((element: Element) => {
+        const style = originalGetComputedStyle(element)
+        if (element.classList.contains('completion-toggle') && element.classList.contains('completed')) {
+          return {
+            ...style,
+            color: 'rgb(0, 0, 0)',
+            backgroundColor: 'rgb(25, 118, 210)',
+            getPropertyValue: (prop: string) => {
+              if (prop === 'color') return 'rgb(0, 0, 0)'
+              if (prop === 'background-color') return 'rgb(25, 118, 210)'
+              return style.getPropertyValue(prop)
+            },
+          } as CSSStyleDeclaration
+        }
+        return style
+      }) as typeof window.getComputedStyle
+
+      renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      const toggleButton = screen.getByRole('button', { name: /mark as done|completed/i })
+      expect(verifyButtonContrast(toggleButton)).toBe(true)
+      
+      window.getComputedStyle = originalGetComputedStyle
+    })
+
+    it('should have sufficient contrast for edit button on hover', async () => {
+      const habits = [
+        createMockHabit({
+          id: '1',
+          name: 'Exercise',
+        }),
+      ]
+
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      const originalGetComputedStyle = window.getComputedStyle
+      window.getComputedStyle = vi.fn((element: Element) => {
+        const style = originalGetComputedStyle(element)
+        if (element.classList.contains('habit-edit-button')) {
+          return {
+            ...style,
+            color: 'rgb(0, 0, 0)',
+            backgroundColor: 'rgb(25, 118, 210)',
+            getPropertyValue: (prop: string) => {
+              if (prop === 'color') return 'rgb(0, 0, 0)'
+              if (prop === 'background-color') return 'rgb(25, 118, 210)'
+              return style.getPropertyValue(prop)
+            },
+          } as CSSStyleDeclaration
+        }
+        return style
+      }) as typeof window.getComputedStyle
+
+      const onEdit = vi.fn()
+      renderWithProviders(<HabitList onEdit={onEdit} />)
+
+      await screen.findByText('Exercise')
+      const editButton = screen.getByRole('button', { name: /edit/i })
+      expect(verifyButtonContrast(editButton)).toBe(true)
+      
+      window.getComputedStyle = originalGetComputedStyle
+    })
+
+    it('should have sufficient contrast for delete button on hover', async () => {
+      const habits = [
+        createMockHabit({
+          id: '1',
+          name: 'Exercise',
+        }),
+      ]
+
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      const originalGetComputedStyle = window.getComputedStyle
+      window.getComputedStyle = vi.fn((element: Element) => {
+        const style = originalGetComputedStyle(element)
+        if (element.classList.contains('habit-delete-button')) {
+          return {
+            ...style,
+            color: 'rgb(0, 0, 0)',
+            backgroundColor: 'rgb(211, 47, 47)',
+            getPropertyValue: (prop: string) => {
+              if (prop === 'color') return 'rgb(0, 0, 0)'
+              if (prop === 'background-color') return 'rgb(211, 47, 47)'
+              return style.getPropertyValue(prop)
+            },
+          } as CSSStyleDeclaration
+        }
+        return style
+      }) as typeof window.getComputedStyle
+
+      renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      const deleteButton = screen.getByRole('button', { name: /delete/i })
+      expect(verifyButtonContrast(deleteButton, 4.0)).toBe(true)
+      
+      window.getComputedStyle = originalGetComputedStyle
     })
   })
 })

@@ -8,7 +8,7 @@
   border: 1px solid var(--color-error-border);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: bold;
   position: fixed;
   top: calc(var(--spacing-md) + env(safe-area-inset-top));
   right: calc(var(--spacing-md) + env(safe-area-inset-right));

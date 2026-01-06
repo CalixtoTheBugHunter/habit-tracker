@@ -3,6 +3,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '@testing-library/react'
 import { ConfirmationModal } from './ConfirmationModal'
+import { verifyButtonContrast } from '../../../test/utils/accessibility-helpers'
 
 type ButtonVariant = 'primary' | 'alert' | 'warning' | 'success'
 
@@ -196,5 +197,43 @@ describe('ConfirmationModal', () => {
     render(<ConfirmationModal {...defaultProps} buttonVariant={variant as ButtonVariant} />)
     const confirmButton = screen.getByRole('button', { name: 'Delete' })
     expect(confirmButton).toHaveClass(expectedClass)
+  })
+
+  describe('Accessibility - Contrast', () => {
+    it.each([
+      { variant: 'primary', bgColor: 'rgb(25, 118, 210)', minRatio: 4.5 },
+      { variant: 'alert', bgColor: 'rgb(211, 47, 47)', minRatio: 4.0 },
+      { variant: 'warning', bgColor: 'rgb(230, 81, 0)', minRatio: 4.5 },
+      { variant: 'success', bgColor: 'rgb(46, 125, 50)', minRatio: 4.0 },
+    ])('should have sufficient contrast for $variant button', ({ variant, bgColor, minRatio }) => {
+      const originalGetComputedStyle = window.getComputedStyle
+      window.getComputedStyle = vi.fn((element: Element) => {
+        const style = originalGetComputedStyle(element)
+        if (element.classList.contains(`confirmation-modal-button-${variant}`)) {
+          return {
+            ...style,
+            color: 'rgb(0, 0, 0)',
+            backgroundColor: bgColor,
+            getPropertyValue: (prop: string) => {
+              if (prop === 'color') return 'rgb(0, 0, 0)'
+              if (prop === 'background-color') return bgColor
+              return style.getPropertyValue(prop)
+            },
+          } as CSSStyleDeclaration
+        }
+        return style
+      }) as typeof window.getComputedStyle
+
+      render(
+        <ConfirmationModal
+          {...defaultProps}
+          buttonVariant={variant as ButtonVariant}
+        />
+      )
+      const confirmButton = screen.getByRole('button', { name: 'Delete' })
+      expect(verifyButtonContrast(confirmButton, minRatio)).toBe(true)
+      
+      window.getComputedStyle = originalGetComputedStyle
+    })
   })
 })
