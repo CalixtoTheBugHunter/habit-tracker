@@ -32,6 +32,7 @@
   background-color: var(--color-primary);
   color: var(--color-button-primary-text);
   border-color: var(--color-primary);
+  font-weight: bold;
 }
 
 .confirmation-modal-button-primary:hover:not(:disabled) {
@@ -42,6 +43,7 @@
   background-color: var(--color-error);
   color: var(--color-button-primary-text);
   border-color: var(--color-error);
+  font-weight: bold;
 }
 
 .confirmation-modal-button-alert:hover:not(:disabled) {
@@ -52,6 +54,7 @@
   background-color: var(--color-warning);
   color: var(--color-button-primary-text);
   border-color: var(--color-warning);
+  font-weight: bold;
 }
 
 .confirmation-modal-button-warning:hover:not(:disabled) {
@@ -62,6 +65,7 @@
   background-color: var(--color-success);
   color: var(--color-button-primary-text);
   border-color: var(--color-success);
+  font-weight: bold;
 }
 
 .confirmation-modal-button-success:hover:not(:disabled) {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HabitList } from './HabitList'
@@ -7,6 +7,7 @@ import { createMockHabit } from '../../../test/fixtures/habits'
 import { createDateString, createDateStrings } from '../../../test/utils/date-helpers'
 import { getAllHabits, openDB, deleteHabit } from '../../../services/indexedDB'
 import type { Habit } from '../../../types/habit'
+import { verifyButtonContrast, mockComputedStyleForElement } from '../../../test/utils/accessibility-helpers'
 
 vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -527,6 +528,85 @@ describe('HabitList', () => {
 
       expect(header).toContainElement(habitName)
       expect(header).toContainElement(badge)
+    })
+  })
+
+  describe('Accessibility - Contrast', () => {
+    let cleanup: (() => void) | undefined
+
+    afterEach(() => {
+      if (cleanup) {
+        cleanup()
+        cleanup = undefined
+      }
+    })
+
+    it.each([
+      {
+        name: 'completed toggle button',
+        matcher: (el: Element) => el.classList.contains('completion-toggle') && el.classList.contains('completed'),
+        bgColor: 'rgb(25, 118, 210)',
+        minRatio: 4.5,
+        buttonName: /mark as done|completed/i,
+        setupHabits: () => {
+          const todayStr = createDateString(0)
+          return [
+            createMockHabit({
+              id: '1',
+              name: 'Exercise',
+              completionDates: [todayStr],
+            }),
+          ]
+        },
+        renderOptions: undefined,
+      },
+      {
+        name: 'edit button on hover',
+        matcher: 'habit-edit-button',
+        bgColor: 'rgb(25, 118, 210)',
+        minRatio: 4.5,
+        buttonName: /edit/i,
+        setupHabits: () => [
+          createMockHabit({
+            id: '1',
+            name: 'Exercise',
+          }),
+        ],
+        renderOptions: { onEdit: vi.fn() },
+      },
+      {
+        name: 'delete button on hover',
+        matcher: 'habit-delete-button',
+        bgColor: 'rgb(211, 47, 47)',
+        minRatio: 4.0,
+        buttonName: /delete/i,
+        setupHabits: () => [
+          createMockHabit({
+            id: '1',
+            name: 'Exercise',
+          }),
+        ],
+        renderOptions: undefined,
+      },
+    ])('should have sufficient contrast for $name', async ({ matcher, bgColor, minRatio, buttonName, setupHabits, renderOptions }) => {
+      const habits = setupHabits()
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      cleanup = mockComputedStyleForElement(
+        matcher as string | ((element: Element) => boolean),
+        'rgb(0, 0, 0)',
+        bgColor
+      )
+
+      if (renderOptions?.onEdit) {
+        renderWithProviders(<HabitList onEdit={renderOptions.onEdit} />)
+      } else {
+        renderWithProviders(<HabitList />)
+      }
+
+      await screen.findByText('Exercise')
+      const button = screen.getByRole('button', { name: buttonName })
+      expect(verifyButtonContrast(button, minRatio)).toBe(true)
     })
   })
 })

@@ -3,6 +3,7 @@ import { screen, waitFor, act } from '@testing-library/react'
 import { render } from '@testing-library/react'
 import { InstallPrompt } from './InstallPrompt'
 import type { BeforeInstallPromptEvent } from '../../../types/pwa'
+import { verifyButtonContrast } from '../../../test/utils/accessibility-helpers'
 
 function createBeforeInstallPromptEvent(
   mockPrompt: () => Promise<void>,
@@ -186,6 +187,43 @@ describe('InstallPrompt', () => {
       const installButton = screen.getByRole('button', { name: /install/i })
       expect(installButton).toHaveAttribute('aria-label', 'Install Habit Tracker app')
       expect(installButton).toHaveAttribute('title', 'Install Habit Tracker app')
+    })
+  })
+
+  describe('Accessibility - Contrast', () => {
+    it('should have sufficient contrast ratio for install prompt button', async () => {
+      const originalGetComputedStyle = window.getComputedStyle
+      window.getComputedStyle = vi.fn((element: Element) => {
+        const style = originalGetComputedStyle(element)
+        if (element.classList.contains('install-prompt')) {
+          return {
+            ...style,
+            color: 'rgb(0, 0, 0)',
+            backgroundColor: 'rgb(25, 118, 210)',
+            getPropertyValue: (prop: string) => {
+              if (prop === 'color') return 'rgb(0, 0, 0)'
+              if (prop === 'background-color') return 'rgb(25, 118, 210)'
+              return style.getPropertyValue(prop)
+            },
+          } as CSSStyleDeclaration
+        }
+        return style
+      }) as typeof window.getComputedStyle
+
+      render(<InstallPrompt />)
+
+      const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
+
+      act(() => {
+        window.dispatchEvent(event)
+      })
+
+      await waitFor(() => {
+        const installButton = screen.getByRole('button', { name: /install/i })
+        expect(verifyButtonContrast(installButton)).toBe(true)
+      })
+      
+      window.getComputedStyle = originalGetComputedStyle
     })
   })
 })

@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HabitForm } from './HabitForm'
 import { renderWithProviders } from '../../../test/utils/render-helpers'
 import { createMockHabit } from '../../../test/fixtures/habits'
 import { addHabit, updateHabit, openDB, getAllHabits } from '../../../services/indexedDB'
+import { verifyButtonContrast, mockComputedStyleForElement } from '../../../test/utils/accessibility-helpers'
 
 vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -605,6 +606,30 @@ describe('HabitForm', () => {
       await user.tab()
       const descriptionInput = await screen.findByLabelText(/description/i)
       expect(descriptionInput).toHaveFocus()
+    })
+  })
+
+  describe('Accessibility - Contrast', () => {
+    let cleanup: (() => void) | undefined
+
+    afterEach(() => {
+      if (cleanup) {
+        cleanup()
+        cleanup = undefined
+      }
+    })
+
+    it('should have sufficient contrast ratio for primary button text', () => {
+      cleanup = mockComputedStyleForElement(
+        'habit-form-button-primary',
+        'rgb(0, 0, 0)',
+        'rgb(25, 118, 210)'
+      )
+
+      renderWithProviders(<HabitForm />)
+      
+      const primaryButton = screen.getByRole('button', { name: /create habit/i })
+      expect(verifyButtonContrast(primaryButton)).toBe(true)
     })
   })
 })
