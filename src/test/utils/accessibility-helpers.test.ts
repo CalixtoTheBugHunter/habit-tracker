@@ -19,7 +19,7 @@ describe('accessibility-helpers', () => {
       backgroundColor: 'rgb(255, 255, 255)',
     }))
     
-    window.getComputedStyle = mockGetComputedStyle
+    window.getComputedStyle = mockGetComputedStyle as unknown as typeof window.getComputedStyle
   })
 
   afterEach(() => {
@@ -34,7 +34,7 @@ describe('accessibility-helpers', () => {
     })
 
     it('should get computed background-color for valid element', () => {
-      mockGetComputedStyle.mockReturnValue({
+      ;(mockGetComputedStyle as ReturnType<typeof vi.fn>).mockReturnValue({
         getPropertyValue: vi.fn(() => 'rgb(255, 0, 0)'),
         backgroundColor: 'rgb(255, 0, 0)',
       })
@@ -44,7 +44,7 @@ describe('accessibility-helpers', () => {
     })
 
     it('should handle hex color values', () => {
-      mockGetComputedStyle.mockReturnValue({
+      ;(mockGetComputedStyle as ReturnType<typeof vi.fn>).mockReturnValue({
         getPropertyValue: vi.fn(() => '#ff0000'),
         color: '#ff0000',
       })
@@ -54,7 +54,7 @@ describe('accessibility-helpers', () => {
     })
 
     it('should handle rgba color values', () => {
-      mockGetComputedStyle.mockReturnValue({
+      ;(mockGetComputedStyle as ReturnType<typeof vi.fn>).mockReturnValue({
         getPropertyValue: vi.fn(() => 'rgba(0, 0, 0, 0.5)'),
         color: 'rgba(0, 0, 0, 0.5)',
       })
@@ -64,7 +64,7 @@ describe('accessibility-helpers', () => {
     })
 
     it('should return default color for invalid values', () => {
-      mockGetComputedStyle.mockReturnValue({
+      ;(mockGetComputedStyle as ReturnType<typeof vi.fn>).mockReturnValue({
         getPropertyValue: vi.fn(() => 'invalid'),
         color: 'invalid',
       })
@@ -81,7 +81,7 @@ describe('accessibility-helpers', () => {
     })
 
     it('should calculate contrast ratio for button with different colors', () => {
-      mockGetComputedStyle.mockReturnValue({
+      ;(mockGetComputedStyle as ReturnType<typeof vi.fn>).mockReturnValue({
         getPropertyValue: vi.fn((prop: string) => {
           if (prop === 'color') return 'rgb(0, 0, 0)'
           if (prop === 'background-color') return 'rgb(25, 118, 210)'
@@ -103,7 +103,7 @@ describe('accessibility-helpers', () => {
     })
 
     it('should return false for button not meeting minimum contrast', () => {
-      mockGetComputedStyle.mockReturnValue({
+      ;(mockGetComputedStyle as ReturnType<typeof vi.fn>).mockReturnValue({
         getPropertyValue: vi.fn((prop: string) => {
           if (prop === 'color') return 'rgb(200, 200, 200)'
           if (prop === 'background-color') return 'rgb(210, 210, 210)'

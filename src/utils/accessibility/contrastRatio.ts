@@ -7,9 +7,9 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } | nul
   const cleaned = hex.replace('#', '')
   
   if (cleaned.length === 3) {
-    const r = parseInt(cleaned[0] + cleaned[0], 16)
-    const g = parseInt(cleaned[1] + cleaned[1], 16)
-    const b = parseInt(cleaned[2] + cleaned[2], 16)
+    const r = parseInt(cleaned[0]! + cleaned[0]!, 16)
+    const g = parseInt(cleaned[1]! + cleaned[1]!, 16)
+    const b = parseInt(cleaned[2]! + cleaned[2]!, 16)
     return { r, g, b }
   }
   

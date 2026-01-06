@@ -11,9 +11,9 @@ function rgbToHex(color: string): string {
     return '#000000'
   }
   
-  const r = parseInt(rgbMatch[0], 10)
-  const g = parseInt(rgbMatch[1], 10)
-  const b = parseInt(rgbMatch[2], 10)
+  const r = parseInt(rgbMatch[0]!, 10)
+  const g = parseInt(rgbMatch[1]!, 10)
+  const b = parseInt(rgbMatch[2]!, 10)
   
   const toHex = (value: number): string => {
     const hex = value.toString(16)
