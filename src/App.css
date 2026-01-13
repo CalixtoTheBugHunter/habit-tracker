@@ -24,12 +24,15 @@
 }
 
 .app-header__logo {
-  font-family: 'Sansita Swashed', cursive;
+  font-family: 'Sansita Swashed', 'Brush Script MT', 'Lucida Handwriting', cursive;
   font-weight: 600;
-  font-size: var(--font-size-4xl);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   letter-spacing: 0px;
   margin: 0 0 var(--spacing-lg) 0;
   color: var(--color-text-primary);
+  line-height: 1.2;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .app-header p {
@@ -66,9 +69,33 @@
   }
 }
 
+/* Ensure consistent logo sizing across all devices */
 @media (max-width: 767px) {
   .app-header__logo {
-    font-size: var(--font-size-3xl);
+    font-size: clamp(1.75rem, 6vw, 2rem);
+  }
+}
+
+/* PWA/Standalone mode adjustments - takes precedence over mobile */
+@media (display-mode: standalone) {
+  .app-header__logo {
+    font-size: clamp(1.875rem, 5.5vw, 2.5rem);
+  }
+}
+
+/* iOS Safari specific adjustments - ensures proper rendering on iOS */
+@supports (-webkit-touch-callout: none) {
+  .app-header__logo {
+    font-size: clamp(1.875rem, 5.5vw, 2.5rem);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* iOS in PWA mode - ensure larger size */
+  @media (display-mode: standalone) {
+    .app-header__logo {
+      font-size: clamp(1.875rem, 5.5vw, 2.5rem);
+    }
   }
 }
 
