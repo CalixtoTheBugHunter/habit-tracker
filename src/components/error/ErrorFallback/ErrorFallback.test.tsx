@@ -75,7 +75,7 @@ describe('ErrorFallback', () => {
 
   it('should focus the container when mounted', () => {
     const error = new AppError('UNKNOWN_ERROR', 'Test error message')
-    const { container } = render(<ErrorFallback error={error} />)
+    render(<ErrorFallback error={error} />)
 
     const alertContainer = screen.getByRole('alert')
     expect(alertContainer).toHaveAttribute('tabIndex', '-1')
