@@ -104,25 +104,25 @@ describe('HabitContext', () => {
   })
 
   it('handles IndexedDB initialization errors', async () => {
-    const errorMessage = 'IndexedDB is not supported in this browser'
-    vi.mocked(openDB).mockRejectedValue(new Error(errorMessage))
+    vi.mocked(openDB).mockRejectedValue(new Error('IndexedDB is not supported in this browser'))
 
     renderWithProviders(<TestComponent />)
 
     await waitFor(() => {
-      expect(screen.getByText(new RegExp(errorMessage, 'i'))).toBeInTheDocument()
+      expect(screen.getByText(/failed to initialize application/i)).toBeInTheDocument()
     })
   })
 
   it('handles errors when loading habits', async () => {
-    const errorMessage = 'Failed to get all habits'
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
-    vi.mocked(getAllHabits).mockRejectedValue(new Error(errorMessage))
+    vi.mocked(getAllHabits).mockRejectedValue(new Error('Failed to get all habits'))
 
     renderWithProviders(<TestComponent />)
 
+    // When getAllHabits fails during initialization, the error is caught
+    // by initializeApp and wrapped with "Failed to initialize application"
     await waitFor(() => {
-      expect(screen.getByText(new RegExp(errorMessage, 'i'))).toBeInTheDocument()
+      expect(screen.getByText(/failed to initialize application/i)).toBeInTheDocument()
     })
   })
 
@@ -244,7 +244,7 @@ describe('HabitContext', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText(/habit with id non-existent not found/i)).toBeInTheDocument()
+      expect(screen.getByText(/failed to toggle habit completion/i)).toBeInTheDocument()
     })
   })
 
@@ -281,7 +281,7 @@ describe('HabitContext', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText(/failed to update habit/i)).toBeInTheDocument()
+      expect(screen.getByText(/failed to toggle habit completion/i)).toBeInTheDocument()
     })
   })
 

@@ -41,13 +41,12 @@ describe('App', () => {
   })
 
   it('handles errors and displays them in App UI', async () => {
-    const errorMessage = 'IndexedDB is not supported in this browser'
-    vi.mocked(openDB).mockRejectedValue(new Error(errorMessage))
+    vi.mocked(openDB).mockRejectedValue(new Error('IndexedDB is not supported in this browser'))
 
     renderWithProviders(<App />)
 
     await waitFor(() => {
-      expect(screen.getByText(new RegExp(errorMessage, 'i'))).toBeInTheDocument()
+      expect(screen.getByText(/failed to initialize application/i)).toBeInTheDocument()
     })
   })
 

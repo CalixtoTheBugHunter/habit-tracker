@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
-import { HabitList, HabitForm, OfflineIndicator, InstallPrompt } from './components'
+import { HabitList, HabitForm, OfflineIndicator, InstallPrompt, ErrorBoundary } from './components'
 import type { Habit } from './types/habit'
 
 function AppContent() {
@@ -61,9 +61,11 @@ function AppContent() {
 
 function App() {
   return (
-    <HabitProvider>
-      <AppContent />
-    </HabitProvider>
+    <ErrorBoundary>
+      <HabitProvider>
+        <AppContent />
+      </HabitProvider>
+    </ErrorBoundary>
   )
 }
 
