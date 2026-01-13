@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
 import { openDB, getAllHabits, updateHabit, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
+import { createAppError } from '../utils/error/errorTypes'
+import { logError } from '../utils/error/errorLogger'
 import type { Habit } from '../types/habit'
 
 interface HabitContextType {
@@ -37,8 +39,13 @@ export function HabitProvider({ children }: HabitProviderProps) {
       const loadedHabits = await getAllHabits()
       setHabits(loadedHabits)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load habits'
-      setError(errorMessage)
+      const appError = createAppError(
+        err,
+        'UNKNOWN_ERROR',
+        'Failed to load habits'
+      )
+      logError(appError)
+      setError(appError.userMessage)
       throw err
     }
   }, [])
@@ -55,8 +62,13 @@ export function HabitProvider({ children }: HabitProviderProps) {
       await updateHabit(updatedHabit)
       await refreshHabits()
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to toggle habit completion'
-      setError(errorMessage)
+      const appError = createAppError(
+        err,
+        'UNKNOWN_ERROR',
+        'Failed to toggle habit completion'
+      )
+      logError(appError)
+      setError(appError.userMessage)
       throw err
     }
   }, [habits, refreshHabits])
@@ -67,8 +79,13 @@ export function HabitProvider({ children }: HabitProviderProps) {
       await deleteHabitFromDB(habitId)
       await refreshHabits()
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete habit'
-      setError(errorMessage)
+      const appError = createAppError(
+        err,
+        'UNKNOWN_ERROR',
+        'Failed to delete habit'
+      )
+      logError(appError)
+      setError(appError.userMessage)
       throw err
     }
   }, [refreshHabits])
@@ -81,8 +98,13 @@ export function HabitProvider({ children }: HabitProviderProps) {
         await openDB()
         await refreshHabits()
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to initialize application'
-        setError(errorMessage)
+        const appError = createAppError(
+          err,
+          'UNKNOWN_ERROR',
+          'Failed to initialize application'
+        )
+        logError(appError)
+        setError(appError.userMessage)
       } finally {
         setIsLoading(false)
       }

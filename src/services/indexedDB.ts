@@ -1,5 +1,7 @@
 import type { Habit } from '../types/habit'
 import { isQuotaExceededError } from '../utils/error/isQuotaExceededError'
+import { IndexedDBError } from '../utils/error/errorTypes'
+import { logError } from '../utils/error/errorLogger'
 import { validateHabit } from '../utils/validation/validateHabit'
 import { validateId } from '../utils/validation/validateId'
 
@@ -20,9 +22,21 @@ function handleRequestError<T>(request: IDBRequest<T>, defaultMessage: string): 
     request.onerror = () => {
       const error = request.error || new Error(defaultMessage)
       if (isQuotaExceededError(error)) {
-        reject(new Error('Storage quota exceeded. Please free up some space.'))
+        const indexedDBError = new IndexedDBError(
+          'INDEXEDDB_QUOTA_EXCEEDED',
+          'Storage is full. Please free up space and try again.',
+          error instanceof Error ? error.message : String(error)
+        )
+        logError(indexedDBError)
+        reject(indexedDBError)
       } else {
-        reject(error)
+        const indexedDBError = new IndexedDBError(
+          'INDEXEDDB_OPERATION_FAILED',
+          'Unable to access storage. Please refresh the page.',
+          error instanceof Error ? error.message : String(error)
+        )
+        logError(indexedDBError)
+        reject(indexedDBError)
       }
     }
   })
@@ -36,7 +50,13 @@ export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const idb = typeof window !== 'undefined' ? window.indexedDB : globalThis.indexedDB
     if (!idb) {
-      reject(new Error('IndexedDB is not supported in this browser'))
+      const indexedDBError = new IndexedDBError(
+        'INDEXEDDB_OPEN_FAILED',
+        'Unable to access storage. Please refresh the page.',
+        'IndexedDB is not supported in this browser'
+      )
+      logError(indexedDBError)
+      reject(indexedDBError)
       return
     }
 
@@ -45,9 +65,21 @@ export function openDB(): Promise<IDBDatabase> {
     request.onerror = () => {
       const error = request.error || new Error('Failed to open database')
       if (isQuotaExceededError(error)) {
-        reject(new Error('Storage quota exceeded. Please free up some space.'))
+        const indexedDBError = new IndexedDBError(
+          'INDEXEDDB_QUOTA_EXCEEDED',
+          'Storage is full. Please free up space and try again.',
+          error instanceof Error ? error.message : String(error)
+        )
+        logError(indexedDBError)
+        reject(indexedDBError)
       } else {
-        reject(error)
+        const indexedDBError = new IndexedDBError(
+          'INDEXEDDB_OPEN_FAILED',
+          'Unable to access storage. Please refresh the page.',
+          error instanceof Error ? error.message : String(error)
+        )
+        logError(indexedDBError)
+        reject(indexedDBError)
       }
     }
 
@@ -83,7 +115,13 @@ function getObjectStore(mode: IDBTransactionMode = 'readonly'): Promise<ObjectSt
     openDB()
       .then((db) => {
         if (!db.objectStoreNames.contains(STORE_NAME)) {
-          reject(new Error(`Object store "${STORE_NAME}" does not exist`))
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            `Object store "${STORE_NAME}" does not exist`
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
           return
         }
 
@@ -91,12 +129,31 @@ function getObjectStore(mode: IDBTransactionMode = 'readonly'): Promise<ObjectSt
         const objectStore = transaction.objectStore(STORE_NAME)
 
         transaction.onerror = () => {
-          reject(transaction.error || new Error('Transaction failed'))
+          const error = transaction.error || new Error('Transaction failed')
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            error instanceof Error ? error.message : String(error)
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
         }
 
         resolve({ objectStore, transaction })
       })
-      .catch(reject)
+      .catch((error) => {
+        if (error instanceof IndexedDBError) {
+          reject(error)
+        } else {
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            error instanceof Error ? error.message : String(error)
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
+        }
+      })
   })
 }
 

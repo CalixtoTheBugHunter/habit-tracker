@@ -145,7 +145,7 @@ describe('IndexedDB Service', () => {
         mockOpenRequest.onerror({ target: { error } })
       }
 
-      await expect(openPromise).rejects.toThrow('Database open failed')
+      await expect(openPromise).rejects.toThrow('Unable to access storage. Please refresh the page.')
     })
 
     it('handles quota exceeded error', async () => {
@@ -162,7 +162,7 @@ describe('IndexedDB Service', () => {
         mockOpenRequest.onerror({ target: { error: quotaError } })
       }
 
-      await expect(openPromise).rejects.toThrow('Storage quota exceeded')
+      await expect(openPromise).rejects.toThrow('Storage is full. Please free up space and try again.')
     })
   })
 
@@ -187,11 +187,11 @@ describe('IndexedDB Service', () => {
     })
 
     it.each([
-      ['Add failed', new Error('Add failed'), 'Add failed'],
+      ['Add failed', new Error('Add failed'), 'Unable to access storage. Please refresh the page.'],
       [
         'Storage quota exceeded',
         new DOMException('QuotaExceededError', 'QuotaExceededError'),
-        'Storage quota exceeded',
+        'Storage is full. Please free up space and try again.',
       ],
     ])('handles %s error on add', async (_, error, expectedMessage) => {
       const habit = createMockHabit()
@@ -239,7 +239,7 @@ describe('IndexedDB Service', () => {
       const getPromise = getHabit('1')
       await triggerIDBRequestError(getRequest, error)
 
-      await expect(getPromise).rejects.toThrow('Get failed')
+      await expect(getPromise).rejects.toThrow('Unable to access storage. Please refresh the page.')
     })
   })
 
@@ -282,7 +282,7 @@ describe('IndexedDB Service', () => {
       const getAllPromise = getAllHabits()
       await triggerIDBRequestError(getAllRequest, error)
 
-      await expect(getAllPromise).rejects.toThrow('GetAll failed')
+      await expect(getAllPromise).rejects.toThrow('Unable to access storage. Please refresh the page.')
     })
   })
 
@@ -311,11 +311,11 @@ describe('IndexedDB Service', () => {
     })
 
     it.each([
-      ['Update failed', new Error('Update failed'), 'Update failed'],
+      ['Update failed', new Error('Update failed'), 'Unable to access storage. Please refresh the page.'],
       [
         'Storage quota exceeded',
         new DOMException('QuotaExceededError', 'QuotaExceededError'),
-        'Storage quota exceeded',
+        'Storage is full. Please free up space and try again.',
       ],
     ])('handles %s error on update', async (_, error, expectedMessage) => {
       const habit = createMockHabit()
@@ -351,7 +351,7 @@ describe('IndexedDB Service', () => {
       const deletePromise = deleteHabit('1')
       await triggerIDBRequestError(deleteRequest, error)
 
-      await expect(deletePromise).rejects.toThrow('Delete failed')
+      await expect(deletePromise).rejects.toThrow('Unable to access storage. Please refresh the page.')
     })
   })
 
