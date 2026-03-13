@@ -1,6 +1,7 @@
 import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useHabits } from '../../../contexts/HabitContext'
 import { addHabit, updateHabit } from '../../../services/indexedDB'
+import { track } from '../../../analytics/umami'
 import type { Habit } from '../../../types/habit'
 import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../../utils/validation/validateHabit'
 import './HabitForm.css'
@@ -90,8 +91,11 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       }
 
       await refreshHabits()
+      if (!isEditMode) {
+        track('habit_created')
+      }
       setSubmitSuccess(true)
-      
+
       if (!isEditMode) {
         setName('')
         setDescription('')
