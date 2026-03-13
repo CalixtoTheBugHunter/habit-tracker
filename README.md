@@ -88,6 +88,19 @@ habit-tracker/
 - **IndexedDB** - Offline storage
 - **ESLint** - Code linting
 
+## Analytics
+
+Production can use **Umami Cloud** for privacy-first analytics (pageviews and custom events such as habit creation). The analytics backend is **not** hosted on Netlify; it is Umami Cloud.
+
+To enable analytics, set these environment variables in Netlify (or at build time):
+
+- `VITE_ANALYTICS_ENABLED=true`
+- `VITE_UMAMI_WEBSITE_ID=<your-website-id>` (from the Umami Cloud dashboard)
+
+Optional: `VITE_UMAMI_SRC` to override the script URL (default is `https://cloud.umami.is/script.js`).
+
+When these variables are not set or analytics is disabled, no tracking script is loaded and no data is sent.
+
 ## Testing
 
 This project follows Test-Driven Development (TDD) principles. All features are thoroughly tested.

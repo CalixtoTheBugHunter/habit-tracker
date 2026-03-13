@@ -5,7 +5,12 @@ import { HabitForm } from './HabitForm'
 import { renderWithProviders } from '../../../test/utils/render-helpers'
 import { createMockHabit } from '../../../test/fixtures/habits'
 import { addHabit, updateHabit, openDB, getAllHabits } from '../../../services/indexedDB'
+import { track } from '../../../analytics/umami'
 import { verifyButtonContrast, mockComputedStyleForElement } from '../../../test/utils/accessibility-helpers'
+
+vi.mock('../../../analytics/umami', () => ({
+  track: vi.fn(),
+}))
 
 vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -122,6 +127,7 @@ describe('HabitForm', () => {
           })
         )
       })
+      expect(vi.mocked(track)).toHaveBeenCalledWith('habit_created')
     })
 
     it('should trim whitespace from name and description', async () => {
@@ -331,6 +337,7 @@ describe('HabitForm', () => {
           })
         )
       })
+      expect(vi.mocked(track)).not.toHaveBeenCalled()
     })
 
     it('should preserve habit id, createdDate, and completionDates when updating', async () => {

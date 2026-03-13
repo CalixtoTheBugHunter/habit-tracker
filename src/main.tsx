@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App'
+import { loadScript } from './analytics/umami'
 import { registerServiceWorker } from './utils/pwa/registerServiceWorker'
 
 const rootElement = document.getElementById('root')
@@ -13,6 +14,7 @@ createRoot(rootElement).render(
     <App />
   </StrictMode>,
 )
+loadScript()
 
 // Register service worker for PWA functionality
 registerServiceWorker({
