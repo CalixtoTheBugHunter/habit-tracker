@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
+import { messages } from '../../../locale'
 import { ReactError, createAppError } from '../../../utils/error/errorTypes'
 import { logError } from '../../../utils/error/errorLogger'
 import { ErrorFallback } from '../ErrorFallback/ErrorFallback'
@@ -28,7 +29,7 @@ export class ErrorBoundary extends Component<
     const appError = createAppError(
       error,
       'REACT_RENDER_ERROR',
-      'Something went wrong. Please refresh the page.',
+      messages.errorBoundary.reactRenderError,
       errorInfo
         ? {
             componentStack: errorInfo.componentStack,

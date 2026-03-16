@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { messages } from '../../../locale'
 import { Modal } from '../Modal/Modal'
 import '../Modal/Modal.css'
 import './ConfirmationModal.css'
@@ -22,8 +23,8 @@ export function ConfirmationModal({
   isOpen,
   title,
   message,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel = messages.confirmationModal.defaultConfirm,
+  cancelLabel = messages.confirmationModal.defaultCancel,
   confirmingLabel,
   buttonVariant = 'alert',
   onConfirm,
@@ -58,7 +59,7 @@ export function ConfirmationModal({
           onClick={onConfirm}
           disabled={isConfirming}
         >
-          {isConfirming ? (confirmingLabel || 'Processing...') : confirmLabel}
+          {isConfirming ? (confirmingLabel ?? messages.confirmationModal.defaultProcessing) : confirmLabel}
         </button>
       </div>
     </Modal>

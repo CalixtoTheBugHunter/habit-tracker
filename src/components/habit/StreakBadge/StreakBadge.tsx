@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { messages, formatMessage } from '../../../locale'
 import './StreakBadge.css'
 
 const COLORFUL_STREAK_THRESHOLD = 7
@@ -52,9 +53,10 @@ export function StreakBadge({ streak }: StreakBadgeProps) {
       ? 'streak-badge streak-badge-colorful'
       : 'streak-badge streak-badge-simple'
 
+  const label = formatMessage(messages.streakBadge.ariaLabel, { streak })
   return (
-    <span ref={badgeRef} className={badgeClass} aria-label={`${streak}-day streak`}>
-      {streak}-day streak
+    <span ref={badgeRef} className={badgeClass} aria-label={label}>
+      {label}
     </span>
   )
 }

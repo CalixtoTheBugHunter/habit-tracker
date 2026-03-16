@@ -2,6 +2,7 @@ import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useHabits } from '../../../contexts/HabitContext'
 import { addHabit, updateHabit } from '../../../services/indexedDB'
 import { track } from '../../../analytics/umami'
+import { messages } from '../../../locale'
 import type { Habit } from '../../../types/habit'
 import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../../utils/validation/validateHabit'
 import './HabitForm.css'
@@ -57,7 +58,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
     setNameError(null)
     
     if (!name.trim()) {
-      setNameError('Name is required')
+      setNameError(messages.habitForm.validation.nameRequired)
       return false
     }
 
@@ -106,9 +107,10 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
         onSuccess()
       }
     } catch (err) {
-      const errorMessage = err instanceof Error 
-        ? 'Failed to save habit. Please try again.' 
-        : 'Failed to save habit'
+      const errorMessage =
+        err instanceof Error
+          ? messages.habitForm.error.saveFailed
+          : messages.habitForm.error.saveFailedGeneric
       setSubmitError(errorMessage)
     } finally {
       setIsSubmitting(false)
@@ -134,12 +136,12 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
   }
 
   return (
-    <form className="habit-form" onSubmit={handleSubmit} aria-label={isEditMode ? 'Edit habit form' : 'Create habit form'}>
-      <h2 className="habit-form-title">{isEditMode ? 'Edit Habit' : 'Create New Habit'}</h2>
+    <form className="habit-form" onSubmit={handleSubmit} aria-label={isEditMode ? messages.habitForm.aria.editForm : messages.habitForm.aria.createForm}>
+      <h2 className="habit-form-title">{isEditMode ? messages.habitForm.title.edit : messages.habitForm.title.create}</h2>
       
       <div className="habit-form-field">
         <label htmlFor="habit-name" className="habit-form-label">
-          Name <span className="required">*</span>
+          {messages.habitForm.labels.name} <span className="required">{messages.habitForm.labels.required}</span>
         </label>
         <input
           id="habit-name"
@@ -173,7 +175,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       {showDescription && (
         <div className="habit-form-field">
           <label htmlFor="habit-description" className="habit-form-label">
-            Description
+            {messages.habitForm.labels.description}
           </label>
           <textarea
             ref={textareaRef}
@@ -196,7 +198,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
 
       {submitSuccess && (
         <div className="habit-form-message habit-form-success-message" role="status" aria-live="polite">
-          {isEditMode ? 'Habit updated successfully!' : 'Habit created successfully!'}
+          {isEditMode ? messages.habitForm.success.updated : messages.habitForm.success.created}
         </div>
       )}
 
@@ -206,7 +208,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
           className="habit-form-button habit-form-button-primary"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Saving...' : isEditMode ? 'Update Habit' : 'Create Habit'}
+          {isSubmitting ? messages.habitForm.buttons.saving : isEditMode ? messages.habitForm.buttons.update : messages.habitForm.buttons.create}
         </button>
         {onCancel && (
           <button
@@ -215,7 +217,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
             onClick={handleCancel}
             disabled={isSubmitting}
           >
-            Cancel
+            {messages.habitForm.buttons.cancel}
           </button>
         )}
       </div>

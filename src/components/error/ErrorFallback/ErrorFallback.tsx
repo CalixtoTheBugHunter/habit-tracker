@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { messages } from '../../../locale'
 import type { AppError } from '../../../utils/error/errorTypes'
 import './ErrorFallback.css'
 
@@ -32,7 +33,7 @@ export function ErrorFallback({ error }: ErrorFallbackProps) {
         onClick={handleReload}
         className="error-fallback__button"
       >
-        Reload Page
+        {messages.errorFallback.reloadButton}
       </button>
     </div>
   )
