@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useHabits } from '../../../contexts/HabitContext'
+import { messages, formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { AnnualCalendar } from '../AnnualCalendar/AnnualCalendar'
@@ -62,7 +63,7 @@ export function HabitList({ onEdit }: HabitListProps) {
   if (isLoading) {
     return (
       <div className="habit-list" role="status" aria-live="polite" aria-atomic="true">
-        <p>Loading habits...</p>
+        <p>{messages.habitList.loading}</p>
       </div>
     )
   }
@@ -70,7 +71,7 @@ export function HabitList({ onEdit }: HabitListProps) {
   if (error) {
     return (
       <div className="habit-list" role="alert" aria-live="assertive" aria-atomic="true">
-        <p className="error">Error loading habits: {error}</p>
+        <p className="error">{formatMessage(messages.habitList.error, { error })}</p>
       </div>
     )
   }
@@ -78,31 +79,31 @@ export function HabitList({ onEdit }: HabitListProps) {
   if (habits.length === 0) {
     return (
       <div className="habit-list">
-        <p className="empty-state">No habits yet. Start by creating your first habit!</p>
+        <p className="empty-state">{messages.habitList.empty}</p>
       </div>
     )
   }
 
-  const habitDisplayName = habitToDelete?.name || 'this habit'
+  const habitDisplayName = habitToDelete?.name || messages.habitList.thisHabit
 
   return (
     <>
       <ConfirmationModal
         isOpen={habitToDelete !== null}
-        title="Delete Habit"
-        message={`Are you sure you want to delete "${habitDisplayName}"? This action cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        confirmingLabel="Deleting..."
+        title={messages.habitList.deleteModal.title}
+        message={formatMessage(messages.habitList.deleteModal.message, { name: habitDisplayName })}
+        confirmLabel={messages.habitList.deleteModal.confirm}
+        cancelLabel={messages.habitList.deleteModal.cancel}
+        confirmingLabel={messages.habitList.deleteModal.confirming}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
         isConfirming={deletingId !== null}
       />
-      <ul className="habit-list" aria-label="List of habits">
+      <ul className="habit-list" aria-label={messages.habitList.aria.list}>
         {habitsWithCalculations.map(habit => (
           <li key={habit.id} className="habit-item">
             <div className="habit-header">
-              <h3 className="habit-name">{habit.name || 'Unnamed Habit'}</h3>
+              <h3 className="habit-name">{habit.name || messages.habitList.unnamedHabit}</h3>
               <StreakBadge streak={habit.streak} />
             </div>
             {habit.description && (
@@ -115,20 +116,20 @@ export function HabitList({ onEdit }: HabitListProps) {
                 className={`completion-toggle ${habit.completedToday ? 'completed' : 'not-completed'}`}
                 onClick={() => handleToggle(habit.id)}
                 disabled={togglingId === habit.id}
-                aria-label={habit.completedToday ? 'Mark as not completed today' : 'Mark as completed today'}
+                aria-label={habit.completedToday ? messages.habitList.aria.markNotCompleted : messages.habitList.aria.markCompleted}
                 aria-pressed={habit.completedToday}
                 aria-busy={togglingId === habit.id}
               >
-                {togglingId === habit.id ? 'Updating...' : habit.completedToday ? '✓ Completed' : 'Mark as done'}
+                {togglingId === habit.id ? messages.habitList.buttons.updating : habit.completedToday ? messages.habitList.buttons.completed : messages.habitList.buttons.markDone}
               </button>
               {onEdit && (
                 <button
                   type="button"
                   className="habit-edit-button"
                   onClick={() => onEdit(habit)}
-                  aria-label={`Edit ${habit.name || 'habit'}`}
+                  aria-label={formatMessage(messages.habitList.aria.editHabit, { name: habit.name || messages.habitList.aria.habitNameFallback })}
                 >
-                  Edit
+                  {messages.habitList.buttons.edit}
                 </button>
               )}
               <button
@@ -136,10 +137,10 @@ export function HabitList({ onEdit }: HabitListProps) {
                 className="habit-delete-button"
                 onClick={() => handleDeleteClick(habit.id, habit.name)}
                 disabled={deletingId === habit.id}
-                aria-label={`Delete ${habit.name || 'habit'}`}
+                aria-label={formatMessage(messages.habitList.aria.deleteHabit, { name: habit.name || messages.habitList.aria.habitNameFallback })}
                 aria-busy={deletingId === habit.id}
               >
-                Delete
+                {messages.habitList.buttons.delete}
               </button>
             </div>
           </li>

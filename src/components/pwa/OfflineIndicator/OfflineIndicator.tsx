@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { WifiOff } from 'lucide-react'
+import { messages } from '../../../locale'
 import './OfflineIndicator.css'
 
 interface OfflineIndicatorProps {
@@ -37,10 +38,10 @@ export function OfflineIndicator({ className }: OfflineIndicatorProps) {
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      aria-label="Offline status indicator"
+      aria-label={messages.offlineIndicator.ariaLabel}
     >
       <WifiOff className="offline-indicator__icon" aria-hidden="true" />
-      <span className="offline-indicator__badge">offline</span>
+      <span className="offline-indicator__badge">{messages.offlineIndicator.badge}</span>
     </div>
   )
 }

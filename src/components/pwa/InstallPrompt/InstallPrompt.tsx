@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Download } from 'lucide-react'
+import { messages } from '../../../locale'
 import './InstallPrompt.css'
 import type { BeforeInstallPromptEvent } from '../../../types/pwa'
 
@@ -70,11 +71,11 @@ export function InstallPrompt() {
     <button
       className="install-prompt"
       onClick={handleInstallClick}
-      aria-label="Install Habit Tracker app"
-      title="Install Habit Tracker app"
+      aria-label={messages.installPrompt.ariaLabel}
+      title={messages.installPrompt.title}
     >
       <Download className="install-prompt__icon" aria-hidden="true" />
-      <span className="install-prompt__text">Install</span>
+      <span className="install-prompt__text">{messages.installPrompt.button}</span>
     </button>
   )
 }

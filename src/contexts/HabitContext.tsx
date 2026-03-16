@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
+import { messages } from '../locale'
 import { openDB, getAllHabits, updateHabit, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
 import { createAppError } from '../utils/error/errorTypes'
@@ -42,7 +43,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       const appError = createAppError(
         err,
         'UNKNOWN_ERROR',
-        'Failed to load habits'
+        messages.app.loadHabitsError
       )
       logError(appError)
       setError(appError.userMessage)
@@ -65,7 +66,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       const appError = createAppError(
         err,
         'UNKNOWN_ERROR',
-        'Failed to toggle habit completion'
+        messages.app.toggleCompletionError
       )
       logError(appError)
       setError(appError.userMessage)
@@ -82,7 +83,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       const appError = createAppError(
         err,
         'UNKNOWN_ERROR',
-        'Failed to delete habit'
+        messages.app.deleteHabitError
       )
       logError(appError)
       setError(appError.userMessage)
@@ -101,7 +102,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
         const appError = createAppError(
           err,
           'UNKNOWN_ERROR',
-          'Failed to initialize application'
+          messages.app.initError
         )
         logError(appError)
         setError(appError.userMessage)

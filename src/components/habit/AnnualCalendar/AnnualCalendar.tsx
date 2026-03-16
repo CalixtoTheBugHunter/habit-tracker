@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { messages, formatMessage } from '../../../locale'
 import { getYearGrid, getDateString, isDateCompleted } from '../../../utils/date/annualCalendarHelpers'
 import { getTodayLocalDateString } from '../../../utils/date/dateHelpers'
 import type { Habit } from '../../../types/habit'
@@ -42,8 +43,11 @@ export function AnnualCalendar({ habit }: AnnualCalendarProps) {
     return isDateCompleted(dateStr, habit.completionDates)
   }
 
+  const calendarAriaLabel = formatMessage(messages.annualCalendar.ariaLabel, {
+    name: habit.name || messages.annualCalendar.nameFallback,
+  })
   return (
-    <div className="annual-calendar" aria-label={`Annual completion calendar for ${habit.name || 'habit'}`}>
+    <div className="annual-calendar" aria-label={calendarAriaLabel}>
       <div className="annual-calendar-grid" role="grid">
         {transposedGrid.map((dayRow, dayIndex) => (
           <div key={dayIndex} className="annual-calendar-day-row" role="row">
@@ -58,7 +62,11 @@ export function AnnualCalendar({ habit }: AnnualCalendarProps) {
                   key={weekIndex}
                   className={`annual-calendar-day ${completed ? 'completed' : ''} ${isTodayDate ? 'today' : ''} ${!isCurrentYear ? 'other-year' : ''}`}
                   role="gridcell"
-                  aria-label={isTodayDate ? `Today, ${dateStr}` : dateStr}
+                  aria-label={
+                    isTodayDate
+                      ? formatMessage(messages.annualCalendar.today, { date: dateStr })
+                      : formatMessage(messages.annualCalendar.date, { date: dateStr })
+                  }
                   title={dateStr}
                   {...(isTodayDate && { 'aria-current': 'date' })}
                 />

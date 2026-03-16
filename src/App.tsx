@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './App.css'
+import { messages, formatMessage } from './locale'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
 import { HabitList, HabitForm, OfflineIndicator, InstallPrompt, ErrorBoundary } from './components'
 import type { Habit } from './types/habit'
@@ -13,9 +14,9 @@ function AppContent() {
       <div className="app">
         <OfflineIndicator />
         <header className="app-header">
-          <h1 className="app-header__logo">Habit Tracker</h1>
+          <h1 className="app-header__logo">{messages.app.title}</h1>
           <div role="status" aria-live="polite" aria-atomic="true">
-            <p>Loading...</p>
+            <p>{messages.app.loading}</p>
           </div>
         </header>
       </div>
@@ -27,9 +28,9 @@ function AppContent() {
       <div className="app">
         <OfflineIndicator />
         <header className="app-header">
-          <h1 className="app-header__logo">Habit Tracker</h1>
+          <h1 className="app-header__logo">{messages.app.title}</h1>
           <div role="alert" aria-live="assertive" aria-atomic="true">
-            <p className="error">Error: {error}</p>
+            <p className="error">{formatMessage(messages.app.error, { error })}</p>
           </div>
         </header>
       </div>
@@ -42,7 +43,7 @@ function AppContent() {
       <header className="app-header">
         <div className="app-header__content">
           <div>
-            <h1 className="app-header__logo">Habit Tracker</h1>
+            <h1 className="app-header__logo">{messages.app.title}</h1>
           </div>
         </div>
         <InstallPrompt />
