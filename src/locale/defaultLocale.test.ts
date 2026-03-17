@@ -57,10 +57,34 @@ describe('getDefaultLocale', () => {
     const { getDefaultLocale: getLocale } = await import('./defaultLocale')
     expect(getLocale()).toBe('en')
   })
+
+  it('should return pt-BR for pt-BR language', async () => {
+    Object.defineProperty(globalThis, 'navigator', {
+      value: { language: 'pt-BR', languages: ['pt-BR', 'en'] },
+      writable: true,
+      configurable: true,
+    })
+    const { getDefaultLocale: getLocale } = await import('./defaultLocale')
+    expect(getLocale()).toBe('pt-BR')
+  })
+
+  it('should return pt-BR for pt language', async () => {
+    Object.defineProperty(globalThis, 'navigator', {
+      value: { language: 'pt', languages: ['pt', 'en'] },
+      writable: true,
+      configurable: true,
+    })
+    const { getDefaultLocale: getLocale } = await import('./defaultLocale')
+    expect(getLocale()).toBe('pt-BR')
+  })
 })
 
 describe('SUPPORTED_LOCALES', () => {
   it('should include en', () => {
     expect(SUPPORTED_LOCALES).toContain('en')
+  })
+
+  it('should include pt-BR', () => {
+    expect(SUPPORTED_LOCALES).toContain('pt-BR')
   })
 })

@@ -1,7 +1,7 @@
 {
   "name": "Habit Tracker",
   "short_name": "Habit Tracker",
-  "description": "A simple, free and offline habit tracker application",
+  "description": "A simple, free and offline habit tracker application. Available in English and Brazilian Portuguese.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
