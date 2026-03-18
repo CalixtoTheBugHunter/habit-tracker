@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
-import { messages, formatMessage } from './locale'
+import { messages, formatMessage, getDefaultLocale } from './locale'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
 import { HabitList, HabitForm, OfflineIndicator, InstallPrompt, ErrorBoundary } from './components'
 import type { Habit } from './types/habit'
@@ -61,6 +61,9 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    document.documentElement.lang = getDefaultLocale()
+  }, [])
   return (
     <ErrorBoundary>
       <HabitProvider>

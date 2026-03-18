@@ -1,12 +1,14 @@
 import type { LocaleCode } from './types'
 
-export const SUPPORTED_LOCALES: readonly LocaleCode[] = ['en']
+export const SUPPORTED_LOCALES: readonly LocaleCode[] = ['en', 'pt-BR']
 
 let cachedLocale: LocaleCode | null = null
 
-function getLanguageSubtag(localeTag: string): string {
-  const part = localeTag.split('-')[0]
-  return part ? part.toLowerCase() : 'en'
+function normalizeToSupportedLocale(localeTag: string): LocaleCode {
+  const subtag = localeTag.split('-')[0]?.toLowerCase() ?? 'en'
+  if (subtag === 'pt') return 'pt-BR'
+  if (subtag === 'en') return 'en'
+  return 'en'
 }
 
 export function getDefaultLocale(): LocaleCode {
@@ -17,9 +19,6 @@ export function getDefaultLocale(): LocaleCode {
     typeof navigator !== 'undefined'
       ? navigator.languages?.[0] ?? navigator.language ?? 'en'
       : 'en'
-  const language = getLanguageSubtag(String(raw))
-  cachedLocale = SUPPORTED_LOCALES.includes(language as LocaleCode)
-    ? (language as LocaleCode)
-    : 'en'
+  cachedLocale = normalizeToSupportedLocale(String(raw))
   return cachedLocale
 }

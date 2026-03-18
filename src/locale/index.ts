@@ -2,10 +2,11 @@ import type { LocaleCode, LocaleMessages } from './types'
 import { getDefaultLocale } from './defaultLocale'
 import { formatMessage as formatMessageFn } from './formatMessage'
 import { en } from './messages/en'
+import { ptBR } from './messages/pt-BR'
 
 function getMessages(locale: LocaleCode): LocaleMessages {
-  if (locale === 'en') {
-    return en
+  if (locale === 'pt-BR') {
+    return ptBR
   }
   return en
 }
