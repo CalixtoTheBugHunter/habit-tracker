@@ -22,6 +22,7 @@ export async function seedMockHabits(): Promise<void> {
       name: 'Exercise',
       description: 'Daily workout routine - 30 minutes of cardio',
       createdDate: getDateString(30),
+      stackingHabits: ['habit-2'],
       completionDates: [
         getDateString(0),  // Today
         getDateString(1),  // Yesterday

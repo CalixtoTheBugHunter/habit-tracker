@@ -5,13 +5,14 @@ import { HabitList } from './HabitList'
 import { renderWithProviders } from '../../../test/utils/render-helpers'
 import { createMockHabit } from '../../../test/fixtures/habits'
 import { createDateString, createDateStrings } from '../../../test/utils/date-helpers'
-import { getAllHabits, openDB, deleteHabit } from '../../../services/indexedDB'
+import { getAllHabits, openDB, updateHabit, deleteHabit } from '../../../services/indexedDB'
 import type { Habit } from '../../../types/habit'
 import { verifyButtonContrast, mockComputedStyleForElement } from '../../../test/utils/accessibility-helpers'
 
 vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
   getAllHabits: vi.fn(),
+  updateHabit: vi.fn(),
   deleteHabit: vi.fn(),
   testUtils: {
     resetDB: vi.fn(),
@@ -607,6 +608,68 @@ describe('HabitList', () => {
       await screen.findByText('Exercise')
       const button = screen.getByRole('button', { name: buttonName })
       expect(verifyButtonContrast(button, minRatio)).toBe(true)
+    })
+  })
+
+  describe('Habit stacking accordion', () => {
+    it('shows accordion when habit has stackingHabits with one valid ID', async () => {
+      const habits = [
+        createMockHabit({ id: '1', name: 'Exercise', stackingHabits: ['2'] }),
+        createMockHabit({ id: '2', name: 'Read', completionDates: [] }),
+      ]
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+      vi.mocked(updateHabit).mockResolvedValue('1')
+
+      renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      const expandButton = screen.getByRole('button', { name: /expand stacked habits/i })
+      expect(expandButton).toBeInTheDocument()
+    })
+
+    it('does not render accordion when habit has no stackingHabits', async () => {
+      const habits = [
+        createMockHabit({ id: '1', name: 'Exercise' }),
+      ]
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      expect(screen.queryByRole('button', { name: /expand stacked habits/i })).not.toBeInTheDocument()
+    })
+
+    it('does not render accordion when habit has empty stackingHabits array', async () => {
+      const habits = [
+        createMockHabit({ id: '1', name: 'Exercise', stackingHabits: [] }),
+      ]
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+      renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      expect(screen.queryByRole('button', { name: /expand stacked habits/i })).not.toBeInTheDocument()
+    })
+
+    it('expand and toggle stacked habit checkbox calls toggleHabitCompletion when stacked habit exists in list', async () => {
+      const user = userEvent.setup()
+      const habits = [
+        createMockHabit({ id: '1', name: 'Exercise', stackingHabits: ['2'] }),
+        createMockHabit({ id: '2', name: 'Read', completionDates: [] }),
+      ]
+      vi.mocked(getAllHabits).mockResolvedValue(habits).mockResolvedValueOnce(habits).mockResolvedValueOnce(habits)
+      vi.mocked(updateHabit).mockResolvedValue('1')
+
+      renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      await user.click(screen.getByRole('button', { name: /expand stacked habits/i }))
+      const checkbox = screen.getByRole('checkbox', { name: /mark read as done for today/i })
+      await user.click(checkbox)
+
+      await waitFor(() => {
+        expect(updateHabit).toHaveBeenCalled()
+      })
     })
   })
 })

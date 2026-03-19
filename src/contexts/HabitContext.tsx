@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
 import { messages } from '../locale'
-import { openDB, getAllHabits, updateHabit, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
+import { openDB, getAllHabits, updateHabit as updateHabitInDB, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
 import { createAppError } from '../utils/error/errorTypes'
 import { logError } from '../utils/error/errorLogger'
@@ -12,6 +12,7 @@ interface HabitContextType {
   error: string | null
   refreshHabits: () => Promise<void>
   toggleHabitCompletion: (habitId: string) => Promise<void>
+  updateHabit: (habit: Habit) => Promise<void>
   deleteHabit: (habitId: string) => Promise<void>
 }
 
@@ -74,6 +75,23 @@ export function HabitProvider({ children }: HabitProviderProps) {
     }
   }, [habits, refreshHabits])
 
+  const updateHabit = useCallback(async (habit: Habit) => {
+    try {
+      setError(null)
+      await updateHabitInDB(habit)
+      await refreshHabits()
+    } catch (err) {
+      const appError = createAppError(
+        err,
+        'UNKNOWN_ERROR',
+        messages.app.toggleCompletionError
+      )
+      logError(appError)
+      setError(appError.userMessage)
+      throw err
+    }
+  }, [refreshHabits])
+
   const deleteHabit = useCallback(async (habitId: string) => {
     try {
       setError(null)
@@ -121,9 +139,10 @@ export function HabitProvider({ children }: HabitProviderProps) {
       error,
       refreshHabits,
       toggleHabitCompletion,
+      updateHabit,
       deleteHabit,
     }),
-    [habits, isLoading, error, refreshHabits, toggleHabitCompletion, deleteHabit]
+    [habits, isLoading, error, refreshHabits, toggleHabitCompletion, updateHabit, deleteHabit]
   )
 
   return <HabitContext.Provider value={value}>{children}</HabitContext.Provider>
