@@ -5,6 +5,7 @@ import { track } from '../../../analytics/umami'
 import { messages } from '../../../locale'
 import type { Habit } from '../../../types/habit'
 import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../../utils/validation/validateHabit'
+import { StackingHabitsSelector } from '../StackingHabitsSelector/StackingHabitsSelector'
 import './HabitForm.css'
 
 const TEXTAREA_MAX_HEIGHT = 200
@@ -16,9 +17,11 @@ interface HabitFormProps {
 }
 
 export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
-  const { refreshHabits } = useHabits()
+  const { habits, refreshHabits } = useHabits()
   const [name, setName] = useState(habit?.name || '')
   const [description, setDescription] = useState(habit?.description || '')
+  const [stackingHabitIds, setStackingHabitIds] = useState<string[]>(habit?.stackingHabits ?? [])
+  const [stackingStepLabels, setStackingStepLabels] = useState<Record<string, string>>(habit?.stackingStepLabels ?? {})
   const [nameError, setNameError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -32,10 +35,14 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
     if (habit) {
       setName(habit.name || '')
       setDescription(habit.description || '')
+      setStackingHabitIds(habit.stackingHabits ?? [])
+      setStackingStepLabels(habit.stackingStepLabels ?? {})
       setShowDescription(true)
     } else {
       setName('')
       setDescription('')
+      setStackingHabitIds([])
+      setStackingStepLabels({})
       setShowDescription(false)
     }
   }, [habit])
@@ -77,12 +84,25 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
     setIsSubmitting(true)
 
     try {
+      const stackingCompletions =
+        isEditMode && habit?.stackingCompletions
+          ? Object.fromEntries(
+              Object.entries(habit.stackingCompletions).filter(([id]) => stackingHabitIds.includes(id))
+            )
+          : undefined
+      const hasStacking = stackingHabitIds.length > 0
+      const labelsForStack = hasStacking
+        ? Object.fromEntries(Object.entries(stackingStepLabels).filter(([id]) => stackingHabitIds.includes(id)))
+        : undefined
       const habitData: Habit = {
         id: habit?.id || globalThis.crypto.randomUUID(),
         name: name.trim(),
         description: description.trim() || undefined,
         createdDate: habit?.createdDate || new Date().toISOString(),
         completionDates: habit?.completionDates || [],
+        stackingHabits: hasStacking ? stackingHabitIds : undefined,
+        stackingCompletions: hasStacking && Object.keys(stackingCompletions ?? {}).length > 0 ? stackingCompletions : undefined,
+        stackingStepLabels: labelsForStack && Object.keys(labelsForStack).length > 0 ? labelsForStack : undefined,
       }
 
       if (isEditMode) {
@@ -100,6 +120,8 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       if (!isEditMode) {
         setName('')
         setDescription('')
+        setStackingHabitIds([])
+        setStackingStepLabels({})
         setShowDescription(false)
       }
 
@@ -121,9 +143,13 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
     if (habit) {
       setName(habit.name || '')
       setDescription(habit.description || '')
+      setStackingHabitIds(habit.stackingHabits ?? [])
+      setStackingStepLabels(habit.stackingStepLabels ?? {})
     } else {
       setName('')
       setDescription('')
+      setStackingHabitIds([])
+      setStackingStepLabels({})
       setShowDescription(false)
     }
     setNameError(null)
@@ -173,21 +199,35 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       </div>
 
       {showDescription && (
-        <div className="habit-form-field">
-          <label htmlFor="habit-description" className="habit-form-label">
-            {messages.habitForm.labels.description}
-          </label>
-          <textarea
-            ref={textareaRef}
-            id="habit-description"
-            className="habit-form-textarea"
-            value={description}
-            maxLength={MAX_DESCRIPTION_LENGTH}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={1}
+        <>
+          <div className="habit-form-field">
+            <label htmlFor="habit-description" className="habit-form-label">
+              {messages.habitForm.labels.description}
+            </label>
+            <textarea
+              ref={textareaRef}
+              id="habit-description"
+              className="habit-form-textarea"
+              value={description}
+              maxLength={MAX_DESCRIPTION_LENGTH}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={1}
+              disabled={isSubmitting}
+            />
+          </div>
+          <StackingHabitsSelector
+            id="habit-form-stacking"
+            value={stackingHabitIds}
+            onChange={(ids, newStepLabels) => {
+              setStackingHabitIds(ids)
+              if (newStepLabels) setStackingStepLabels(prev => ({ ...prev, ...newStepLabels }))
+            }}
+            habits={habits}
+            stackingStepLabels={stackingStepLabels}
+            excludeId={habit?.id}
             disabled={isSubmitting}
           />
-        </div>
+        </>
       )}
 
       {submitError && (

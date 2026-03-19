@@ -48,6 +48,57 @@ export function validateHabit(habit: unknown): asserts habit is Habit {
     }
   }
   
+  if (habitObj.stackingHabits !== undefined) {
+    if (!Array.isArray(habitObj.stackingHabits)) {
+      throw new Error('Habit stackingHabits must be an array if provided')
+    }
+    for (const id of habitObj.stackingHabits) {
+      if (typeof id !== 'string' || id.trim() === '') {
+        throw new Error('All stackingHabits elements must be non-empty strings')
+      }
+    }
+  }
+
+  if (habitObj.stackingCompletions !== undefined) {
+    if (typeof habitObj.stackingCompletions !== 'object' || habitObj.stackingCompletions === null || Array.isArray(habitObj.stackingCompletions)) {
+      throw new Error('Habit stackingCompletions must be an object if provided')
+    }
+    const completions = habitObj.stackingCompletions as Record<string, unknown>
+    for (const key of Object.keys(completions)) {
+      if (typeof key !== 'string' || key.trim() === '') {
+        throw new Error('Habit stackingCompletions keys must be non-empty strings')
+      }
+      const arr = completions[key]
+      if (!Array.isArray(arr)) {
+        throw new Error('Habit stackingCompletions values must be arrays')
+      }
+      for (const dateStr of arr) {
+        if (typeof dateStr !== 'string') {
+          throw new Error('All stackingCompletions date strings must be strings')
+        }
+        if (!isValidISO8601(dateStr)) {
+          throw new Error('All stackingCompletions date strings must be valid ISO 8601')
+        }
+      }
+    }
+  }
+
+  if (habitObj.stackingStepLabels !== undefined) {
+    if (typeof habitObj.stackingStepLabels !== 'object' || habitObj.stackingStepLabels === null || Array.isArray(habitObj.stackingStepLabels)) {
+      throw new Error('Habit stackingStepLabels must be an object if provided')
+    }
+    const labels = habitObj.stackingStepLabels as Record<string, unknown>
+    for (const key of Object.keys(labels)) {
+      if (typeof key !== 'string' || key.trim() === '') {
+        throw new Error('Habit stackingStepLabels keys must be non-empty strings')
+      }
+      const val = labels[key]
+      if (typeof val !== 'string' || (val as string).trim() === '') {
+        throw new Error('Habit stackingStepLabels values must be non-empty strings')
+      }
+    }
+  }
+
   const stringFields = ['name', 'description']
   for (const field of stringFields) {
     if (habitObj[field] !== undefined && typeof habitObj[field] !== 'string') {

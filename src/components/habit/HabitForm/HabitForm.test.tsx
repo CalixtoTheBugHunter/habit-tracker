@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HabitForm } from './HabitForm'
 import { renderWithProviders } from '../../../test/utils/render-helpers'
@@ -37,6 +37,14 @@ describe('HabitForm', () => {
       expect(screen.queryByLabelText(/description/i)).not.toBeInTheDocument()
       expect(screen.getByText(/create new habit/i)).toBeInTheDocument()
       expect(screen.getByRole('button', { name: /create habit/i })).toBeInTheDocument()
+    })
+
+    it('should not show stacking selector in create mode until name is focused', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<HabitForm />)
+      expect(screen.queryByLabelText(/add habit to stack/i)).not.toBeInTheDocument()
+      await user.click(screen.getByLabelText(/name/i))
+      expect(screen.getByLabelText(/add habit to stack/i)).toBeInTheDocument()
     })
 
     it('should show validation error when submitting with empty name', async () => {
@@ -459,6 +467,104 @@ describe('HabitForm', () => {
 
       await waitFor(() => {
         expect(onSuccess).toHaveBeenCalled()
+      })
+    })
+
+    it('should show stacking habits in edit mode and include them in submit payload', async () => {
+      const user = userEvent.setup()
+      const mainHabit = createMockHabit({
+        id: 'habit-1',
+        name: 'Main',
+        stackingHabits: ['habit-2'],
+        stackingCompletions: { 'habit-2': ['2025-01-15'] },
+      })
+      const stackedHabit = createMockHabit({ id: 'habit-2', name: 'Stacked' })
+      vi.mocked(getAllHabits).mockResolvedValue([mainHabit, stackedHabit])
+      vi.mocked(updateHabit).mockResolvedValue('habit-1')
+
+      renderWithProviders(<HabitForm habit={mainHabit} />)
+
+      await waitFor(() => {
+        expect(screen.getByText('Stacked')).toBeInTheDocument()
+      })
+
+      const submitButton = screen.getByRole('button', { name: /update habit/i })
+      await user.click(submitButton)
+
+      await waitFor(() => {
+        expect(vi.mocked(updateHabit)).toHaveBeenCalledWith(
+          expect.objectContaining({
+            stackingHabits: ['habit-2'],
+            stackingCompletions: { 'habit-2': ['2025-01-15'] },
+          })
+        )
+      })
+    })
+
+    it('should include stackingHabits in create submit payload when selected', async () => {
+      const user = userEvent.setup()
+      const otherHabit = createMockHabit({ id: 'other-id', name: 'Other Habit' })
+      vi.mocked(getAllHabits).mockResolvedValue([otherHabit])
+      vi.mocked(addHabit).mockResolvedValue('new-id')
+
+      renderWithProviders(<HabitForm />)
+
+      const nameInput = screen.getByLabelText(/name/i)
+      await user.click(nameInput)
+      await user.type(nameInput, 'New Habit')
+
+      await waitFor(() => {
+        expect(screen.getByLabelText(/add habit to stack/i)).toBeInTheDocument()
+      })
+      const combobox = screen.getByLabelText(/add habit to stack/i)
+      await user.click(combobox)
+      const listbox = screen.getByRole('listbox')
+      const option = within(listbox).getByText('Other Habit')
+      await user.click(option)
+
+      const submitButton = screen.getByRole('button', { name: /create habit/i })
+      await user.click(submitButton)
+
+      await waitFor(() => {
+        expect(vi.mocked(addHabit)).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'New Habit',
+            stackingHabits: ['other-id'],
+          })
+        )
+      })
+    })
+
+    it('should include stackingStepLabels in create submit when user adds new step by name', async () => {
+      const user = userEvent.setup()
+      vi.mocked(getAllHabits).mockResolvedValue([])
+      vi.mocked(addHabit).mockResolvedValue('new-id')
+
+      renderWithProviders(<HabitForm />)
+
+      const nameInput = screen.getByLabelText(/name/i)
+      await user.click(nameInput)
+      await user.type(nameInput, 'Parent Habit')
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/type to search habits/i)).toBeInTheDocument()
+      })
+      const stackingInput = screen.getByPlaceholderText(/type to search habits/i)
+      await user.click(stackingInput)
+      await user.type(stackingInput, 'Drink water')
+      const addBtn = screen.getByRole('button', { name: /^add$/i })
+      await user.click(addBtn)
+
+      const submitButton = screen.getByRole('button', { name: /create habit/i })
+      await user.click(submitButton)
+
+      await waitFor(() => {
+        expect(vi.mocked(addHabit)).toHaveBeenCalled()
+        const [habitData] = vi.mocked(addHabit).mock.calls[0]
+        expect(habitData.name).toBe('Parent Habit')
+        expect(habitData.stackingHabits).toHaveLength(1)
+        expect(habitData.stackingStepLabels).toBeDefined()
+        expect(habitData.stackingStepLabels![habitData.stackingHabits![0]]).toBe('Drink water')
       })
     })
   })

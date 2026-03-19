@@ -35,6 +35,41 @@ describe('validateHabit', () => {
       }
       expect(() => validateHabit(habit)).not.toThrow()
     })
+
+    it('should validate habit with stackingHabits array of strings', () => {
+      const habit: Habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        stackingHabits: ['habit-2', 'habit-3'],
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
+
+    it('should validate habit with stackingCompletions object', () => {
+      const habit: Habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        stackingCompletions: {
+          'stack-1': ['2025-01-15T00:00:00.000Z'],
+        },
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
+
+    it('should validate habit with stackingStepLabels object', () => {
+      const habit: Habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        stackingStepLabels: {
+          'step-uuid-1': 'Drink water',
+          'step-uuid-2': 'Morning routine',
+        },
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
   })
 
   describe('invalid habits', () => {
@@ -163,6 +198,48 @@ describe('validateHabit', () => {
         completionDates: Array(10000).fill('2025-01-01T00:00:00.000Z'),
       }
       expect(() => validateHabit(invalid)).toThrow('Habit data exceeds maximum size')
+    })
+
+    it('should reject habit with stackingHabits containing non-string', () => {
+      const invalid = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        stackingHabits: ['habit-2', 123],
+      }
+      expect(() => validateHabit(invalid)).toThrow('All stackingHabits elements must be non-empty strings')
+    })
+
+    it('should reject habit with invalid stackingCompletions non-ISO string', () => {
+      const invalid = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        stackingCompletions: {
+          'stack-1': ['not-a-date'],
+        },
+      }
+      expect(() => validateHabit(invalid)).toThrow('All stackingCompletions date strings must be valid ISO 8601')
+    })
+
+    it('should reject habit with stackingStepLabels as array', () => {
+      const invalid = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        stackingStepLabels: ['label'],
+      }
+      expect(() => validateHabit(invalid)).toThrow('Habit stackingStepLabels must be an object if provided')
+    })
+
+    it('should reject habit with stackingStepLabels containing non-string value', () => {
+      const invalid = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        stackingStepLabels: { 'step-1': 123 },
+      }
+      expect(() => validateHabit(invalid)).toThrow('Habit stackingStepLabels values must be non-empty strings')
     })
   })
 })

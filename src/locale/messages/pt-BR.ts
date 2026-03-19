@@ -39,6 +39,15 @@ export const ptBR = {
       createForm: 'Formulário de criação de hábito',
       editForm: 'Formulário de edição de hábito',
     },
+    stacking: {
+      label: 'Hábitos em sequência',
+      placeholder: 'Digite para buscar hábitos...',
+      empty: 'Nenhum hábito para adicionar.',
+      addNewStepHint: 'Pressione Adicionar ou Enter para criar como nova etapa',
+      addAria: 'Adicionar hábito à sequência',
+      addButton: 'Adicionar',
+      removeAria: 'Remover {name} da sequência',
+    },
   },
   habitList: {
     loading: 'Carregando hábitos...',
@@ -68,6 +77,21 @@ export const ptBR = {
       confirm: 'Excluir',
       cancel: 'Cancelar',
       confirming: 'Excluindo...',
+    },
+    stacking: {
+      title: 'Hábitos em sequência',
+      expandAria: 'Expandir hábitos em sequência',
+      collapseAria: 'Recolher hábitos em sequência',
+      unknownHabit: 'Hábito desconhecido',
+      checkboxAria: 'Marcar {name} como feito hoje',
+      removeModal: {
+        title: 'Remover da sequência',
+        message: 'Remover "{name}" dos hábitos em sequência?',
+        confirm: 'Remover',
+        cancel: 'Cancelar',
+        confirming: 'Removendo...',
+      },
+      removeButtonAria: 'Remover {name} da sequência',
     },
   },
   confirmationModal: {
