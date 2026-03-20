@@ -427,7 +427,7 @@ describe('HabitContext', () => {
     })
 
     await waitFor(() => {
-      expect(screen.getByText(/failed to toggle habit completion/i)).toBeInTheDocument()
+      expect(screen.getByText(/failed to update habit/i)).toBeInTheDocument()
     })
   })
 })

@@ -52,6 +52,23 @@ export function HabitProvider({ children }: HabitProviderProps) {
     }
   }, [])
 
+  const updateHabit = useCallback(async (habit: Habit) => {
+    try {
+      setError(null)
+      await updateHabitInDB(habit)
+      await refreshHabits()
+    } catch (err) {
+      const appError = createAppError(
+        err,
+        'UNKNOWN_ERROR',
+        messages.app.updateHabitError
+      )
+      logError(appError)
+      setError(appError.userMessage)
+      throw err
+    }
+  }, [refreshHabits])
+
   const toggleHabitCompletion = useCallback(async (habitId: string) => {
     try {
       setError(null)
@@ -73,24 +90,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       setError(appError.userMessage)
       throw err
     }
-  }, [habits, refreshHabits])
-
-  const updateHabit = useCallback(async (habit: Habit) => {
-    try {
-      setError(null)
-      await updateHabitInDB(habit)
-      await refreshHabits()
-    } catch (err) {
-      const appError = createAppError(
-        err,
-        'UNKNOWN_ERROR',
-        messages.app.toggleCompletionError
-      )
-      logError(appError)
-      setError(appError.userMessage)
-      throw err
-    }
-  }, [refreshHabits])
+  }, [habits, refreshHabits, updateHabit])
 
   const deleteHabit = useCallback(async (habitId: string) => {
     try {

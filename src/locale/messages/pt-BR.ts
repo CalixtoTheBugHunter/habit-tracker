@@ -6,6 +6,7 @@ export const ptBR = {
     initError: 'Falha ao inicializar o aplicativo',
     loadHabitsError: 'Falha ao carregar hábitos',
     toggleCompletionError: 'Falha ao marcar conclusão do hábito',
+    updateHabitError: 'Falha ao atualizar hábito',
     deleteHabitError: 'Falha ao excluir hábito',
   },
   habitForm: {
@@ -80,8 +81,9 @@ export const ptBR = {
     },
     stacking: {
       title: 'Hábitos em sequência',
-      expandAria: 'Expandir hábitos em sequência',
-      collapseAria: 'Recolher hábitos em sequência',
+      expandAria: 'Expandir hábitos em sequência de {name}',
+      collapseAria: 'Recolher hábitos em sequência de {name}',
+      regionAria: 'Hábitos em sequência de {name}',
       unknownHabit: 'Hábito desconhecido',
       checkboxAria: 'Marcar {name} como feito hoje',
       removeModal: {

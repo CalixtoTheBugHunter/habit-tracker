@@ -66,11 +66,15 @@ export function HabitList({ onEdit }: HabitListProps) {
     const parentHabit = habits.find(h => h.id === parentHabitId)
     const stackingHabit = habits.find(h => h.id === stackingHabitId)
     if (!parentHabit) return
-    if (stackingHabit) {
-      await toggleHabitCompletion(stackingHabitId)
-    } else {
-      const updated = toggleStackingHabitCompletion(parentHabit, stackingHabitId)
-      await updateHabit(updated)
+    try {
+      if (stackingHabit) {
+        await toggleHabitCompletion(stackingHabitId)
+      } else {
+        const updated = toggleStackingHabitCompletion(parentHabit, stackingHabitId)
+        await updateHabit(updated)
+      }
+    } catch {
+      // Error is already handled in context, but we catch to prevent unhandled promise rejection
     }
   }
 

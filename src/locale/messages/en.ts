@@ -6,6 +6,7 @@ export const en = {
     initError: 'Failed to initialize application',
     loadHabitsError: 'Failed to load habits',
     toggleCompletionError: 'Failed to toggle habit completion',
+    updateHabitError: 'Failed to update habit',
     deleteHabitError: 'Failed to delete habit',
   },
   habitForm: {
@@ -79,8 +80,9 @@ export const en = {
     },
     stacking: {
       title: 'Stacked habits',
-      expandAria: 'Expand stacked habits',
-      collapseAria: 'Collapse stacked habits',
+      expandAria: 'Expand stacked habits for {name}',
+      collapseAria: 'Collapse stacked habits for {name}',
+      regionAria: 'Stacked habits for {name}',
       unknownHabit: 'Unknown habit',
       checkboxAria: 'Mark {name} as done for today',
       removeModal: {

@@ -30,12 +30,14 @@
   overflow: hidden;
   max-height: 0;
   opacity: 0;
+  pointer-events: none;
   transition: max-height 250ms ease-out, opacity 200ms ease-out;
 }
 
 .habit-stacking-accordion__panel--open {
-  max-height: 500px;
+  max-height: 2000px;
   opacity: 1;
+  pointer-events: auto;
 }
 
 .habit-stacking-accordion__heading {
@@ -60,6 +62,11 @@
 
 .habit-stacking-accordion__remove {
   margin-left: var(--spacing-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   padding: var(--spacing-xs);
   background: none;
   border: none;

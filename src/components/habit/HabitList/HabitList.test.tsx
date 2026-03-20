@@ -623,7 +623,7 @@ describe('HabitList', () => {
       renderWithProviders(<HabitList />)
 
       await screen.findByText('Exercise')
-      const expandButton = screen.getByRole('button', { name: /expand stacked habits/i })
+      const expandButton = screen.getByRole('button', { name: /expand stacked habits for exercise/i })
       expect(expandButton).toBeInTheDocument()
     })
 
@@ -651,24 +651,30 @@ describe('HabitList', () => {
       expect(screen.queryByRole('button', { name: /expand stacked habits/i })).not.toBeInTheDocument()
     })
 
-    it('expand and toggle stacked habit checkbox calls toggleHabitCompletion when stacked habit exists in list', async () => {
+    it('expand and toggle stacked habit checkbox persists today on the stacked habit via updateHabit', async () => {
       const user = userEvent.setup()
+      const todayIso = createDateString(0)
       const habits = [
         createMockHabit({ id: '1', name: 'Exercise', stackingHabits: ['2'] }),
         createMockHabit({ id: '2', name: 'Read', completionDates: [] }),
       ]
-      vi.mocked(getAllHabits).mockResolvedValue(habits).mockResolvedValueOnce(habits).mockResolvedValueOnce(habits)
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
       vi.mocked(updateHabit).mockResolvedValue('1')
 
       renderWithProviders(<HabitList />)
 
       await screen.findByText('Exercise')
-      await user.click(screen.getByRole('button', { name: /expand stacked habits/i }))
+      await user.click(screen.getByRole('button', { name: /expand stacked habits for exercise/i }))
       const checkbox = screen.getByRole('checkbox', { name: /mark read as done for today/i })
       await user.click(checkbox)
 
       await waitFor(() => {
-        expect(updateHabit).toHaveBeenCalled()
+        expect(updateHabit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: '2',
+            completionDates: expect.arrayContaining([todayIso]),
+          })
+        )
       })
     })
   })

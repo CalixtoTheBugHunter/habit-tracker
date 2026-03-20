@@ -63,6 +63,10 @@ export function HabitStackingAccordion({
   }
 
   const removeModal = messages.habitList.stacking.removeModal
+  const parentDisplayName = parentHabit.name || messages.habitList.unnamedHabit
+  const expandCollapseLabel = expanded
+    ? formatMessage(messages.habitList.stacking.collapseAria, { name: parentDisplayName })
+    : formatMessage(messages.habitList.stacking.expandAria, { name: parentDisplayName })
 
   return (
     <div className="habit-stacking-accordion">
@@ -74,15 +78,17 @@ export function HabitStackingAccordion({
         aria-controls={panelId}
         onClick={handleTriggerClick}
       >
-        {expanded ? messages.habitList.stacking.collapseAria : messages.habitList.stacking.expandAria}
+        {expandCollapseLabel}
         {expanded ? <ChevronUp aria-hidden /> : <ChevronDown aria-hidden />}
       </button>
       <div
         id={panelId}
         role="region"
         aria-labelledby={triggerId}
-        aria-label={messages.habitList.stacking.title}
+        aria-label={formatMessage(messages.habitList.stacking.regionAria, { name: parentDisplayName })}
         className={`habit-stacking-accordion__panel ${expanded ? 'habit-stacking-accordion__panel--open' : ''}`}
+        aria-hidden={!expanded}
+        {...(!expanded ? { inert: '' as const } : {})}
       >
         <h4 className="habit-stacking-accordion__heading">{messages.habitList.stacking.title}</h4>
         <ul className="habit-stacking-accordion__list">
