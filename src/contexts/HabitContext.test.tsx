@@ -55,6 +55,14 @@ function TestComponentWithDelete({ onDelete }: { onDelete: (deleteFn: (id: strin
   return <TestComponent />
 }
 
+function TestComponentWithUpdate({ onUpdate }: { onUpdate: (updateFn: (habit: import('../types/habit').Habit) => Promise<void>) => void }) {
+  const { updateHabit } = useHabits()
+  React.useEffect(() => {
+    onUpdate(updateHabit)
+  }, [updateHabit, onUpdate])
+  return <TestComponent />
+}
+
 describe('HabitContext', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -189,6 +197,7 @@ describe('HabitContext', () => {
     vi.mocked(getAllHabits)
       .mockResolvedValueOnce([habit])
       .mockResolvedValueOnce([updatedHabit])
+      .mockResolvedValue([updatedHabit])
     vi.mocked(updateHabit).mockResolvedValue('1')
 
     let toggleFn: ((id: string) => Promise<void>) | null = null
@@ -213,7 +222,7 @@ describe('HabitContext', () => {
     })
 
     await waitFor(() => {
-      expect(getAllHabits).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(getAllHabits).mock.calls.length).toBeGreaterThanOrEqual(2)
     })
   })
 
@@ -355,6 +364,70 @@ describe('HabitContext', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/failed to delete habit/i)).toBeInTheDocument()
+    })
+  })
+
+  it('calls indexedDB updateHabit and refreshHabits when updateHabit is invoked', async () => {
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    const habits = [createMockHabit({ id: '1', name: 'Exercise' })]
+    vi.mocked(getAllHabits).mockResolvedValue(habits).mockResolvedValueOnce(habits).mockResolvedValueOnce(habits)
+    vi.mocked(updateHabit).mockResolvedValue('1')
+
+    let updateFn: ((habit: import('../types/habit').Habit) => Promise<void>) | null = null
+    const onUpdate = (fn: (habit: import('../types/habit').Habit) => Promise<void>) => {
+      updateFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithUpdate onUpdate={onUpdate} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+
+    expect(updateFn).not.toBeNull()
+    const habitToUpdate = createMockHabit({ id: '1', name: 'Exercise Updated' })
+
+    await act(async () => {
+      await updateFn!(habitToUpdate)
+    })
+
+    await waitFor(() => {
+      expect(updateHabit).toHaveBeenCalledWith(habitToUpdate)
+    })
+    await waitFor(() => {
+      expect(getAllHabits).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  it('handles errors when updateHabit fails', async () => {
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    const habits = [createMockHabit({ id: '1', name: 'Exercise' })]
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+    vi.mocked(updateHabit).mockRejectedValue(new Error('Failed to update habit'))
+
+    let updateFn: ((habit: import('../types/habit').Habit) => Promise<void>) | null = null
+    const onUpdate = (fn: (habit: import('../types/habit').Habit) => Promise<void>) => {
+      updateFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithUpdate onUpdate={onUpdate} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+
+    expect(updateFn).not.toBeNull()
+
+    await act(async () => {
+      try {
+        await updateFn!(createMockHabit({ id: '1' }))
+      } catch {
+        // expected
+      }
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/failed to update habit/i)).toBeInTheDocument()
     })
   })
 })

@@ -3,7 +3,9 @@ import { useHabits } from '../../../contexts/HabitContext'
 import { messages, formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
+import { toggleStackingHabitCompletion } from '../../../utils/habit/toggleStackingHabitCompletion'
 import { AnnualCalendar } from '../AnnualCalendar/AnnualCalendar'
+import { HabitStackingAccordion } from '../HabitStackingAccordion/HabitStackingAccordion'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
 import { StreakBadge } from '../StreakBadge/StreakBadge'
 import type { Habit } from '../../../types/habit'
@@ -14,7 +16,7 @@ interface HabitListProps {
 }
 
 export function HabitList({ onEdit }: HabitListProps) {
-  const { habits, isLoading, error, toggleHabitCompletion, deleteHabit } = useHabits()
+  const { habits, isLoading, error, toggleHabitCompletion, updateHabit, deleteHabit } = useHabits()
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [habitToDelete, setHabitToDelete] = useState<{ id: string; name?: string } | null>(null)
@@ -58,6 +60,22 @@ export function HabitList({ onEdit }: HabitListProps) {
 
   const handleDeleteCancel = () => {
     setHabitToDelete(null)
+  }
+
+  const handleToggleStackingHabit = async (parentHabitId: string, stackingHabitId: string) => {
+    const parentHabit = habits.find(h => h.id === parentHabitId)
+    const stackingHabit = habits.find(h => h.id === stackingHabitId)
+    if (!parentHabit) return
+    try {
+      if (stackingHabit) {
+        await toggleHabitCompletion(stackingHabitId)
+      } else {
+        const updated = toggleStackingHabitCompletion(parentHabit, stackingHabitId)
+        await updateHabit(updated)
+      }
+    } catch {
+      // Error is already handled in context, but we catch to prevent unhandled promise rejection
+    }
   }
 
   if (isLoading) {
@@ -110,6 +128,14 @@ export function HabitList({ onEdit }: HabitListProps) {
               <p className="habit-description">{habit.description}</p>
             )}
             <AnnualCalendar habit={habit} />
+            {habit.stackingHabits && habit.stackingHabits.length > 0 && (
+              <HabitStackingAccordion
+                parentHabit={habit}
+                stackingHabitsResolved={habit.stackingHabits.map(id => habits.find(h => h.id === id))}
+                onToggleStackingHabit={handleToggleStackingHabit}
+                updateHabit={updateHabit}
+              />
+            )}
             <div className="habit-actions">
               <button
                 type="button"

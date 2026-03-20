@@ -6,6 +6,7 @@ export const en = {
     initError: 'Failed to initialize application',
     loadHabitsError: 'Failed to load habits',
     toggleCompletionError: 'Failed to toggle habit completion',
+    updateHabitError: 'Failed to update habit',
     deleteHabitError: 'Failed to delete habit',
   },
   habitForm: {
@@ -39,6 +40,15 @@ export const en = {
       createForm: 'Create habit form',
       editForm: 'Edit habit form',
     },
+    stacking: {
+      label: 'Stacked habits',
+      placeholder: 'Type to search habits...',
+      empty: 'No habits to add.',
+      addNewStepHint: 'Press Add or Enter to create as a new step',
+      addAria: 'Add habit to stack',
+      addButton: 'Add',
+      removeAria: 'Remove {name} from stack',
+    },
   },
   habitList: {
     loading: 'Loading habits...',
@@ -67,6 +77,22 @@ export const en = {
       confirm: 'Delete',
       cancel: 'Cancel',
       confirming: 'Deleting...',
+    },
+    stacking: {
+      title: 'Stacked habits',
+      expandAria: 'Expand stacked habits for {name}',
+      collapseAria: 'Collapse stacked habits for {name}',
+      regionAria: 'Stacked habits for {name}',
+      unknownHabit: 'Unknown habit',
+      checkboxAria: 'Mark {name} as done for today',
+      removeModal: {
+        title: 'Remove from stack',
+        message: 'Remove "{name}" from stacked habits?',
+        confirm: 'Remove',
+        cancel: 'Cancel',
+        confirming: 'Removing...',
+      },
+      removeButtonAria: 'Remove {name} from stack',
     },
   },
   confirmationModal: {
