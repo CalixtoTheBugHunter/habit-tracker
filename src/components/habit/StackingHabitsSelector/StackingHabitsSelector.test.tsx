@@ -200,7 +200,7 @@ describe('StackingHabitsSelector', () => {
     const addBtn = screen.getByRole('button', { name: /^add$/i })
     await user.click(addBtn)
     expect(onChange).toHaveBeenCalledTimes(1)
-    const [ids, newStepLabels] = onChange.mock.calls[0]
+    const [ids, newStepLabels] = onChange.mock.calls[0]!
     expect(ids).toHaveLength(1)
     expect(newStepLabels).toBeDefined()
     expect(Object.keys(newStepLabels!)).toHaveLength(1)
@@ -218,7 +218,7 @@ describe('StackingHabitsSelector', () => {
     await user.type(input, 'Morning routine')
     await user.keyboard('{Enter}')
     expect(onChange).toHaveBeenCalledTimes(1)
-    const [ids, newStepLabels] = onChange.mock.calls[0]
+    const [ids, newStepLabels] = onChange.mock.calls[0]!
     expect(ids).toHaveLength(1)
     expect(newStepLabels).toBeDefined()
     expect(newStepLabels![ids[0]]).toBe('Morning routine')

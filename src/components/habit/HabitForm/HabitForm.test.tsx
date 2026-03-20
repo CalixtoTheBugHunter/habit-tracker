@@ -560,11 +560,12 @@ describe('HabitForm', () => {
 
       await waitFor(() => {
         expect(vi.mocked(addHabit)).toHaveBeenCalled()
-        const [habitData] = vi.mocked(addHabit).mock.calls[0]
+        const [habitData] = vi.mocked(addHabit).mock.calls[0]!
         expect(habitData.name).toBe('Parent Habit')
         expect(habitData.stackingHabits).toHaveLength(1)
         expect(habitData.stackingStepLabels).toBeDefined()
-        expect(habitData.stackingStepLabels![habitData.stackingHabits![0]]).toBe('Drink water')
+        const stackingId = habitData.stackingHabits![0]!
+        expect(habitData.stackingStepLabels![stackingId]).toBe('Drink water')
       })
     })
   })
