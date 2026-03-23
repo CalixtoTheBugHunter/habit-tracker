@@ -318,15 +318,17 @@ DO NOT proceed to REVIEW mode without explicit user signal.
 **Required**: EXPLICITLY FLAG ANY DEVIATION, no matter how minor
 **Deviation Format**: ":warning: DEVIATION DETECTED: [description of exact deviation]"
 
-### Step 10: Request Manual Testing
+### Step 10: Manual Testing and AI Acceptance Test (Cursor Browser)
 
-**User Interaction Required**: Get user validation
+**User Interaction Required**: Get user validation; run structured browser verification against acceptance criteria.
+
+#### Step 10a: Manual / local run
 
 ```
 Verify the app runs locally:
   - Run `npm run dev` to start the development server
   - Verify the app loads without errors
-  - NEVER run `npm run build` in this workflow - use `npm run dev` instead
+  - NEVER run `npm run build` in this workflow for acceptance verification - use `npm run dev` instead
 
 Provide user with:
   - Summary of implemented changes
@@ -334,14 +336,73 @@ Provide user with:
   - Expected behavior and outcomes
   - Edge cases to verify
 
-Wait for user confirmation that manual testing is complete and successful
+Wait for user confirmation that manual testing is complete and successful (when applicable)
+```
 
-Note: Browser-based testing with Cursor Browser navigation will be added when local dev server is available
+#### Step 10b: AI acceptance test (cursor-ide-browser MCP)
+
+**Purpose**: Use the **Cursor Browser** MCP server (`cursor-ide-browser`) to exercise the running app and compare observable behavior to the GitHub issue’s acceptance criteria (and any UX-related items from the approved PLAN checklist).
+
+**Prerequisites**
+
+```
+- Dev server is reachable from the automation environment
+- Record BASE_URL (from package.json dev script defaults, framework docs, or user-provided URL)
+- Read **cursor-ide-browser** MCP tool schemas (project MCP descriptors) before invoking tools
+```
+
+**Criteria source and normalization**
+
+```
+- Primary source: acceptance criteria from the issue body gathered in RESEARCH (Step 2–3)
+- Secondary: numbered checklist items from the approved PLAN that describe user-visible behavior
+- Normalize into a numbered list of testable statements (Given/When/Then or clear bullets)
+- Map each item to concrete navigation or interaction steps in the app
+```
+
+**Cursor Browser MCP protocol (mandatory order)**
+
+```
+1. If a tab may already exist: use browser_tabs (list) as needed
+2. browser_navigate to BASE_URL (or the route under test)
+3. browser_lock (requires an existing tab after navigate)
+4. browser_snapshot before any click/type/fill — use element refs from the snapshot for interactions
+5. Exercise flows: browser_click, browser_fill, browser_type, browser_select_option, browser_press_key, browser_scroll (scrollIntoView before obscured controls), etc., as needed
+6. Prefer short incremental waits (1–3s) with browser_snapshot between steps rather than one long wait; use browser_wait_for when appropriate
+7. browser_unlock when all browser operations for this pass are complete
+
+Do not interact with iframe content (not supported). For native dialogs, follow MCP dialog-handling guidance before the triggering action.
+
+Security: do not paste secrets, tokens, or production credentials into chat or logs; prefer local-only flows and test accounts. Do not mark a criterion Pass on the basis of unverified assumptions.
+```
+
+**Per-criterion recording**
+
+```
+For each normalized criterion, record:
+  - Result: Pass | Fail | Blocked
+  - Brief evidence: what was visible or behaved as expected in snapshot terms (no raw secrets)
+  - If Blocked: reason (env, auth, missing data, MCP error, timeout, iframe-only UI, etc.)
+
+If the browser session fails (no tab, navigation error, timeout): document as Blocked — do not fake Pass. Optionally retry once after confirming the dev server and URL.
+
+Verdict: state whether all acceptance criteria are satisfied by the running app. Any Fail or material Blocked item is a REVIEW finding; use existing error handling to return to EXECUTE or PLAN as appropriate.
+```
+
+**AI acceptance test summary (required output)**
+
+```
+Produce a short "AI Acceptance Test Report" section containing:
+  - The numbered criteria and result per row (Pass / Fail / Blocked + evidence)
+  - Overall verdict (all satisfied vs gaps)
+  - List of blockers for automation if any
 ```
 
 ### Step 11: Validate Implementation Against Plan
 
 ```
+Include the AI Acceptance Test Report summary (from Step 10b) in the REVIEW narrative before the final verdict.
+
 Perform line-by-line comparison:
   - Compare each implemented item against the approved plan
   - Verify all checklist items were completed
@@ -375,6 +436,7 @@ The /create-pr workflow will handle all version control and PR creation steps.
 
 ```
 Present final review findings:
+  - AI Acceptance Test Report summary (criteria alignment with the running app)
   - Implementation validation results
   - Manual testing confirmation
   - PR creation status
@@ -390,6 +452,7 @@ Workflow complete.
 - **Code Quality Gates**: TypeScript, linting, and test coverage
 - **Pattern Compliance**: Follow established architecture patterns
 - **Manual Validation**: User testing before PR creation
+- **Automated Browser Verification**: cursor-ide-browser checks must be non-secret (no tokens/credentials in chat or logs); use local-only flows where possible
 - **Atomic Changes**: Clean commits with proper documentation
 - **Traceability**: Link all changes back to GitHub issue
 - **Mode Transition Security**: Mandatory user approval at each mode transition
@@ -400,6 +463,7 @@ Workflow complete.
 - If tests fail, stop workflow and request fixes
 - If user input is unclear, ask for clarification before proceeding
 - If manual testing fails, return to EXECUTE mode (or PLAN mode if plan modification needed)
+- If AI acceptance testing fails (criterion Fail) or browser MCP is Blocked after retry, document results and return to EXECUTE or PLAN as appropriate; do not proceed as if criteria passed
 - If deviation detected in EXECUTE mode, IMMEDIATELY return to PLAN mode
 - Maintain rollback capability at each mode
 - If user requests mode repetition, return to appropriate mode
@@ -415,4 +479,4 @@ Workflow complete.
 - PR creation is handled by the /create-pr command
 - **Owner/Repository**: Always retrieve the current GitHub username/owner dynamically. Do not hardcode "CalixtoTheBugHunter" or assume a specific owner. The repository is always "habit-tracker" but the owner should be determined at runtime.
 - **RIPER-5 Protocol**: This command enforces RIPER-5 protocol with mandatory mode declarations and user approval at each transition. The user is always accountable for AI actions and decisions.
-
+- **Cursor Browser MCP**: MODE 5 uses **cursor-ide-browser** for AI-driven acceptance checks against issue acceptance criteria while `npm run dev` is running; read MCP tool schemas before invoking tools.
