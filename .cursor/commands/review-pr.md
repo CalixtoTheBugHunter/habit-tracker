@@ -1,10 +1,10 @@
 ---
-description: Review PR focusing on security, performance, accessibility, code smells, unnecessary comments, and test quality
+description: Review PR focusing on security, performance, accessibility, code smells, unnecessary comments, test quality, and AI browser acceptance vs criteria
 ---
 
 # Review PR Workflow
 
-This workflow performs a focused code review of a GitHub PR, analyzing security risks, performance issues, accessibility concerns, code smells, unnecessary comments, and test quality using MCP GitHub operations and codebase analysis.
+This workflow performs a focused code review of a GitHub PR, analyzing security risks, performance issues, accessibility concerns, code smells, unnecessary comments, and test quality using MCP GitHub operations and codebase analysis. When the app can be run locally (`npm run dev`), it also uses the **cursor-ide-browser** MCP to run an **AI acceptance test** against resolved acceptance criteria and to produce a **discovery report**.
 
 ## Phase 1: PR Information Gathering
 
@@ -49,9 +49,27 @@ Use mcp_github_get_pull_request_comments and mcp_github_get_pull_request_reviews
   - Identify areas already flagged for review
 ```
 
+### Step 4: Acceptance Criteria Resolution
+
+**Purpose**: Establish what to verify in the AI browser pass (Phase 7).
+
+```
+1. Parse the PR title and body for:
+   - Sections titled or implying acceptance criteria (e.g. "Acceptance criteria", "Definition of Done", "DoD")
+   - Checkbox lists or numbered requirements
+2. Resolve linked issues from the PR body (e.g. Fixes #n, Closes #n, Refs #n):
+   - Get current GitHub username/owner dynamically
+   - Use GitHub MCP (e.g. get linked issues or mcp_github_get_issue) to fetch issue bodies for linked numbers
+   - Merge any acceptance criteria from those issues into a single normalized list
+3. If no explicit criteria exist anywhere:
+   - State explicitly in the final report that acceptance criteria are **absent**
+   - Run browser verification as **exploratory** against the PR description and changed UI only — do not invent strict pass/fail for undocumented expectations
+4. Output for later phases: a numbered list of testable criteria with source note (PR section vs issue #n)
+```
+
 ## Phase 2: Security Review
 
-### Step 4: Security Risk Analysis
+### Step 5: Security Risk Analysis
 
 **Security Check**: Identify vulnerabilities and security concerns
 
@@ -89,7 +107,7 @@ Use codebase_search to find:
   - Previous security implementations
 ```
 
-### Step 5: PII and Privacy Concerns
+### Step 6: PII and Privacy Concerns
 
 **Security Check**: Identify personal data handling issues
 
@@ -111,7 +129,7 @@ Flag any:
 
 ## Phase 3: Performance Review
 
-### Step 6: Performance Analysis
+### Step 7: Performance Analysis
 
 **Performance Check**: Identify bottlenecks and optimization opportunities
 
@@ -153,7 +171,7 @@ Use codebase_search to:
   - Compare with existing performance optimizations
 ```
 
-### Step 7: Check Best Practices for Tools Used
+### Step 8: Check Best Practices for Tools Used
 
 **Performance Check**: Verify library/framework usage follows best practices
 
@@ -176,7 +194,7 @@ Use web_search if needed to find:
 
 ## Phase 4: Accessibility Review
 
-### Step 8: Accessibility Analysis
+### Step 9: Accessibility Analysis
 
 **Accessibility Check**: Ensure WCAG compliance and accessibility best practices
 
@@ -219,7 +237,7 @@ Use codebase_search to:
   - Review WCAG compliance in similar features
 ```
 
-### Step 9: Reference Accessibility Best Practices
+### Step 10: Reference Accessibility Best Practices
 
 **Accessibility Check**: Verify against established standards
 
@@ -239,7 +257,7 @@ Use web_search if needed to find:
 
 ## Phase 5: Code Quality Review
 
-### Step 10: Code Smell Detection
+### Step 11: Code Smell Detection
 
 **Code Quality Check**: Identify code smells and anti-patterns
 
@@ -285,7 +303,7 @@ Use codebase_search to:
   - Verify consistency with codebase patterns
 ```
 
-### Step 11: Check for Reusable Helpers and Utilities
+### Step 12: Check for Reusable Helpers and Utilities
 
 **Code Quality Check**: Identify opportunities to use or create reusable helpers/utils
 
@@ -342,7 +360,7 @@ Use codebase_search to:
   - Verify consistency with existing utility structure
 ```
 
-### Step 12: Remove Unnecessary Comments
+### Step 13: Remove Unnecessary Comments
 
 **Code Quality Check**: Clean up redundant or outdated comments
 
@@ -373,7 +391,7 @@ Use codebase_search to:
 
 ## Phase 6: Test Quality Review
 
-### Step 13: Test Validation and Quality Analysis
+### Step 14: Test Validation and Quality Analysis
 
 **Test Quality Check**: Ensure tests are meaningful, maintainable, and follow best practices
 
@@ -447,7 +465,7 @@ Use codebase_search to:
   - Verify consistency with existing test structure
 ```
 
-### Step 14: Test Best Practices Verification
+### Step 15: Test Best Practices Verification
 
 **Test Quality Check**: Ensure tests follow testing best practices
 
@@ -484,9 +502,55 @@ Use codebase_search to:
   - Verify consistency with project testing standards
 ```
 
-## Phase 7: Review Summary and Recommendations
+## Phase 7: AI Acceptance Testing (Cursor Browser)
 
-### Step 15: Generate Review Report
+Use the numbered criteria from **Step 4** (or exploratory scope if criteria were absent). Do not use `npm run build` for this path; run **`npm run dev`** and verify against the running app. Read **cursor-ide-browser** MCP tool schemas before invoking tools.
+
+### Step 16: Execute browser verification against criteria
+
+**Prerequisites**
+
+```
+- Dev server reachable; record BASE_URL (package.json dev script, framework default, or user-provided)
+- Criteria list from Step 4 available (or explicit exploratory scope)
+```
+
+**Cursor Browser MCP protocol (mandatory order)** — align with `/implement-issue-riper5` MODE 5 Step 10b:
+
+```
+1. If a tab may already exist: browser_tabs (list) as needed
+2. browser_navigate to BASE_URL (or route under test)
+3. browser_lock (after a tab exists)
+4. browser_snapshot before interactions — use refs from the snapshot for browser_click, browser_fill, browser_type, browser_select_option, browser_press_key, browser_scroll (scrollIntoView for obscured controls), etc.
+5. Prefer short incremental waits (1–3s) with browser_snapshot between steps; use browser_wait_for when appropriate
+6. browser_unlock when finished with this pass
+
+Limitations: iframe content is not supported. Native dialogs: use MCP dialog-handling before the triggering action.
+
+Security: no secrets, tokens, or production credentials in chat or evidence; prefer local-only flows. Do not mark Pass without observable evidence. On MCP failure (no tab, navigation error, timeout), record Blocked — optionally retry once after confirming the server — never fake Pass.
+```
+
+**Per criterion**
+
+```
+For each criterion (or exploratory checkpoint), record Pass | Fail | Blocked with brief snapshot-based evidence (no raw secrets). Note automation blockers (login, feature flags, seed data, iframe-only UI).
+```
+
+### Step 17: AI Acceptance Test Report and discoveries
+
+**Required deliverable** — produce a written **AI Acceptance Test Report** for inclusion in Phase 8:
+
+```
+1. Criteria list with source (PR section vs issue #n), or statement that criteria were absent and scope was exploratory
+2. For each item: Criterion → Result (Pass/Fail/Blocked) → Evidence → Notes
+3. **Discoveries**: regressions, UX gaps, unexpected behavior, and accessibility observations noticed during navigation (cross-reference Phase 4 findings when overlapping)
+4. **Automation blockers** that prevented verification
+5. **Overall alignment**: do observed behaviors match documented acceptance criteria (or PR intent for exploratory runs)?
+```
+
+## Phase 8: Review Summary and Recommendations
+
+### Step 18: Generate Review Report
 
 **Security Check**: Compile comprehensive review findings
 
@@ -527,14 +591,19 @@ Create structured review report with:
    - Missing or underutilized test utilities
    - Test maintainability concerns
 
-6. **Overall Assessment**:
+6. **AI acceptance testing and criteria alignment**:
+   - Summarize or embed the AI Acceptance Test Report from Step 17
+   - State explicitly whether criteria were present or absent (from Step 4)
+   - Highlight mismatches between criteria and observed behavior; do not duplicate static code findings unless the browser run surfaced them first
+
+7. **Overall Assessment**:
    - Summary of critical issues
    - Priority ranking
    - Estimated effort for fixes
    - Approval recommendation
 ```
 
-### Step 16: Create Review Comments
+### Step 19: Create Review Comments
 
 **Security Check**: Add actionable review comments to PR
 
@@ -560,6 +629,7 @@ Structure comments as:
 - If codebase_search doesn't find patterns, note that new patterns may be needed
 - If web_search is needed for documentation, clearly indicate when external research is required
 - If PR is too large, suggest breaking into smaller PRs for thorough review
+- If cursor-ide-browser calls fail or the dev server is unavailable, document Phase 7 as **Blocked** in the AI Acceptance Test Report; do not imply criteria passed without a successful run
 
 ## Security Guidelines
 
@@ -579,13 +649,16 @@ Before completing review:
 - [ ] Reusable helpers/utils checked for opportunities
 - [ ] Unnecessary comments flagged for removal
 - [ ] Test quality analyzed (substance, redundancy, patterns, mocks, utilities)
+- [ ] Acceptance criteria identified in Step 4 or explicitly marked absent
+- [ ] Cursor Browser MCP acceptance pass completed **or** documented as blocked in the AI Acceptance Test Report
+- [ ] AI discovery report (Step 17) included in the final output (Phase 8)
 - [ ] Review comments added to PR for critical issues
 - [ ] Overall assessment provided with approval recommendation
 
 ## Notes
 
 - This workflow uses MCP GitHub operations instead of CLI commands
-- Focus areas: Security, Performance, Accessibility, Code Quality, Comments, Test Quality
+- Focus areas: Security, Performance, Accessibility, Code Quality, Comments, Test Quality, AI browser acceptance vs criteria
 - Always reference official documentation for best practices
 - Prioritize critical security and accessibility issues
 - **Owner/Repository**: Always retrieve the current GitHub username/owner dynamically. Do not hardcode "CalixtoTheBugHunter" or assume a specific owner. The repository is always "habit-tracker" but the owner should be determined at runtime.
