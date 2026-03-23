@@ -122,7 +122,7 @@ export function HabitStackingAccordion({
                       aria-label={formatMessage(messages.habitList.stacking.removeButtonAria, { name: displayName })}
                       onClick={() => handleRemoveClick(stackingHabitId, displayName)}
                     >
-                      <Trash2 aria-hidden size={16} />
+                      <Trash2 aria-hidden size={16} className="habit-stacking-accordion__remove-icon" />
                     </button>
                   )}
                 </li>
@@ -148,7 +148,7 @@ export function HabitStackingAccordion({
                     aria-label={formatMessage(messages.habitList.stacking.removeButtonAria, { name: displayName })}
                     onClick={() => handleRemoveClick(habit.id, displayName)}
                   >
-                    <Trash2 aria-hidden size={16} />
+                    <Trash2 aria-hidden size={16} className="habit-stacking-accordion__remove-icon" />
                   </button>
                 )}
               </li>

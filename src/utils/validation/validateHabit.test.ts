@@ -70,6 +70,16 @@ describe('validateHabit', () => {
       }
       expect(() => validateHabit(habit)).not.toThrow()
     })
+
+    it('should validate habit with autoCompletedDates array', () => {
+      const habit: Habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        autoCompletedDates: ['2025-01-15T00:00:00.000Z'],
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
   })
 
   describe('invalid habits', () => {
@@ -240,6 +250,26 @@ describe('validateHabit', () => {
         stackingStepLabels: { 'step-1': 123 },
       }
       expect(() => validateHabit(invalid)).toThrow('Habit stackingStepLabels values must be non-empty strings')
+    })
+
+    it('should reject habit with autoCompletedDates as non-array', () => {
+      const invalid = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        autoCompletedDates: '2025-01-15T00:00:00.000Z',
+      }
+      expect(() => validateHabit(invalid)).toThrow('Habit autoCompletedDates must be an array if provided')
+    })
+
+    it('should reject habit with invalid ISO in autoCompletedDates', () => {
+      const invalid = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        autoCompletedDates: ['not-a-date'],
+      }
+      expect(() => validateHabit(invalid)).toThrow('All autoCompletedDates must be valid ISO 8601 date strings')
     })
   })
 })

@@ -83,6 +83,20 @@ export function validateHabit(habit: unknown): asserts habit is Habit {
     }
   }
 
+  if (habitObj.autoCompletedDates !== undefined) {
+    if (!Array.isArray(habitObj.autoCompletedDates)) {
+      throw new Error('Habit autoCompletedDates must be an array if provided')
+    }
+    for (const date of habitObj.autoCompletedDates) {
+      if (typeof date !== 'string') {
+        throw new Error('All autoCompletedDates must be strings')
+      }
+      if (!isValidISO8601(date)) {
+        throw new Error('All autoCompletedDates must be valid ISO 8601 date strings')
+      }
+    }
+  }
+
   if (habitObj.stackingStepLabels !== undefined) {
     if (typeof habitObj.stackingStepLabels !== 'object' || habitObj.stackingStepLabels === null || Array.isArray(habitObj.stackingStepLabels)) {
       throw new Error('Habit stackingStepLabels must be an object if provided')

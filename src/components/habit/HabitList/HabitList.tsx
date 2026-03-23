@@ -3,7 +3,7 @@ import { useHabits } from '../../../contexts/HabitContext'
 import { messages, formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
-import { toggleStackingHabitCompletion } from '../../../utils/habit/toggleStackingHabitCompletion'
+import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stackingCompletionCoordinator'
 import { AnnualCalendar } from '../AnnualCalendar/AnnualCalendar'
 import { HabitStackingAccordion } from '../HabitStackingAccordion/HabitStackingAccordion'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
@@ -63,15 +63,12 @@ export function HabitList({ onEdit }: HabitListProps) {
   }
 
   const handleToggleStackingHabit = async (parentHabitId: string, stackingHabitId: string) => {
-    const parentHabit = habits.find(h => h.id === parentHabitId)
-    const stackingHabit = habits.find(h => h.id === stackingHabitId)
-    if (!parentHabit) return
+    if (!habits.find(h => h.id === parentHabitId)) return
+    const toPersist = getHabitsToPersistAfterStackingToggle(habits, parentHabitId, stackingHabitId)
+    if (toPersist.length === 0) return
     try {
-      if (stackingHabit) {
-        await toggleHabitCompletion(stackingHabitId)
-      } else {
-        const updated = toggleStackingHabitCompletion(parentHabit, stackingHabitId)
-        await updateHabit(updated)
+      for (const h of toPersist) {
+        await updateHabit(h)
       }
     } catch {
       // Error is already handled in context, but we catch to prevent unhandled promise rejection

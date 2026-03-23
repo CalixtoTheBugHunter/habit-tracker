@@ -226,6 +226,50 @@ describe('HabitContext', () => {
     })
   })
 
+  it('strips today from autoCompletedDates when toggling main completion off', async () => {
+    const today = createDateString(0)
+    const habit = createMockHabit({
+      id: '1',
+      name: 'Exercise',
+      completionDates: [today],
+      autoCompletedDates: [today],
+    })
+    const afterToggle = createMockHabit({
+      id: '1',
+      name: 'Exercise',
+      completionDates: [],
+    })
+
+    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+    vi.mocked(getAllHabits).mockResolvedValueOnce([habit]).mockResolvedValue([afterToggle])
+    vi.mocked(updateHabit).mockResolvedValue('1')
+
+    let toggleFn: ((id: string) => Promise<void>) | null = null
+    const onToggle = (fn: (id: string) => Promise<void>) => {
+      toggleFn = fn
+    }
+
+    renderWithProviders(<TestComponentWithToggle onToggle={onToggle} />)
+
+    await waitFor(() => {
+      expect(screen.getByText(/habits: 1/i)).toBeInTheDocument()
+    })
+
+    await act(async () => {
+      await toggleFn!('1')
+    })
+
+    await waitFor(() => {
+      expect(updateHabit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '1',
+          completionDates: [],
+          autoCompletedDates: undefined,
+        })
+      )
+    })
+  })
+
   it('handles errors when toggling completion for non-existent habit', async () => {
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
     const habits = [createMockHabit({ id: '1', name: 'Exercise' })]

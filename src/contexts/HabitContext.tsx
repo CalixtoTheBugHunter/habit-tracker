@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, R
 import { messages } from '../locale'
 import { openDB, getAllHabits, updateHabit as updateHabitInDB, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
+import { stripTodayFromAutoCompletedDates } from '../utils/habit/checkAutoCompletion'
 import { createAppError } from '../utils/error/errorTypes'
 import { logError } from '../utils/error/errorLogger'
 import type { Habit } from '../types/habit'
@@ -77,7 +78,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
         throw new Error(`Habit with id ${habitId} not found`)
       }
 
-      const updatedHabit = toggleCompletion(habit)
+      const updatedHabit = stripTodayFromAutoCompletedDates(toggleCompletion(habit))
       await updateHabit(updatedHabit)
       await refreshHabits()
     } catch (err) {

@@ -103,6 +103,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
         stackingHabits: hasStacking ? stackingHabitIds : undefined,
         stackingCompletions: hasStacking && Object.keys(stackingCompletions ?? {}).length > 0 ? stackingCompletions : undefined,
         stackingStepLabels: labelsForStack && Object.keys(labelsForStack).length > 0 ? labelsForStack : undefined,
+        autoCompletedDates: hasStacking ? habit?.autoCompletedDates : undefined,
       }
 
       if (isEditMode) {

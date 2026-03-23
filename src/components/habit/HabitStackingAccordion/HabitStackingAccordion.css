@@ -61,22 +61,30 @@
 }
 
 .habit-stacking-accordion__remove {
-  margin-left: var(--spacing-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: var(--spacing-xs);
+  margin-left: var(--spacing-sm);
+  padding: 0 var(--spacing-xs);
+  line-height: 0;
+  color: var(--color-error);
   background: none;
   border: none;
-  color: var(--color-error);
   cursor: pointer;
   border-radius: var(--radius-sm);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.habit-stacking-accordion__remove-icon {
+  flex-shrink: 0;
+  color: inherit;
+  stroke: currentColor;
+  fill: none;
 }
 
 .habit-stacking-accordion__remove:hover {
-  background: var(--color-error-bg, rgba(211, 47, 47, 0.08));
+  opacity: 0.85;
 }
 
 .habit-stacking-accordion__remove:focus-visible {
