@@ -677,6 +677,70 @@ describe('HabitList', () => {
         )
       })
     })
+
+    it('marks parent complete with autoCompletedDates when last stacked habit is checked', async () => {
+      const user = userEvent.setup()
+      const todayIso = createDateString(0)
+      let db: Habit[] = [
+        createMockHabit({ id: '1', name: 'Exercise', stackingHabits: ['2', '3'], completionDates: [] }),
+        createMockHabit({ id: '2', name: 'Read', completionDates: [] }),
+        createMockHabit({ id: '3', name: 'Meditate', completionDates: [] }),
+      ]
+      vi.mocked(getAllHabits).mockImplementation(() => Promise.resolve(db))
+      vi.mocked(updateHabit).mockImplementation(async (h: Habit) => {
+        db = db.map(x => (x.id === h.id ? h : x))
+        return h.id
+      })
+
+      renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      await user.click(screen.getByRole('button', { name: /expand stacked habits for exercise/i }))
+      await user.click(screen.getByRole('checkbox', { name: /mark read as done for today/i }))
+      await user.click(screen.getByRole('checkbox', { name: /mark meditate as done for today/i }))
+
+      await waitFor(() => {
+        expect(updateHabit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: '1',
+            completionDates: expect.arrayContaining([todayIso]),
+            autoCompletedDates: expect.arrayContaining([todayIso]),
+          })
+        )
+      })
+    })
+
+    it('does not clear manually completed parent when unchecking a stacked habit', async () => {
+      const user = userEvent.setup()
+      const todayIso = createDateString(0)
+      const habits = [
+        createMockHabit({
+          id: '1',
+          name: 'Exercise',
+          stackingHabits: ['2', '3'],
+          completionDates: [todayIso],
+        }),
+        createMockHabit({ id: '2', name: 'Read', completionDates: [todayIso] }),
+        createMockHabit({ id: '3', name: 'Meditate', completionDates: [todayIso] }),
+      ]
+      vi.mocked(getAllHabits).mockResolvedValue(habits)
+      vi.mocked(updateHabit).mockResolvedValue('1')
+
+      renderWithProviders(<HabitList />)
+
+      await screen.findByText('Exercise')
+      await user.click(screen.getByRole('button', { name: /expand stacked habits for exercise/i }))
+      await user.click(screen.getByRole('checkbox', { name: /mark meditate as done for today/i }))
+
+      await waitFor(() => {
+        expect(updateHabit).toHaveBeenCalled()
+      })
+
+      const parentCalls = vi.mocked(updateHabit).mock.calls.filter(
+        (call: [Habit]) => call[0].id === '1'
+      )
+      expect(parentCalls).toHaveLength(0)
+    })
   })
 })
 
