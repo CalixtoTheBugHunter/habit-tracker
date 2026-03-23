@@ -38,7 +38,7 @@ export function hasAutoCompletedForToday(habit: Habit): boolean {
     return false
   }
   const todayStr = getTodayLocalDateString()
-  return dates.some(d => d.split('T')[0] === todayStr)
+  return dates.some(d => getDateString(d) === todayStr)
 }
 
 /**

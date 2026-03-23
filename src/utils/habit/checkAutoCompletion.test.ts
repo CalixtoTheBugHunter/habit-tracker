@@ -67,6 +67,13 @@ describe('checkAutoCompletion', () => {
       })
       expect(hasAutoCompletedForToday(habit)).toBe(true)
     })
+
+    it('throws when autoCompletedDates contains an invalid date string', () => {
+      const habit = createMockHabit({
+        autoCompletedDates: ['not-a-date'],
+      })
+      expect(() => hasAutoCompletedForToday(habit)).toThrow(/Invalid date string/)
+    })
   })
 
   describe('syncParentMainCompletionWithStackingState', () => {
