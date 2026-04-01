@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import { messages, formatMessage, getDefaultLocale } from './locale'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
-import { HabitList, HabitForm, OfflineIndicator, InstallPrompt, ErrorBoundary } from './components'
+import { HabitList, HabitForm, OfflineIndicator, InstallPrompt, ErrorBoundary, SettingsButton } from './components'
 import type { Habit } from './types/habit'
 
 function AppContent() {
@@ -40,6 +40,7 @@ function AppContent() {
   return (
     <div className="app">
       <OfflineIndicator />
+      <SettingsButton onClick={() => {}} />
       <header className="app-header">
         <div className="app-header__content">
           <div>
@@ -49,7 +50,7 @@ function AppContent() {
         <InstallPrompt />
       </header>
       <main className="app-main">
-        <HabitForm 
+        <HabitForm
           habit={editingHabit}
           onSuccess={() => setEditingHabit(undefined)}
           onCancel={() => setEditingHabit(undefined)}

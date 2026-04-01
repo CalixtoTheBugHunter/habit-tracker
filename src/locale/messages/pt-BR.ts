@@ -125,4 +125,7 @@ export const ptBR = {
   errorBoundary: {
     reactRenderError: 'Algo deu errado. Atualize a página.',
   },
+  settingsButton: {
+    ariaLabel: 'Abrir configurações',
+  },
 } as const
