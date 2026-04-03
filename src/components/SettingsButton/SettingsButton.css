@@ -30,6 +30,11 @@
   transform: scale(0.95);
 }
 
+.settings-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .settings-button__icon {
   color: var(--color-text-secondary);
 }
