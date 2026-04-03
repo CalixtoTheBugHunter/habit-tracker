@@ -124,4 +124,7 @@ export const en = {
   errorBoundary: {
     reactRenderError: 'Something went wrong. Please refresh the page.',
   },
+  settingsButton: {
+    ariaLabel: 'Open settings',
+  },
 } as const

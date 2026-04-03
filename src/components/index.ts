@@ -9,3 +9,6 @@ export { OfflineIndicator, InstallPrompt } from './pwa'
 
 // Error components
 export { ErrorBoundary, ErrorFallback } from './error'
+
+// Settings components
+export { SettingsButton } from './SettingsButton/SettingsButton'
