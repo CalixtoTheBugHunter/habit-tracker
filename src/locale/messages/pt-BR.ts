@@ -128,4 +128,11 @@ export const ptBR = {
   settingsButton: {
     ariaLabel: 'Abrir configurações',
   },
+  settings: {
+    title: 'Configurações',
+    close: 'Fechar configurações',
+    items: {
+      changelog: 'Registro de alterações',
+    },
+  },
 } as const

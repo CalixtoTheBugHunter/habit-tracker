@@ -127,4 +127,11 @@ export const en = {
   settingsButton: {
     ariaLabel: 'Open settings',
   },
+  settings: {
+    title: 'Settings',
+    close: 'Close settings',
+    items: {
+      changelog: 'Changelog',
+    },
+  },
 } as const

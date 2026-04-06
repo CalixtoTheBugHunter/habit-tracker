@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import { messages, formatMessage, getDefaultLocale } from './locale'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
-import { HabitList, HabitForm, OfflineIndicator, InstallPrompt, ErrorBoundary, SettingsButton } from './components'
+import { HabitList, HabitForm, OfflineIndicator, InstallPrompt, ErrorBoundary, SettingsButton, Settings } from './components'
 import type { Habit } from './types/habit'
 
 function AppContent() {
   const { isLoading, error } = useHabits()
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined)
+  const [showSettings, setShowSettings] = useState(false)
 
   if (isLoading) {
     return (
@@ -40,7 +41,8 @@ function AppContent() {
   return (
     <div className="app">
       <OfflineIndicator />
-      <SettingsButton onClick={() => {}} />
+      <SettingsButton onClick={() => setShowSettings(true)} />
+      {showSettings && <Settings onClose={() => setShowSettings(false)} />}
       <header className="app-header">
         <div className="app-header__content">
           <div>
