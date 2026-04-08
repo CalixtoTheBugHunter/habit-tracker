@@ -12,3 +12,4 @@ export { ErrorBoundary, ErrorFallback } from './error'
 
 // Settings components
 export { SettingsButton } from './SettingsButton/SettingsButton'
+export { Settings } from './Settings/Settings'
