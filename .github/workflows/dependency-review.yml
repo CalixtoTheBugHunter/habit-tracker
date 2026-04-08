@@ -1,0 +1,169 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review-dependencies:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch base branch package.json
+        run: |
+          git show origin/${{ github.base_ref }}:package.json > /tmp/base-package.json
+
+      - name: Detect dependency changes
+        id: deps
+        run: |
+          node -e "
+            const fs = require('fs');
+            const base = JSON.parse(fs.readFileSync('/tmp/base-package.json', 'utf8'));
+            const head = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+
+            const baseDeps = { ...(base.dependencies || {}), ...(base.devDependencies || {}) };
+            const headDeps = { ...(head.dependencies || {}), ...(head.devDependencies || {}) };
+
+            const added = [];
+            const changed = [];
+            const removed = [];
+
+            for (const [name, ver] of Object.entries(headDeps)) {
+              if (!(name in baseDeps)) added.push({ name, version: ver });
+              else if (baseDeps[name] !== ver) changed.push({ name, from: baseDeps[name], to: ver });
+            }
+            for (const [name, ver] of Object.entries(baseDeps)) {
+              if (!(name in headDeps)) removed.push({ name, version: ver });
+            }
+
+            const result = { added, changed, removed, hasChanges: added.length + changed.length + removed.length > 0 };
+            fs.writeFileSync('/tmp/dep-diff.json', JSON.stringify(result));
+          "
+
+      - name: Run security audit
+        id: audit
+        continue-on-error: true
+        run: |
+          npm audit --json > /tmp/audit-result.json 2>/dev/null || true
+
+      - name: Post PR comment
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+
+            const depDiff = JSON.parse(fs.readFileSync('/tmp/dep-diff.json', 'utf8'));
+
+            let auditData = {};
+            try {
+              auditData = JSON.parse(fs.readFileSync('/tmp/audit-result.json', 'utf8'));
+            } catch {}
+
+            let body = '<!-- dependency-review -->\n## Dependency Review\n\n';
+
+            // --- Dependency Changes ---
+            body += '### Dependency Changes\n';
+            if (!depDiff.hasChanges) {
+              body += 'No dependency changes detected.\n\n';
+            } else {
+              body += '| Package | Change | Version |\n';
+              body += '|---------|--------|---------|\n';
+              for (const d of depDiff.added) {
+                body += `| \`${d.name}\` | Added | \`${d.version}\` |\n`;
+              }
+              for (const d of depDiff.changed) {
+                body += `| \`${d.name}\` | Changed | \`${d.from}\` → \`${d.to}\` |\n`;
+              }
+              for (const d of depDiff.removed) {
+                body += `| \`${d.name}\` | Removed | \`${d.version}\` |\n`;
+              }
+              body += '\n';
+            }
+
+            // --- Security Audit ---
+            body += '### Security Audit\n';
+            const meta = auditData.metadata;
+            if (meta && meta.vulnerabilities) {
+              const v = meta.vulnerabilities;
+              const total = v.total || ((v.critical || 0) + (v.high || 0) + (v.moderate || 0) + (v.low || 0) + (v.info || 0));
+              body += '| Severity | Count |\n';
+              body += '|----------|-------|\n';
+              body += `| Critical | ${v.critical || 0} |\n`;
+              body += `| High | ${v.high || 0} |\n`;
+              body += `| Moderate | ${v.moderate || 0} |\n`;
+              body += `| Low | ${v.low || 0} |\n`;
+              body += `| Info | ${v.info || 0} |\n\n`;
+              if (total === 0) {
+                body += 'No known vulnerabilities found.\n\n';
+              } else {
+                body += `**${total} vulnerabilities found.** Run \`npm audit\` for details.\n\n`;
+              }
+            } else {
+              body += 'Audit completed with no structured output available.\n\n';
+            }
+
+            // --- Accessibility Checklist ---
+            if (depDiff.hasChanges && depDiff.added.length > 0) {
+              const uiPattern = /svelte|ui|component|button|modal|dialog|menu|dropdown|popover|tooltip|accordion|tabs?|carousel|select|input|form|layout|grid|table|card|avatar|badge|alert|toast|notification|mui|chakra|radix|headless|react|lucide|icon/i;
+              const uiPackages = depDiff.added.filter(d => uiPattern.test(d.name));
+              if (uiPackages.length > 0) {
+                const names = uiPackages.map(d => `\`${d.name}\``).join(', ');
+                body += '### Accessibility Checklist\n';
+                body += `> The following new packages appear to be UI-related: ${names}\n\n`;
+                body += '- [ ] Keyboard navigation supported?\n';
+                body += '- [ ] Screen reader compatible (ARIA attributes)?\n';
+                body += '- [ ] Color contrast meets WCAG AA?\n';
+                body += '- [ ] Focus management handled correctly?\n';
+                body += '- [ ] Documentation reviewed for a11y guidance?\n\n';
+              }
+            }
+
+            body += '\n---\n*Generated by Dependency Review workflow*';
+
+            // --- Upsert comment ---
+            const marker = '<!-- dependency-review -->';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes(marker)
+            );
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
