@@ -1,0 +1,14 @@
+---
+description: GitHub CLI must use CalixtoTheBugHunter for authenticated gh commands in this repo.
+alwaysApply: true
+---
+
+# GitHub CLI authentication (habit-tracker)
+
+Before running any **`gh`** command that talks to GitHub with the user’s credentials (for example `gh pr create`, `gh pr view`, `gh issue`, `gh api`, `gh repo`, `gh workflow`, `gh release`), run:
+
+```bash
+gh auth switch -u CalixtoTheBugHunter
+```
+
+Then run the intended `gh` command. This keeps the active account **CalixtoTheBugHunter** when multiple GitHub accounts are logged in on the machine.
