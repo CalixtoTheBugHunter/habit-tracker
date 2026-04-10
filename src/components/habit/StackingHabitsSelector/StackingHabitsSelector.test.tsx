@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, within, waitFor, render } from '@testing-library/react'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ComponentProps } from 'react'
 import { StackingHabitsSelector } from './StackingHabitsSelector'
@@ -7,7 +7,7 @@ import { renderWithProviders } from '../../../test/utils/render-helpers'
 import { createMockHabit } from '../../../test/fixtures/habits'
 
 function renderSelector(props: ComponentProps<typeof StackingHabitsSelector>) {
-  return render(<StackingHabitsSelector {...props} />)
+  return renderWithProviders(<StackingHabitsSelector {...props} />)
 }
 
 describe('StackingHabitsSelector', () => {

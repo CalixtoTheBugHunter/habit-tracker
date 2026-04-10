@@ -1,8 +1,24 @@
+import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from '@testing-library/react'
 import { AnnualCalendar } from './AnnualCalendar'
 import { createMockHabit } from '../../../test/fixtures/habits'
 import { createDateString } from '../../../test/utils/date-helpers'
+import * as localeModule from '../../../locale'
+import { supportedLanguages } from '../../../config/supportedLanguages'
+
+vi.mock('../../../contexts/LanguageContext', () => ({
+  LanguageProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  useLanguage: () => ({
+    locale: 'en' as const,
+    messages: localeModule.getMessagesForLocale('en'),
+    setLanguage: vi.fn(),
+    supportedLanguages,
+    isReady: true,
+  }),
+}))
 
 describe('AnnualCalendar', () => {
   beforeEach(() => {

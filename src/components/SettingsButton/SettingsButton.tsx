@@ -1,5 +1,5 @@
 import { Settings } from 'lucide-react'
-import { messages } from '../../locale'
+import { useLanguage } from '../../contexts/LanguageContext'
 import './SettingsButton.css'
 
 interface SettingsButtonProps {
@@ -7,6 +7,7 @@ interface SettingsButtonProps {
 }
 
 export function SettingsButton({ onClick }: SettingsButtonProps) {
+  const { messages } = useLanguage()
   return (
     <button
       className="settings-button"

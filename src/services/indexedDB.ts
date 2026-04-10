@@ -6,8 +6,9 @@ import { validateHabit } from '../utils/validation/validateHabit'
 import { validateId } from '../utils/validation/validateId'
 
 const DB_NAME = 'habit-tracker'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = 'habits'
+const SETTINGS_STORE = 'settings'
 
 let dbInstance: IDBDatabase | null = null
 
@@ -99,6 +100,10 @@ export function openDB(): Promise<IDBDatabase> {
         objectStore.createIndex('name', 'name', { unique: false })
         objectStore.createIndex('createdDate', 'createdDate', { unique: false })
       }
+
+      if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
+        db.createObjectStore(SETTINGS_STORE, { keyPath: 'key' })
+      }
     }
   })
 }
@@ -155,6 +160,79 @@ function getObjectStore(mode: IDBTransactionMode = 'readonly'): Promise<ObjectSt
         }
       })
   })
+}
+
+interface SettingsRow {
+  key: string
+  value: string
+}
+
+function getSettingsObjectStore(
+  mode: IDBTransactionMode = 'readonly'
+): Promise<ObjectStoreResult> {
+  return new Promise((resolve, reject) => {
+    openDB()
+      .then((db) => {
+        if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            `Object store "${SETTINGS_STORE}" does not exist`
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
+          return
+        }
+
+        const transaction = db.transaction([SETTINGS_STORE], mode)
+        const objectStore = transaction.objectStore(SETTINGS_STORE)
+
+        transaction.onerror = () => {
+          const error = transaction.error || new Error('Transaction failed')
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            error instanceof Error ? error.message : String(error)
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
+        }
+
+        resolve({ objectStore, transaction })
+      })
+      .catch((error) => {
+        if (error instanceof IndexedDBError) {
+          reject(error)
+        } else {
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            error instanceof Error ? error.message : String(error)
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
+        }
+      })
+  })
+}
+
+export async function getSetting(key: string): Promise<string | undefined> {
+  const { objectStore } = await getSettingsObjectStore('readonly')
+  const request = objectStore.get(key)
+  const row = await handleRequestError<SettingsRow | undefined>(
+    request,
+    'Failed to read setting'
+  )
+  if (row && typeof row === 'object' && 'value' in row) {
+    return String(row.value)
+  }
+  return undefined
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  const { objectStore } = await getSettingsObjectStore('readwrite')
+  const request = objectStore.put({ key, value } as SettingsRow)
+  await handleRequestError(request, 'Failed to write setting')
 }
 
 export async function addHabit(habit: Habit): Promise<string> {

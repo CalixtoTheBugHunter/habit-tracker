@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
-import { messages } from '../locale'
+import { useLanguage } from './LanguageContext'
 import { openDB, getAllHabits, updateHabit as updateHabitInDB, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
 import { stripTodayFromAutoCompletedDates } from '../utils/habit/checkAutoCompletion'
@@ -32,6 +32,7 @@ interface HabitProviderProps {
 }
 
 export function HabitProvider({ children }: HabitProviderProps) {
+  const { messages } = useLanguage()
   const [habits, setHabits] = useState<Habit[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -51,7 +52,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       setError(appError.userMessage)
       throw err
     }
-  }, [])
+  }, [messages.app.loadHabitsError])
 
   const updateHabit = useCallback(async (habit: Habit) => {
     try {
@@ -68,7 +69,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       setError(appError.userMessage)
       throw err
     }
-  }, [refreshHabits])
+  }, [messages.app.updateHabitError, refreshHabits])
 
   const toggleHabitCompletion = useCallback(async (habitId: string) => {
     try {
@@ -91,7 +92,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       setError(appError.userMessage)
       throw err
     }
-  }, [habits, refreshHabits, updateHabit])
+  }, [habits, messages.app.toggleCompletionError, refreshHabits, updateHabit])
 
   const deleteHabit = useCallback(async (habitId: string) => {
     try {
@@ -108,7 +109,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       setError(appError.userMessage)
       throw err
     }
-  }, [refreshHabits])
+  }, [messages.app.deleteHabitError, refreshHabits])
 
   useEffect(() => {
     async function initializeApp() {
@@ -131,7 +132,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
     }
 
     initializeApp()
-  }, [refreshHabits])
+  }, [messages.app.initError, refreshHabits])
 
   const value: HabitContextType = useMemo(
     () => ({

@@ -1,6 +1,22 @@
+import React from 'react'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { StreakBadge } from './StreakBadge'
+import * as localeModule from '../../../locale'
+import { supportedLanguages } from '../../../config/supportedLanguages'
+
+vi.mock('../../../contexts/LanguageContext', () => ({
+  LanguageProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  useLanguage: () => ({
+    locale: 'en' as const,
+    messages: localeModule.getMessagesForLocale('en'),
+    setLanguage: vi.fn(),
+    supportedLanguages,
+    isReady: true,
+  }),
+}))
 import {
   setupIntersectionObserverMock,
   teardownIntersectionObserverMock,

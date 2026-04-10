@@ -1,7 +1,23 @@
+import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HabitStackingAccordion } from './HabitStackingAccordion'
+import * as localeModule from '../../../locale'
+import { supportedLanguages } from '../../../config/supportedLanguages'
+
+vi.mock('../../../contexts/LanguageContext', () => ({
+  LanguageProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  useLanguage: () => ({
+    locale: 'en' as const,
+    messages: localeModule.getMessagesForLocale('en'),
+    setLanguage: vi.fn(),
+    supportedLanguages,
+    isReady: true,
+  }),
+}))
 import { createMockHabit } from '../../../test/fixtures/habits'
 import { createDateString } from '../../../test/utils/date-helpers'
 

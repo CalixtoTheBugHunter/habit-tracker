@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { X, ChevronRight } from 'lucide-react'
-import { messages } from '../../locale'
+import { useLanguage } from '../../contexts/LanguageContext'
+import type { LocaleCode } from '../../locale/types'
 import './Settings.css'
 
 interface SettingsProps {
@@ -9,6 +10,8 @@ interface SettingsProps {
 }
 
 export function Settings({ onClose, onNavigateToChangelog }: SettingsProps) {
+  const { messages, locale, setLanguage, supportedLanguages } = useLanguage()
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -34,6 +37,29 @@ export function Settings({ onClose, onNavigateToChangelog }: SettingsProps) {
       </header>
       <nav className="settings__nav">
         <ul className="settings__list">
+          <li className="settings__language-row">
+            <label
+              className="settings__language-label"
+              htmlFor="preferred-language"
+            >
+              {messages.settings.preferredLanguage}
+            </label>
+            <select
+              id="preferred-language"
+              className="settings__language-select"
+              aria-label={messages.settings.languageSelectAria}
+              value={locale}
+              onChange={(e) => {
+                void setLanguage(e.target.value as LocaleCode)
+              }}
+            >
+              {supportedLanguages.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.nativeName}
+                </option>
+              ))}
+            </select>
+          </li>
           <li>
             <button
               className="settings__item"

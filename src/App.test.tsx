@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import App from './App'
 import { openDB, getAllHabits } from './services/indexedDB'
 import { testUtils } from './services/indexedDB'
-import { renderWithProviders } from './test/utils/render-helpers'
 
 vi.mock('./services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -31,7 +30,7 @@ describe('App', () => {
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
     vi.mocked(getAllHabits).mockResolvedValue([])
 
-    renderWithProviders(<App />)
+    render(<App />)
 
     await waitFor(() => {
       const element = screen.getByRole(role, { name: text })
@@ -43,7 +42,7 @@ describe('App', () => {
   it('handles errors and displays them in App UI', async () => {
     vi.mocked(openDB).mockRejectedValue(new Error('IndexedDB is not supported in this browser'))
 
-    renderWithProviders(<App />)
+    render(<App />)
 
     await waitFor(() => {
       expect(screen.getByText(/failed to initialize application/i)).toBeInTheDocument()
@@ -53,7 +52,7 @@ describe('App', () => {
   it('handles non-Error exceptions', async () => {
     vi.mocked(openDB).mockRejectedValue('String error')
 
-    renderWithProviders(<App />)
+    render(<App />)
 
     await waitFor(() => {
       expect(screen.getByText(/failed to initialize application/i)).toBeInTheDocument()

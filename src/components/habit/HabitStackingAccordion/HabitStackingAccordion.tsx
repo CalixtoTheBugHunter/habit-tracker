@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
-import { messages, formatMessage } from '../../../locale'
+import { formatMessage } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { isStackingHabitCompletedToday } from '../../../utils/habit/isStackingHabitCompletedToday'
 import { removeStackingHabit } from '../../../utils/habit/removeStackingHabit'
@@ -21,6 +22,7 @@ export function HabitStackingAccordion({
   onToggleStackingHabit,
   updateHabit,
 }: HabitStackingAccordionProps) {
+  const { messages } = useLanguage()
   const [expanded, setExpanded] = useState(false)
   const [togglingStackingId, setTogglingStackingId] = useState<string | null>(null)
   const [removalPending, setRemovalPending] = useState<{ stackingHabitId: string; displayName: string } | null>(null)

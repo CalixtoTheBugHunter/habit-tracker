@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { ErrorFallback } from './ErrorFallback'
 import { AppError, IndexedDBError, ReactError } from '../../../utils/error/errorTypes'
+import { renderWithLangReady } from '../../../test/utils/renderWithLangReady'
 
 describe('ErrorFallback', () => {
   beforeEach(() => {
-    // Mock window.location.reload
     Object.defineProperty(window, 'location', {
       writable: true,
       value: { reload: vi.fn() },
@@ -16,56 +16,56 @@ describe('ErrorFallback', () => {
     vi.restoreAllMocks()
   })
 
-  it('should render error message', () => {
+  it('should render error message', async () => {
     const error = new AppError('UNKNOWN_ERROR', 'Test error message')
-    render(<ErrorFallback error={error} />)
+    await renderWithLangReady(<ErrorFallback error={error} />)
 
     expect(screen.getByText('Test error message')).toBeInTheDocument()
   })
 
-  it('should have proper accessibility attributes', () => {
+  it('should have proper accessibility attributes', async () => {
     const error = new AppError('UNKNOWN_ERROR', 'Test error message')
-    render(<ErrorFallback error={error} />)
+    await renderWithLangReady(<ErrorFallback error={error} />)
 
     const container = screen.getByRole('alert')
     expect(container).toHaveAttribute('aria-live', 'assertive')
   })
 
-  it('should display IndexedDBError message', () => {
+  it('should display IndexedDBError message', async () => {
     const error = new IndexedDBError(
       'INDEXEDDB_OPEN_FAILED',
       'Unable to access storage. Please refresh the page.'
     )
-    render(<ErrorFallback error={error} />)
+    await renderWithLangReady(<ErrorFallback error={error} />)
 
     expect(
       screen.getByText('Unable to access storage. Please refresh the page.')
     ).toBeInTheDocument()
   })
 
-  it('should display ReactError message', () => {
+  it('should display ReactError message', async () => {
     const error = new ReactError(
       'REACT_RENDER_ERROR',
       'Something went wrong. Please refresh the page.'
     )
-    render(<ErrorFallback error={error} />)
+    await renderWithLangReady(<ErrorFallback error={error} />)
 
     expect(
       screen.getByText('Something went wrong. Please refresh the page.')
     ).toBeInTheDocument()
   })
 
-  it('should render reload button', () => {
+  it('should render reload button', async () => {
     const error = new AppError('UNKNOWN_ERROR', 'Test error message')
-    render(<ErrorFallback error={error} />)
+    await renderWithLangReady(<ErrorFallback error={error} />)
 
     const button = screen.getByRole('button', { name: /reload page/i })
     expect(button).toBeInTheDocument()
   })
 
-  it('should reload page when reload button is clicked', () => {
+  it('should reload page when reload button is clicked', async () => {
     const error = new AppError('UNKNOWN_ERROR', 'Test error message')
-    render(<ErrorFallback error={error} />)
+    await renderWithLangReady(<ErrorFallback error={error} />)
 
     const button = screen.getByRole('button', { name: /reload page/i })
     button.click()
@@ -73,13 +73,12 @@ describe('ErrorFallback', () => {
     expect(window.location.reload).toHaveBeenCalledTimes(1)
   })
 
-  it('should focus the container when mounted', () => {
+  it('should focus the container when mounted', async () => {
     const error = new AppError('UNKNOWN_ERROR', 'Test error message')
-    render(<ErrorFallback error={error} />)
+    await renderWithLangReady(<ErrorFallback error={error} />)
 
     const alertContainer = screen.getByRole('alert')
     expect(alertContainer).toHaveAttribute('tabIndex', '-1')
     expect(alertContainer).toBe(document.activeElement)
   })
 })
-
