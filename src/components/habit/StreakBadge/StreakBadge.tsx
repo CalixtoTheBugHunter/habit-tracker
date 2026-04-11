@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { messages, formatMessage } from '../../../locale'
+import { formatMessage } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import './StreakBadge.css'
 
 const COLORFUL_STREAK_THRESHOLD = 7
@@ -9,6 +10,7 @@ interface StreakBadgeProps {
 }
 
 export function StreakBadge({ streak }: StreakBadgeProps) {
+  const { messages } = useLanguage()
   const badgeRef = useRef<HTMLSpanElement>(null)
   const [hasAnimated, setHasAnimated] = useState(false)
 

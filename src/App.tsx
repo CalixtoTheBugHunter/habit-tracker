@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import './App.css'
-import { messages, formatMessage, getDefaultLocale } from './locale'
+import { formatMessage } from './locale'
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
-import { HabitList, HabitForm, OfflineIndicator, InstallPrompt, ErrorBoundary, SettingsButton, Settings } from './components'
+import {
+  HabitList,
+  HabitForm,
+  OfflineIndicator,
+  InstallPrompt,
+  ErrorBoundary,
+  SettingsButton,
+  Settings,
+} from './components'
 import type { Habit } from './types/habit'
 
 function AppContent() {
+  const { messages } = useLanguage()
   const { isLoading, error } = useHabits()
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined)
   const [showSettings, setShowSettings] = useState(false)
@@ -64,17 +74,15 @@ function AppContent() {
 }
 
 function App() {
-  useEffect(() => {
-    document.documentElement.lang = getDefaultLocale()
-  }, [])
   return (
-    <ErrorBoundary>
-      <HabitProvider>
-        <AppContent />
-      </HabitProvider>
-    </ErrorBoundary>
+    <LanguageProvider>
+      <ErrorBoundary>
+        <HabitProvider>
+          <AppContent />
+        </HabitProvider>
+      </ErrorBoundary>
+    </LanguageProvider>
   )
 }
 
 export default App
-

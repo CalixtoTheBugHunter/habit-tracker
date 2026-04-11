@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { messages } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import type { AppError } from '../../../utils/error/errorTypes'
 import './ErrorFallback.css'
 
@@ -8,6 +8,7 @@ interface ErrorFallbackProps {
 }
 
 export function ErrorFallback({ error }: ErrorFallbackProps) {
+  const { messages } = useLanguage()
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

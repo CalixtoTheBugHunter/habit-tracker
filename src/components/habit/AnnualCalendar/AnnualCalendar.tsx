@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { messages, formatMessage } from '../../../locale'
+import { formatMessage } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import { getYearGrid, getDateString, isDateCompleted } from '../../../utils/date/annualCalendarHelpers'
 import { getTodayLocalDateString } from '../../../utils/date/dateHelpers'
 import type { Habit } from '../../../types/habit'
@@ -10,6 +11,7 @@ interface AnnualCalendarProps {
 }
 
 export function AnnualCalendar({ habit }: AnnualCalendarProps) {
+  const { messages } = useLanguage()
   const currentYear = new Date().getFullYear()
   const today = getTodayLocalDateString()
 

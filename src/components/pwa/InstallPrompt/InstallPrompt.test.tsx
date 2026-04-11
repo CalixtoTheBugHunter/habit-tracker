@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor, act } from '@testing-library/react'
-import { render } from '@testing-library/react'
 import { InstallPrompt } from './InstallPrompt'
+import { renderWithLangReady } from '../../../test/utils/renderWithLangReady'
 import type { BeforeInstallPromptEvent } from '../../../types/pwa'
 import { verifyButtonContrast } from '../../../test/utils/accessibility-helpers'
 
@@ -53,7 +53,7 @@ describe('InstallPrompt', () => {
     vi.restoreAllMocks()
   })
 
-  it('should not render when app is already installed', () => {
+  it('should not render when app is already installed', async () => {
     window.matchMedia = vi.fn().mockImplementation((query: string) => {
       if (query === '(display-mode: standalone)') {
         return {
@@ -79,19 +79,19 @@ describe('InstallPrompt', () => {
       }
     })
 
-    render(<InstallPrompt />)
+    await renderWithLangReady(<InstallPrompt />)
 
     expect(screen.queryByRole('button', { name: /install/i })).not.toBeInTheDocument()
   })
 
-  it('should not render when beforeinstallprompt event is not fired', () => {
-    render(<InstallPrompt />)
+  it('should not render when beforeinstallprompt event is not fired', async () => {
+    await renderWithLangReady(<InstallPrompt />)
 
     expect(screen.queryByRole('button', { name: /install/i })).not.toBeInTheDocument()
   })
 
   it('should render install button when beforeinstallprompt event is fired', async () => {
-    render(<InstallPrompt />)
+    await renderWithLangReady(<InstallPrompt />)
 
     const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 
@@ -105,7 +105,7 @@ describe('InstallPrompt', () => {
   })
 
   it('should call prompt when install button is clicked', async () => {
-    render(<InstallPrompt />)
+    await renderWithLangReady(<InstallPrompt />)
 
     const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 
@@ -126,7 +126,7 @@ describe('InstallPrompt', () => {
   })
 
   it('should hide install button after successful installation', async () => {
-    render(<InstallPrompt />)
+    await renderWithLangReady(<InstallPrompt />)
 
     const event = createBeforeInstallPromptEvent(
       mockPrompt,
@@ -153,7 +153,7 @@ describe('InstallPrompt', () => {
   })
 
   it('should hide install button when appinstalled event is fired', async () => {
-    render(<InstallPrompt />)
+    await renderWithLangReady(<InstallPrompt />)
 
     const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 
@@ -175,7 +175,7 @@ describe('InstallPrompt', () => {
   })
 
   it('should have proper accessibility attributes', async () => {
-    render(<InstallPrompt />)
+    await renderWithLangReady(<InstallPrompt />)
 
     const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 
@@ -210,7 +210,7 @@ describe('InstallPrompt', () => {
         return style
       }) as typeof window.getComputedStyle
 
-      render(<InstallPrompt />)
+      await renderWithLangReady(<InstallPrompt />)
 
       const event = createBeforeInstallPromptEvent(mockPrompt, mockUserChoice)
 

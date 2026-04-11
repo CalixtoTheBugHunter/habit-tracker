@@ -1,7 +1,40 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { SUPPORTED_LOCALES } from './defaultLocale'
 
-describe('getDefaultLocale', () => {
+describe('normalizeNavigatorLanguageTag', () => {
+  let normalizeNavigatorLanguageTag: (raw: string) => 'en' | 'pt-BR'
+
+  beforeEach(async () => {
+    vi.resetModules()
+    ;({ normalizeNavigatorLanguageTag } = await import('./defaultLocale'))
+  })
+
+  afterEach(() => {
+    vi.resetModules()
+  })
+
+  it('should return en for en language', () => {
+    expect(normalizeNavigatorLanguageTag('en')).toBe('en')
+  })
+
+  it('should return en for en-US', () => {
+    expect(normalizeNavigatorLanguageTag('en-US')).toBe('en')
+  })
+
+  it('should return en for unsupported language', () => {
+    expect(normalizeNavigatorLanguageTag('fr')).toBe('en')
+  })
+
+  it('should return pt-BR for pt-BR language', () => {
+    expect(normalizeNavigatorLanguageTag('pt-BR')).toBe('pt-BR')
+  })
+
+  it('should return pt-BR for pt language', () => {
+    expect(normalizeNavigatorLanguageTag('pt')).toBe('pt-BR')
+  })
+})
+
+describe('getDeviceLocale', () => {
   let originalNavigator: typeof navigator
 
   beforeEach(() => {
@@ -24,8 +57,8 @@ describe('getDefaultLocale', () => {
       writable: true,
       configurable: true,
     })
-    const { getDefaultLocale: getLocale } = await import('./defaultLocale')
-    expect(getLocale()).toBe('en')
+    const { getDeviceLocale } = await import('./defaultLocale')
+    expect(getDeviceLocale()).toBe('en')
   })
 
   it('should return en for en-US', async () => {
@@ -34,8 +67,8 @@ describe('getDefaultLocale', () => {
       writable: true,
       configurable: true,
     })
-    const { getDefaultLocale: getLocale } = await import('./defaultLocale')
-    expect(getLocale()).toBe('en')
+    const { getDeviceLocale } = await import('./defaultLocale')
+    expect(getDeviceLocale()).toBe('en')
   })
 
   it('should return en for unsupported language', async () => {
@@ -44,8 +77,8 @@ describe('getDefaultLocale', () => {
       writable: true,
       configurable: true,
     })
-    const { getDefaultLocale: getLocale } = await import('./defaultLocale')
-    expect(getLocale()).toBe('en')
+    const { getDeviceLocale } = await import('./defaultLocale')
+    expect(getDeviceLocale()).toBe('en')
   })
 
   it('should return en when navigator.languages is empty and language is unsupported', async () => {
@@ -54,8 +87,8 @@ describe('getDefaultLocale', () => {
       writable: true,
       configurable: true,
     })
-    const { getDefaultLocale: getLocale } = await import('./defaultLocale')
-    expect(getLocale()).toBe('en')
+    const { getDeviceLocale } = await import('./defaultLocale')
+    expect(getDeviceLocale()).toBe('en')
   })
 
   it('should return pt-BR for pt-BR language', async () => {
@@ -64,8 +97,8 @@ describe('getDefaultLocale', () => {
       writable: true,
       configurable: true,
     })
-    const { getDefaultLocale: getLocale } = await import('./defaultLocale')
-    expect(getLocale()).toBe('pt-BR')
+    const { getDeviceLocale } = await import('./defaultLocale')
+    expect(getDeviceLocale()).toBe('pt-BR')
   })
 
   it('should return pt-BR for pt language', async () => {
@@ -74,8 +107,8 @@ describe('getDefaultLocale', () => {
       writable: true,
       configurable: true,
     })
-    const { getDefaultLocale: getLocale } = await import('./defaultLocale')
-    expect(getLocale()).toBe('pt-BR')
+    const { getDeviceLocale } = await import('./defaultLocale')
+    expect(getDeviceLocale()).toBe('pt-BR')
   })
 })
 

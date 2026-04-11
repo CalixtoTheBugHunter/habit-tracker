@@ -1,11 +1,12 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
-import { messages } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import { ReactError, createAppError } from '../../../utils/error/errorTypes'
 import { logError } from '../../../utils/error/errorLogger'
 import { ErrorFallback } from '../ErrorFallback/ErrorFallback'
 
-interface ErrorBoundaryProps {
+interface ErrorBoundaryInnerProps {
   children: ReactNode
+  reactRenderErrorMessage: string
 }
 
 interface ErrorBoundaryState {
@@ -13,44 +14,49 @@ interface ErrorBoundaryState {
   error: ReactError | null
 }
 
-export class ErrorBoundary extends Component<
-  ErrorBoundaryProps,
+function buildReactError(
+  reactRenderErrorMessage: string,
+  error: unknown,
+  errorInfo?: ErrorInfo
+): ReactError {
+  const appError = createAppError(
+    error,
+    'REACT_RENDER_ERROR',
+    reactRenderErrorMessage,
+    errorInfo
+      ? {
+          componentStack: errorInfo.componentStack,
+        }
+      : undefined
+  )
+  return new ReactError(
+    appError.code as 'REACT_RENDER_ERROR',
+    appError.userMessage,
+    appError.technicalDetails,
+    appError.context
+  )
+}
+
+class ErrorBoundaryInner extends Component<
+  ErrorBoundaryInnerProps,
   ErrorBoundaryState
 > {
-  constructor(props: ErrorBoundaryProps) {
+  constructor(props: ErrorBoundaryInnerProps) {
     super(props)
     this.state = { hasError: false, error: null }
   }
 
-  private static createReactError(
-    error: unknown,
-    errorInfo?: ErrorInfo
-  ): ReactError {
-    const appError = createAppError(
+  static getDerivedStateFromError(): Partial<ErrorBoundaryState> {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: unknown, errorInfo: ErrorInfo): void {
+    const reactError = buildReactError(
+      this.props.reactRenderErrorMessage,
       error,
-      'REACT_RENDER_ERROR',
-      messages.errorBoundary.reactRenderError,
       errorInfo
-        ? {
-            componentStack: errorInfo.componentStack,
-          }
-        : undefined
     )
-    return new ReactError(
-      appError.code as 'REACT_RENDER_ERROR',
-      appError.userMessage,
-      appError.technicalDetails,
-      appError.context
-    )
-  }
-
-  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
-    const reactError = ErrorBoundary.createReactError(error)
-    return { hasError: true, error: reactError }
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    const reactError = ErrorBoundary.createReactError(error, errorInfo)
+    this.setState({ error: reactError })
     logError(reactError, { componentStack: errorInfo.componentStack })
   }
 
@@ -58,8 +64,24 @@ export class ErrorBoundary extends Component<
     if (this.state.hasError && this.state.error) {
       return <ErrorFallback error={this.state.error} />
     }
+    if (this.state.hasError) {
+      return null
+    }
     return this.props.children
   }
 }
 
+interface ErrorBoundaryProps {
+  children: ReactNode
+}
 
+export function ErrorBoundary({ children }: ErrorBoundaryProps) {
+  const { messages } = useLanguage()
+  return (
+    <ErrorBoundaryInner
+      reactRenderErrorMessage={messages.errorBoundary.reactRenderError}
+    >
+      {children}
+    </ErrorBoundaryInner>
+  )
+}

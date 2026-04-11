@@ -131,6 +131,8 @@ export const ptBR = {
   settings: {
     title: 'Configurações',
     close: 'Fechar configurações',
+    preferredLanguage: 'Idioma preferido',
+    languageSelectAria: 'Idioma preferido',
     items: {
       changelog: 'Registro de alterações',
     },

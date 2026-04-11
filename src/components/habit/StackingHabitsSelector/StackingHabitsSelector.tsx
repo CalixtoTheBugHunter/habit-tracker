@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from 'react'
-import { messages, formatMessage } from '../../../locale'
+import { formatMessage } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import { wouldCreateStackingCycle } from '../../../utils/habit/wouldCreateStackingCycle'
 import type { Habit } from '../../../types/habit'
 import './StackingHabitsSelector.css'
@@ -23,6 +24,7 @@ export function StackingHabitsSelector({
   disabled = false,
   id = 'stacking-habits-selector',
 }: StackingHabitsSelectorProps) {
+  const { messages } = useLanguage()
   const [filterText, setFilterText] = useState('')
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(0)

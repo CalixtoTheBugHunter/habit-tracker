@@ -1,8 +1,8 @@
 import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useHabits } from '../../../contexts/HabitContext'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import { addHabit, updateHabit } from '../../../services/indexedDB'
 import { track } from '../../../analytics/umami'
-import { messages } from '../../../locale'
 import type { Habit } from '../../../types/habit'
 import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../../utils/validation/validateHabit'
 import { StackingHabitsSelector } from '../StackingHabitsSelector/StackingHabitsSelector'
@@ -17,6 +17,7 @@ interface HabitFormProps {
 }
 
 export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
+  const { messages } = useLanguage()
   const { habits, refreshHabits } = useHabits()
   const [name, setName] = useState(habit?.name || '')
   const [description, setDescription] = useState(habit?.description || '')

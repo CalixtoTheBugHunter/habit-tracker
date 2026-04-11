@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { WifiOff } from 'lucide-react'
-import { messages } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import './OfflineIndicator.css'
 
 interface OfflineIndicatorProps {
@@ -8,6 +8,7 @@ interface OfflineIndicatorProps {
 }
 
 export function OfflineIndicator({ className }: OfflineIndicatorProps) {
+  const { messages } = useLanguage()
   const [isOffline, setIsOffline] = useState(!globalThis.navigator.onLine)
 
   useEffect(() => {

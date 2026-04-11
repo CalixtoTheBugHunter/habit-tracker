@@ -130,6 +130,8 @@ export const en = {
   settings: {
     title: 'Settings',
     close: 'Close settings',
+    preferredLanguage: 'Preferred language',
+    languageSelectAria: 'Preferred language',
     items: {
       changelog: 'Changelog',
     },

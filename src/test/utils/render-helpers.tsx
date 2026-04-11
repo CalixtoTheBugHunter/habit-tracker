@@ -1,6 +1,7 @@
 import { ReactElement, ReactNode, Component, ErrorInfo } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { HabitProvider } from '../../contexts/HabitContext'
+import { LanguageProvider } from '../../contexts/LanguageContext'
 
 type CustomRenderOptions = Omit<RenderOptions, 'wrapper'>
 
@@ -9,7 +10,11 @@ export function renderWithProviders(
   options?: CustomRenderOptions
 ) {
   function Wrapper({ children }: { children: ReactNode }) {
-    return <HabitProvider>{children}</HabitProvider>
+    return (
+      <LanguageProvider initialLocale="en">
+        <HabitProvider>{children}</HabitProvider>
+      </LanguageProvider>
+    )
   }
 
   return render(ui, { wrapper: Wrapper, ...options })
@@ -56,4 +61,3 @@ export function renderWithErrorBoundary(
     </ErrorBoundary>
   )
 }
-

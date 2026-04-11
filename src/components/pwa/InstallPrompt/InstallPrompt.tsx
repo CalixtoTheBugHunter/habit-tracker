@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Download } from 'lucide-react'
-import { messages } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
 import './InstallPrompt.css'
 import type { BeforeInstallPromptEvent } from '../../../types/pwa'
 
 export function InstallPrompt() {
+  const { messages } = useLanguage()
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(() => {
     if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {

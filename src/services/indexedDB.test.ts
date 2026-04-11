@@ -102,6 +102,9 @@ describe('IndexedDB Service', () => {
     it('opens database and creates object store if it does not exist', async () => {
       const mockOpenRequest = createMockRequest()
       mockOpenRequest.result = mockDB
+      const createObjectStore = vi.fn().mockReturnValue({
+        createIndex: vi.fn(),
+      })
 
       ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
 
@@ -114,9 +117,7 @@ describe('IndexedDB Service', () => {
           target: {
             result: {
               objectStoreNames: { contains: () => false },
-              createObjectStore: vi.fn().mockReturnValue({
-                createIndex: vi.fn(),
-              }),
+              createObjectStore,
             },
           },
         } as unknown as IDBVersionChangeEvent)
@@ -127,8 +128,45 @@ describe('IndexedDB Service', () => {
 
       const db = await openPromise
 
-      expect(mockIndexedDB.open).toHaveBeenCalledWith('habit-tracker', 1)
+      expect(mockIndexedDB.open).toHaveBeenCalledWith('habit-tracker', 2)
+      expect(createObjectStore).toHaveBeenCalledWith('habits', { keyPath: 'id' })
+      expect(createObjectStore).toHaveBeenCalledWith('settings', { keyPath: 'key' })
       expect(db).toBe(mockDB)
+    })
+
+    it('creates settings store on upgrade when habits already exist', async () => {
+      const mockOpenRequest = createMockRequest()
+      mockOpenRequest.result = mockDB
+      const createObjectStore = vi.fn().mockReturnValue({
+        createIndex: vi.fn(),
+      })
+
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
+
+      const openPromise = openDB()
+
+      await Promise.resolve()
+      const openRequest = mockOpenRequest as unknown as IDBOpenDBRequest
+      if (openRequest.onupgradeneeded) {
+        openRequest.onupgradeneeded({
+          target: {
+            result: {
+              objectStoreNames: {
+                contains: (name: string) => name === 'habits',
+              },
+              createObjectStore,
+            },
+          },
+        } as unknown as IDBVersionChangeEvent)
+      }
+      if (mockOpenRequest.onsuccess) {
+        mockOpenRequest.onsuccess({ target: { result: mockDB } })
+      }
+
+      await openPromise
+
+      expect(createObjectStore).toHaveBeenCalledWith('settings', { keyPath: 'key' })
+      expect(createObjectStore).not.toHaveBeenCalledWith('habits', { keyPath: 'id' })
     })
 
     it('handles database open errors', async () => {

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useHabits } from '../../../contexts/HabitContext'
-import { messages, formatMessage } from '../../../locale'
+import { useLanguage } from '../../../contexts/LanguageContext'
+import { formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stackingCompletionCoordinator'
@@ -16,6 +17,7 @@ interface HabitListProps {
 }
 
 export function HabitList({ onEdit }: HabitListProps) {
+  const { messages } = useLanguage()
   const { habits, isLoading, error, toggleHabitCompletion, updateHabit, deleteHabit } = useHabits()
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
