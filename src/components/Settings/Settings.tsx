@@ -1,27 +1,67 @@
-import { useEffect } from 'react'
-import { X, ChevronRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { X, ChevronRight, ChevronLeft } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { LocaleCode } from '../../locale/types'
+import { SettingsChangelogPanel } from './SettingsChangelogPanel'
 import './Settings.css'
 
 interface SettingsProps {
   onClose: () => void
-  onNavigateToChangelog?: () => void
 }
 
-export function Settings({ onClose, onNavigateToChangelog }: SettingsProps) {
+type SettingsPanel = 'list' | 'changelog'
+
+export function Settings({ onClose }: SettingsProps) {
   const { messages, locale, setLanguage, supportedLanguages } = useLanguage()
+  const [panel, setPanel] = useState<SettingsPanel>('list')
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose()
+        if (panel === 'changelog') {
+          setPanel('list')
+        } else {
+          onClose()
+        }
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  }, [onClose, panel])
+
+  if (panel === 'changelog') {
+    return (
+      <div className="settings">
+        <header className="settings__header settings__header--sub">
+          <button
+            type="button"
+            className="settings__back-button"
+            onClick={() => setPanel('list')}
+            aria-label={messages.settings.changelogBack}
+          >
+            <ChevronLeft size={24} aria-hidden="true" />
+          </button>
+          <h1
+            id="settings-changelog-title"
+            className="settings__title settings__title--sub"
+          >
+            {messages.settings.changelogTitle}
+          </h1>
+          <button
+            className="settings__close-button"
+            onClick={onClose}
+            aria-label={messages.settings.close}
+          >
+            <X size={24} aria-hidden="true" />
+          </button>
+        </header>
+        <div className="settings__changelog-scroll">
+          <SettingsChangelogPanel />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="settings">
@@ -62,8 +102,9 @@ export function Settings({ onClose, onNavigateToChangelog }: SettingsProps) {
           </li>
           <li>
             <button
+              type="button"
               className="settings__item"
-              onClick={() => onNavigateToChangelog?.()}
+              onClick={() => setPanel('changelog')}
             >
               <span className="settings__item-label">
                 {messages.settings.items.changelog}

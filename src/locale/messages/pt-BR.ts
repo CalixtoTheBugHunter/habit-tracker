@@ -41,13 +41,13 @@ export const ptBR = {
       editForm: 'Formulário de edição de hábito',
     },
     stacking: {
-      label: 'Hábitos em sequência',
+      label: 'Cadeia de hábitos',
       placeholder: 'Digite para buscar hábitos...',
       empty: 'Nenhum hábito para adicionar.',
       addNewStepHint: 'Pressione Adicionar ou Enter para criar como nova etapa',
-      addAria: 'Adicionar hábito à sequência',
+      addAria: 'Adicionar hábito à cadeia',
       addButton: 'Adicionar',
-      removeAria: 'Remover {name} da sequência',
+      removeAria: 'Remover {name} da cadeia de hábitos',
     },
   },
   habitList: {
@@ -80,10 +80,10 @@ export const ptBR = {
       confirming: 'Excluindo...',
     },
     stacking: {
-      title: 'Hábitos em sequência',
-      expandAria: 'Expandir hábitos em sequência de {name}',
-      collapseAria: 'Recolher hábitos em sequência de {name}',
-      regionAria: 'Hábitos em sequência de {name}',
+      title: 'Cadeia de hábitos',
+      expandAria: 'Expandir cadeia de hábitos de {name}',
+      collapseAria: 'Encolher cadeia de hábitos de {name}',
+      regionAria: 'Cadeia de hábitos de {name}',
       unknownHabit: 'Hábito desconhecido',
       checkboxAria: 'Marcar {name} como feito hoje',
       removeModal: {
@@ -111,7 +111,7 @@ export const ptBR = {
     ariaLabel: 'Indicador de status offline',
   },
   streakBadge: {
-    ariaLabel: 'Sequência de {streak} dias',
+    ariaLabel: 'Dias de sequência: {streak}',
   },
   annualCalendar: {
     ariaLabel: 'Calendário anual de conclusão para {name}',
@@ -131,10 +131,15 @@ export const ptBR = {
   settings: {
     title: 'Configurações',
     close: 'Fechar configurações',
-    preferredLanguage: 'Idioma preferido',
-    languageSelectAria: 'Idioma preferido',
+    preferredLanguage: 'Idioma',
+    languageSelectAria: 'Idioma',
+    changelogTitle: 'Atualizações',
+    changelogBack: 'Voltar às configurações',
+    changelogLoadError:
+      'Não foi possível carregar as atualizações. Verifique a conexão e tente novamente.',
+    changelogRetry: 'Tentar novamente',
     items: {
-      changelog: 'Registro de alterações',
+      changelog: 'Atualizações',
     },
   },
 } as const

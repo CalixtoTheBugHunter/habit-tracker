@@ -21,7 +21,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src"],
+  "include": ["src", "changelog-files.json"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
 
