@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Components } from 'react-markdown'
 import ReactMarkdown from 'react-markdown'
 import { changelogBasenameForLocale } from '../../config/changelogFiles'
@@ -53,27 +53,37 @@ async function loadChangelogSections(
   return { ok: true, sections: parseChangelogMarkdown(text) }
 }
 
-const changelogMarkdownComponents: Components = {
-  h1: ({ children, ...props }) => (
-    <h2 className="settings__changelog-prose-h1" {...props}>
-      {children}
-    </h2>
-  ),
-  a: ({ href, children, ...props }) => (
-    <a
-      {...props}
-      href={href}
-      {...(href?.startsWith('http')
-        ? { target: '_blank', rel: 'noopener noreferrer' }
-        : {})}
-    >
-      {children}
-    </a>
-  ),
-}
-
 export function SettingsChangelogPanel() {
   const { messages, locale } = useLanguage()
+  const changelogMarkdownComponents: Components = useMemo(
+    () => ({
+      h1: ({ children, ...props }) => (
+        <h2 className="settings__changelog-prose-h1" {...props}>
+          {children}
+        </h2>
+      ),
+      a: ({ href, children, ...props }) => {
+        const isExternal = href?.startsWith('http')
+        return (
+          <a
+            {...props}
+            href={href}
+            {...(isExternal
+              ? { target: '_blank', rel: 'noopener noreferrer' }
+              : {})}
+          >
+            {children}
+            {isExternal ? (
+              <span className="settings__changelog-link-sr-only">
+                {messages.settings.changelogExternalLinkSuffix}
+              </span>
+            ) : null}
+          </a>
+        )
+      },
+    }),
+    [messages.settings.changelogExternalLinkSuffix]
+  )
   const errorMessage = messages.settings.changelogLoadError
   const [state, setState] = useState<LoadState>({ status: 'loading' })
 

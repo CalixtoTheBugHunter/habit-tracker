@@ -160,7 +160,7 @@
 
 .settings__changelog-prose p {
   margin: 0 0 var(--spacing-md);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .settings__changelog-prose a {
@@ -182,7 +182,7 @@
 .settings__changelog-prose ol {
   margin: 0 0 var(--spacing-md);
   padding-left: var(--spacing-2xl);
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .settings__changelog-prose li {
@@ -206,6 +206,18 @@
 
 .settings__changelog-prose > :last-child {
   margin-bottom: 0;
+}
+
+.settings__changelog-link-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .settings__nav {

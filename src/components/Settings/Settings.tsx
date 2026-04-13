@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { X, ChevronRight, ChevronLeft } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import type { LocaleCode } from '../../locale/types'
@@ -11,9 +11,28 @@ interface SettingsProps {
 
 type SettingsPanel = 'list' | 'changelog'
 
+const FOCUSABLE_SELECTOR =
+  'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+
+function getFocusableElements(root: HTMLElement): HTMLElement[] {
+  return [...root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)].filter(
+    (el) => !el.hasAttribute('disabled')
+  )
+}
+
 export function Settings({ onClose }: SettingsProps) {
   const { messages, locale, setLanguage, supportedLanguages } = useLanguage()
   const [panel, setPanel] = useState<SettingsPanel>('list')
+  const settingsRef = useRef<HTMLDivElement>(null)
+  const settingsTitleId = useId()
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -30,9 +49,48 @@ export function Settings({ onClose }: SettingsProps) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose, panel])
 
+  useEffect(() => {
+    const root = settingsRef.current
+    if (!root) return
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusable = getFocusableElements(root)
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (!first || !last) return
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else if (document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    root.addEventListener('keydown', handleTab)
+    return () => root.removeEventListener('keydown', handleTab)
+  }, [panel])
+
+  useEffect(() => {
+    const root = settingsRef.current
+    if (!root) return
+    const focusable = getFocusableElements(root)
+    focusable[0]?.focus()
+  }, [panel])
+
   if (panel === 'changelog') {
     return (
-      <div className="settings">
+      <div
+        ref={settingsRef}
+        className="settings"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-changelog-title"
+      >
         <header className="settings__header settings__header--sub">
           <button
             type="button"
@@ -64,9 +122,17 @@ export function Settings({ onClose }: SettingsProps) {
   }
 
   return (
-    <div className="settings">
+    <div
+      ref={settingsRef}
+      className="settings"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={settingsTitleId}
+    >
       <header className="settings__header">
-        <h1 className="settings__title">{messages.settings.title}</h1>
+        <h1 id={settingsTitleId} className="settings__title">
+          {messages.settings.title}
+        </h1>
         <button
           className="settings__close-button"
           onClick={onClose}

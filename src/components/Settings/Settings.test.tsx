@@ -76,6 +76,7 @@ describe('Settings', () => {
     await renderReady(<Settings onClose={() => {}} />)
 
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Settings' })).toBeInTheDocument()
   })
 
   it('should render a close button with aria-label', async () => {
@@ -110,9 +111,14 @@ describe('Settings', () => {
       ).toBeInTheDocument()
     })
     expect(within(region).getByText('Item one')).toBeInTheDocument()
-    expect(
-      within(region).getByRole('link', { name: 'Keep a Changelog' })
-    ).toHaveAttribute('href', 'https://keepachangelog.com/en/1.1.0/')
+    const externalLink = within(region).getByRole('link', {
+      name: /Keep a Changelog/,
+    })
+    expect(externalLink).toHaveAttribute(
+      'href',
+      'https://keepachangelog.com/en/1.1.0/'
+    )
+    expect(externalLink).toHaveAccessibleName(/opens in new tab/i)
     expect(
       within(region).getByRole('heading', { name: 'Changelog', level: 2 })
     ).toBeInTheDocument()
@@ -293,6 +299,25 @@ describe('Settings', () => {
     await user.click(screen.getByRole('button', { name: 'Close settings' }))
 
     expect(handleClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('should cycle Tab focus within settings on the changelog panel', async () => {
+    const user = userEvent.setup()
+    await renderReady(<Settings onClose={() => {}} />)
+
+    await user.click(screen.getByRole('button', { name: /Changelog/ }))
+    const region = screen.getByRole('region', { name: 'Changelog' })
+    await waitFor(() => {
+      expect(
+        within(region).getByRole('link', { name: /Keep a Changelog/ })
+      ).toBeInTheDocument()
+    })
+
+    const back = screen.getByRole('button', { name: 'Back to settings list' })
+    const link = within(region).getByRole('link', { name: /Keep a Changelog/ })
+    link.focus()
+    await user.tab()
+    expect(document.activeElement).toBe(back)
   })
 
   it('should show changelog load error when fetch fails', async () => {

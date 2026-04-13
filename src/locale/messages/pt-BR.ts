@@ -138,6 +138,7 @@ export const ptBR = {
     changelogLoadError:
       'Não foi possível carregar as atualizações. Verifique a conexão e tente novamente.',
     changelogRetry: 'Tentar novamente',
+    changelogExternalLinkSuffix: ', abre em nova aba',
     items: {
       changelog: 'Atualizações',
     },
