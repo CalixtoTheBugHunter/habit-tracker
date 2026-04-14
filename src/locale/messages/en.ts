@@ -132,6 +132,11 @@ export const en = {
     close: 'Close settings',
     preferredLanguage: 'Preferred language',
     languageSelectAria: 'Preferred language',
+    changelogTitle: 'Changelog',
+    changelogBack: 'Back to settings list',
+    changelogLoadError: 'Could not load changelog. Check your connection and try again.',
+    changelogRetry: 'Try again',
+    changelogExternalLinkSuffix: ', opens in new tab',
     items: {
       changelog: 'Changelog',
     },

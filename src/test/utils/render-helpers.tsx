@@ -2,22 +2,27 @@ import { ReactElement, ReactNode, Component, ErrorInfo } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { HabitProvider } from '../../contexts/HabitContext'
 import { LanguageProvider } from '../../contexts/LanguageContext'
+import type { LocaleCode } from '../../locale/types'
 
-type CustomRenderOptions = Omit<RenderOptions, 'wrapper'>
+type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
+  initialLocale?: LocaleCode
+}
 
 export function renderWithProviders(
   ui: ReactElement,
   options?: CustomRenderOptions
 ) {
+  const { initialLocale = 'en', ...renderOptions } = options ?? {}
+
   function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <LanguageProvider initialLocale="en">
+      <LanguageProvider initialLocale={initialLocale}>
         <HabitProvider>{children}</HabitProvider>
       </LanguageProvider>
     )
   }
 
-  return render(ui, { wrapper: Wrapper, ...options })
+  return render(ui, { wrapper: Wrapper, ...renderOptions })
 }
 
 interface ErrorBoundaryProps {
