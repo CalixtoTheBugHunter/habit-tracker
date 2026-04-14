@@ -1,3 +1,5 @@
+import type { Habit } from '../../types/habit'
+
 export interface Migration {
   version: number
   name: string
@@ -16,5 +18,5 @@ export interface MigrationLogEntry {
 export interface MigrationBackup {
   version: number
   timestamp: string
-  habits: unknown[]
+  habits: Habit[]
 }

@@ -1,3 +1,4 @@
+import type { Habit } from '../../types/habit'
 import type { Migration, MigrationLogEntry, MigrationBackup } from './types'
 import { STORE_NAME, SETTINGS_STORE } from '../indexedDB'
 import { IndexedDBError } from '../../utils/error/errorTypes'
@@ -36,7 +37,7 @@ function settingsPut(db: IDBDatabase, key: string, value: string): Promise<void>
   })
 }
 
-function habitsGetAll(db: IDBDatabase): Promise<unknown[]> {
+function habitsGetAll(db: IDBDatabase): Promise<Habit[]> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([STORE_NAME], 'readonly')
     const store = transaction.objectStore(STORE_NAME)
@@ -49,7 +50,7 @@ function habitsGetAll(db: IDBDatabase): Promise<unknown[]> {
   })
 }
 
-function habitsClearAndRestore(db: IDBDatabase, habits: unknown[]): Promise<void> {
+function habitsClearAndRestore(db: IDBDatabase, habits: Habit[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([STORE_NAME], 'readwrite')
     const store = transaction.objectStore(STORE_NAME)

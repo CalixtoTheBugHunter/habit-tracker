@@ -7,6 +7,8 @@ import {
   createBackup,
 } from './migrationRunner'
 import type { Migration } from './types'
+import type { Habit } from '../../types/habit'
+import { createMockHabit } from '../../test/fixtures/habits'
 
 function createMockStoreBackedByMap(data: Map<string, unknown>) {
   return {
@@ -68,8 +70,8 @@ function createMockStoreBackedByMap(data: Map<string, unknown>) {
 }
 
 describe('Migration Runner', () => {
-  let settingsData: Map<string, unknown>
-  let habitsData: Map<string, unknown>
+  let settingsData: Map<string, { key: string; value: string }>
+  let habitsData: Map<string, Habit>
   let mockDB: IDBDatabase
 
   beforeEach(() => {
@@ -155,7 +157,7 @@ describe('Migration Runner', () => {
     })
 
     it('creates backup before running migrations', async () => {
-      habitsData.set('h1', { id: 'h1', name: 'Exercise' })
+      habitsData.set('h1', createMockHabit({ id: 'h1', name: 'Exercise' }))
 
       const migrations: Migration[] = [
         { version: 1, name: 'test-migration', migrate: vi.fn() },
@@ -163,12 +165,12 @@ describe('Migration Runner', () => {
 
       await runMigrations(mockDB, migrations)
 
-      const backupRow = settingsData.get('migrationBackup') as { value: string }
+      const backupRow = settingsData.get('migrationBackup')
       expect(backupRow).toBeDefined()
-      const backup = JSON.parse(backupRow.value)
+      const backup = JSON.parse(backupRow!.value)
       expect(backup.version).toBe(0)
       expect(backup.habits).toHaveLength(1)
-      expect(backup.habits[0]).toEqual({ id: 'h1', name: 'Exercise' })
+      expect(backup.habits[0]).toEqual(expect.objectContaining({ id: 'h1', name: 'Exercise' }))
     })
 
     it('updates data version after each successful migration', async () => {
@@ -236,7 +238,7 @@ describe('Migration Runner', () => {
     })
 
     it('attempts restore from backup on failure', async () => {
-      habitsData.set('h1', { id: 'h1', name: 'Original' })
+      habitsData.set('h1', createMockHabit({ id: 'h1', name: 'Original' }))
 
       const migrations: Migration[] = [
         {
@@ -258,7 +260,7 @@ describe('Migration Runner', () => {
 
       const restored = Array.from(habitsData.values())
       expect(restored).toHaveLength(1)
-      expect(restored[0]).toEqual({ id: 'h1', name: 'Original' })
+      expect(restored[0]).toEqual(expect.objectContaining({ id: 'h1', name: 'Original' }))
     })
 
     it('continues even if backup creation fails', async () => {
@@ -307,8 +309,8 @@ describe('Migration Runner', () => {
 
   describe('createBackup and restoreFromBackup', () => {
     it('round-trips backup and restore preserving data', async () => {
-      habitsData.set('h1', { id: 'h1', name: 'Exercise' })
-      habitsData.set('h2', { id: 'h2', name: 'Read' })
+      habitsData.set('h1', createMockHabit({ id: 'h1', name: 'Exercise' }))
+      habitsData.set('h2', createMockHabit({ id: 'h2', name: 'Read' }))
 
       await createBackup(mockDB, 0)
 
