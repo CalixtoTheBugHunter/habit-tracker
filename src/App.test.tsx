@@ -12,6 +12,11 @@ vi.mock('./services/indexedDB', () => ({
   },
 }))
 
+vi.mock('./services/migration', () => ({
+  runMigrations: vi.fn(),
+  migrations: [],
+}))
+
 const { resetDB } = testUtils
 
 describe('App', () => {

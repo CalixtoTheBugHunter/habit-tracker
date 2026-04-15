@@ -7,8 +7,8 @@ import { validateId } from '../utils/validation/validateId'
 
 const DB_NAME = 'habit-tracker'
 const DB_VERSION = 2
-const STORE_NAME = 'habits'
-const SETTINGS_STORE = 'settings'
+export const STORE_NAME = 'habits'
+export const SETTINGS_STORE = 'settings'
 
 let dbInstance: IDBDatabase | null = null
 

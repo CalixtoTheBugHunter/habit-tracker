@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
 import { useLanguage } from './LanguageContext'
 import { openDB, getAllHabits, updateHabit as updateHabitInDB, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
+import { runMigrations, migrations } from '../services/migration'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
 import { stripTodayFromAutoCompletedDates } from '../utils/habit/checkAutoCompletion'
 import { createAppError } from '../utils/error/errorTypes'
@@ -116,7 +117,8 @@ export function HabitProvider({ children }: HabitProviderProps) {
       try {
         setIsLoading(true)
         setError(null)
-        await openDB()
+        const db = await openDB()
+        await runMigrations(db, migrations)
         await refreshHabits()
       } catch (err) {
         const appError = createAppError(

@@ -18,6 +18,11 @@ vi.mock('../../services/indexedDB', () => ({
   testUtils: { resetDB: vi.fn() },
 }))
 
+vi.mock('../../services/migration', () => ({
+  runMigrations: vi.fn(),
+  migrations: [],
+}))
+
 const SAMPLE_CHANGELOG = `# Changelog
 
 See [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) for format.
