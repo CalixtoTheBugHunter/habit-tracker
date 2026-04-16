@@ -59,14 +59,11 @@ export function calculateTotalDaysTracked(createdDate: string): number {
 
   if (created > today) return 0
 
-  let count = 1
-  let current = created
-  while (current < today) {
-    current = getNextDayDateString(current)
-    count++
-  }
-
-  return count
+  const createdParts = created.split('-')
+  const todayParts = today.split('-')
+  const createdMs = Date.UTC(Number(createdParts[0]), Number(createdParts[1]) - 1, Number(createdParts[2]))
+  const todayMs = Date.UTC(Number(todayParts[0]), Number(todayParts[1]) - 1, Number(todayParts[2]))
+  return Math.floor((todayMs - createdMs) / 86_400_000) + 1
 }
 
 export function calculateWeeklyCompletionRate(completionDates: string[]): number {

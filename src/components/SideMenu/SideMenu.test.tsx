@@ -102,4 +102,59 @@ describe('SideMenu', () => {
     const nav = container.querySelector('.side-menu')
     expect(nav).not.toHaveClass('side-menu--open')
   })
+
+  it('should call onClose when Escape key is pressed', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<SideMenu {...defaultProps} onClose={onClose} />)
+
+    await user.keyboard('{Escape}')
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not call onClose on Escape when closed', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<SideMenu {...defaultProps} isOpen={false} onClose={onClose} />)
+
+    await user.keyboard('{Escape}')
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('should focus first nav item when opened', () => {
+    render(<SideMenu {...defaultProps} isOpen={true} />)
+    const firstButton = screen.getByRole('button', { name: /home/i })
+    expect(document.activeElement).toBe(firstButton)
+  })
+
+  it('should trap focus within the menu on Tab', async () => {
+    const user = userEvent.setup()
+    render(<SideMenu {...defaultProps} isOpen={true} />)
+
+    const buttons = screen.getAllByRole('button')
+    const firstButton = buttons[0]!
+    const lastButton = buttons[buttons.length - 1]!
+
+    // Focus should start on first button
+    expect(document.activeElement).toBe(firstButton)
+
+    // Tab from last button should wrap to first
+    lastButton.focus()
+    await user.tab()
+    expect(document.activeElement).toBe(firstButton)
+  })
+
+  it('should trap focus within the menu on Shift+Tab', async () => {
+    const user = userEvent.setup()
+    render(<SideMenu {...defaultProps} isOpen={true} />)
+
+    const buttons = screen.getAllByRole('button')
+    const firstButton = buttons[0]!
+    const lastButton = buttons[buttons.length - 1]!
+
+    // Shift+Tab from first button should wrap to last
+    firstButton.focus()
+    await user.tab({ shift: true })
+    expect(document.activeElement).toBe(lastButton)
+  })
 })

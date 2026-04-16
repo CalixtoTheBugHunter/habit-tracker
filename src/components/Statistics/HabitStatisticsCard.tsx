@@ -59,7 +59,7 @@ export function HabitStatisticsCard({ habit }: HabitStatisticsCardProps) {
         <div className="habit-stats-card__stat">
           <span className="habit-stats-card__stat-label">{messages.statistics.completionRate}</span>
           <span className="habit-stats-card__stat-value">{stats.completionRate}%</span>
-          <div className="habit-stats-card__progress-bar" role="progressbar" aria-valuenow={stats.completionRate} aria-valuemin={0} aria-valuemax={100}>
+          <div className="habit-stats-card__progress-bar" role="progressbar" aria-valuenow={stats.completionRate} aria-valuemin={0} aria-valuemax={100} aria-label={messages.statistics.completionRate}>
             <div className="habit-stats-card__progress-fill" style={{ width: `${stats.completionRate}%` }} />
           </div>
         </div>
@@ -67,7 +67,7 @@ export function HabitStatisticsCard({ habit }: HabitStatisticsCardProps) {
         <div className="habit-stats-card__stat">
           <span className="habit-stats-card__stat-label">{messages.statistics.weeklyRate}</span>
           <span className="habit-stats-card__stat-value">{stats.weeklyRate}%</span>
-          <div className="habit-stats-card__progress-bar" role="progressbar" aria-valuenow={stats.weeklyRate} aria-valuemin={0} aria-valuemax={100}>
+          <div className="habit-stats-card__progress-bar" role="progressbar" aria-valuenow={stats.weeklyRate} aria-valuemin={0} aria-valuemax={100} aria-label={messages.statistics.weeklyRate}>
             <div className="habit-stats-card__progress-fill" style={{ width: `${stats.weeklyRate}%` }} />
           </div>
         </div>
@@ -75,7 +75,7 @@ export function HabitStatisticsCard({ habit }: HabitStatisticsCardProps) {
         <div className="habit-stats-card__stat">
           <span className="habit-stats-card__stat-label">{messages.statistics.monthlyRate}</span>
           <span className="habit-stats-card__stat-value">{stats.monthlyRate}%</span>
-          <div className="habit-stats-card__progress-bar" role="progressbar" aria-valuenow={stats.monthlyRate} aria-valuemin={0} aria-valuemax={100}>
+          <div className="habit-stats-card__progress-bar" role="progressbar" aria-valuenow={stats.monthlyRate} aria-valuemin={0} aria-valuemax={100} aria-label={messages.statistics.monthlyRate}>
             <div className="habit-stats-card__progress-fill" style={{ width: `${stats.monthlyRate}%` }} />
           </div>
         </div>
