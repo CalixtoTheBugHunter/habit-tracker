@@ -5,7 +5,6 @@ import { formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stackingCompletionCoordinator'
-import { AnnualCalendar } from '../AnnualCalendar/AnnualCalendar'
 import { HabitStackingAccordion } from '../HabitStackingAccordion/HabitStackingAccordion'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
 import { StreakBadge } from '../StreakBadge/StreakBadge'
@@ -126,7 +125,6 @@ export function HabitList({ onEdit }: HabitListProps) {
             {habit.description && (
               <p className="habit-description">{habit.description}</p>
             )}
-            <AnnualCalendar habit={habit} />
             {habit.stackingHabits && habit.stackingHabits.length > 0 && (
               <HabitStackingAccordion
                 parentHabit={habit}

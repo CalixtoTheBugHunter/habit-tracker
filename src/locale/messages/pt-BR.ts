@@ -128,6 +128,27 @@ export const ptBR = {
   settingsButton: {
     ariaLabel: 'Abrir configurações',
   },
+  appHeader: {
+    menuButtonOpenAria: 'Abrir menu',
+    menuButtonCloseAria: 'Fechar menu',
+  },
+  sideMenu: {
+    navigationAria: 'Navegação principal',
+    home: 'Início',
+    statistics: 'Estatísticas',
+    settings: 'Configurações',
+  },
+  statistics: {
+    title: 'Estatísticas',
+    empty: 'Ainda não há hábitos. Crie um hábito para ver estatísticas!',
+    currentStreak: 'Sequência atual',
+    longestStreak: 'Maior sequência',
+    completionRate: 'Taxa de conclusão',
+    weeklyRate: 'Últimos 7 dias',
+    monthlyRate: 'Últimos 30 dias',
+    totalDaysTracked: 'Dias rastreados',
+    daysUnit: 'dias',
+  },
   settings: {
     title: 'Configurações',
     close: 'Fechar configurações',

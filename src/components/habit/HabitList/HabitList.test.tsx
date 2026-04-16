@@ -358,7 +358,7 @@ describe('HabitList', () => {
       vi.mocked(getAllHabits).mockResolvedValue(habits)
       return renderWithProviders(<HabitList onEdit={options?.onEdit} />)
     }
-    it('should render action buttons below the annual calendar', async () => {
+    it('should render action buttons in the habit item', async () => {
       const habits = [
         createMockHabit({
           id: '1',
@@ -374,16 +374,8 @@ describe('HabitList', () => {
       const habitItem = container.querySelector('.habit-item')
       expect(habitItem).toBeInTheDocument()
 
-      const calendar = habitItem?.querySelector('.annual-calendar')
       const actionsContainer = habitItem?.querySelector('.habit-actions')
-
-      expect(calendar).toBeInTheDocument()
       expect(actionsContainer).toBeInTheDocument()
-
-      // Verify calendar appears before actions in DOM
-      const calendarIndex = Array.from(habitItem!.children).indexOf(calendar!)
-      const actionsIndex = Array.from(habitItem!.children).indexOf(actionsContainer!)
-      expect(actionsIndex).toBeGreaterThan(calendarIndex)
     })
 
     it('should have all action buttons in habit-actions container', async () => {
@@ -429,22 +421,19 @@ describe('HabitList', () => {
 
       const nameHeading = screen.getByRole('heading', { name: 'Exercise' })
       const description = screen.getByText('Daily workout')
-      const calendar = screen.getByLabelText(/annual completion calendar/i)
       const toggleButton = screen.getByRole('button', { name: /mark as completed today/i })
 
       // Verify DOM order by checking element positions
       const habitItem = container.querySelector('.habit-item')
       const allChildren = Array.from(habitItem!.children)
-      
+
       const nameIndex = allChildren.findIndex(el => el.contains(nameHeading))
       const descriptionIndex = allChildren.findIndex(el => el.contains(description))
-      const calendarIndex = allChildren.findIndex(el => el.contains(calendar))
       const actionsIndex = allChildren.findIndex(el => el.contains(toggleButton))
 
-      // Verify logical order: name → description → calendar → buttons
+      // Verify logical order: name → description → buttons
       expect(nameIndex).toBeLessThan(descriptionIndex)
-      expect(descriptionIndex).toBeLessThan(calendarIndex)
-      expect(calendarIndex).toBeLessThan(actionsIndex)
+      expect(descriptionIndex).toBeLessThan(actionsIndex)
     })
 
     it('should have left-aligned button group', async () => {

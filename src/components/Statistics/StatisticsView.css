@@ -1,0 +1,30 @@
+.statistics-view {
+  width: 100%;
+  max-width: 800px;
+  margin: var(--spacing-3xl) auto;
+  padding: 0;
+}
+
+.statistics-view__title {
+  font-size: var(--font-size-3xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-2xl);
+}
+
+.statistics-view__empty {
+  text-align: center;
+  padding: var(--spacing-3xl);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+}
+
+@media (max-width: 600px) {
+  .statistics-view {
+    margin: var(--spacing-lg) auto;
+  }
+
+  .statistics-view__title {
+    font-size: var(--font-size-2xl);
+  }
+}

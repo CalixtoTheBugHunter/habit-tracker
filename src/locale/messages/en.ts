@@ -127,6 +127,27 @@ export const en = {
   settingsButton: {
     ariaLabel: 'Open settings',
   },
+  appHeader: {
+    menuButtonOpenAria: 'Open menu',
+    menuButtonCloseAria: 'Close menu',
+  },
+  sideMenu: {
+    navigationAria: 'Main navigation',
+    home: 'Home',
+    statistics: 'Statistics',
+    settings: 'Settings',
+  },
+  statistics: {
+    title: 'Statistics',
+    empty: 'No habits yet. Create a habit to see statistics!',
+    currentStreak: 'Current streak',
+    longestStreak: 'Longest streak',
+    completionRate: 'Completion rate',
+    weeklyRate: 'Last 7 days',
+    monthlyRate: 'Last 30 days',
+    totalDaysTracked: 'Days tracked',
+    daysUnit: 'days',
+  },
   settings: {
     title: 'Settings',
     close: 'Close settings',

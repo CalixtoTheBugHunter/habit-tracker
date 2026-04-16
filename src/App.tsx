@@ -7,29 +7,36 @@ import {
   HabitList,
   HabitForm,
   OfflineIndicator,
-  InstallPrompt,
   ErrorBoundary,
-  SettingsButton,
+  AppHeader,
+  SideMenu,
   Settings,
+  StatisticsView,
 } from './components'
+import type { AppView } from './components'
 import type { Habit } from './types/habit'
 
 function AppContent() {
   const { messages } = useLanguage()
   const { isLoading, error } = useHabits()
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(undefined)
-  const [showSettings, setShowSettings] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [activeView, setActiveView] = useState<AppView>('home')
+
+  const handleNavigate = (view: AppView) => {
+    setActiveView(view)
+    setEditingHabit(undefined)
+  }
 
   if (isLoading) {
     return (
       <div className="app">
         <OfflineIndicator />
-        <header className="app-header">
-          <h1 className="app-header__logo">{messages.app.title}</h1>
-          <div role="status" aria-live="polite" aria-atomic="true">
-            <p>{messages.app.loading}</p>
-          </div>
-        </header>
+        <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
+        <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
+        <div className="app-loading" role="status" aria-live="polite" aria-atomic="true">
+          <p>{messages.app.loading}</p>
+        </div>
       </div>
     )
   }
@@ -38,12 +45,11 @@ function AppContent() {
     return (
       <div className="app">
         <OfflineIndicator />
-        <header className="app-header">
-          <h1 className="app-header__logo">{messages.app.title}</h1>
-          <div role="alert" aria-live="assertive" aria-atomic="true">
-            <p className="error">{formatMessage(messages.app.error, { error })}</p>
-          </div>
-        </header>
+        <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
+        <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
+        <div className="app-error" role="alert" aria-live="assertive" aria-atomic="true">
+          <p className="error">{formatMessage(messages.app.error, { error })}</p>
+        </div>
       </div>
     )
   }
@@ -51,23 +57,25 @@ function AppContent() {
   return (
     <div className="app">
       <OfflineIndicator />
-      <SettingsButton onClick={() => setShowSettings(true)} />
-      {showSettings && <Settings onClose={() => setShowSettings(false)} />}
-      <header className="app-header">
-        <div className="app-header__content">
-          <div>
-            <h1 className="app-header__logo">{messages.app.title}</h1>
-          </div>
-        </div>
-        <InstallPrompt />
-      </header>
+      <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
+      <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
       <main className="app-main">
-        <HabitForm
-          habit={editingHabit}
-          onSuccess={() => setEditingHabit(undefined)}
-          onCancel={() => setEditingHabit(undefined)}
-        />
-        <HabitList onEdit={setEditingHabit} />
+        {activeView === 'home' && (
+          <>
+            <HabitForm
+              habit={editingHabit}
+              onSuccess={() => setEditingHabit(undefined)}
+              onCancel={() => setEditingHabit(undefined)}
+            />
+            <HabitList onEdit={setEditingHabit} />
+          </>
+        )}
+        {activeView === 'settings' && (
+          <Settings onClose={() => setActiveView('home')} />
+        )}
+        {activeView === 'statistics' && (
+          <StatisticsView />
+        )}
       </main>
     </div>
   )

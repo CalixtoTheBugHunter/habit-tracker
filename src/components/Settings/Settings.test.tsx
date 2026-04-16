@@ -4,7 +4,6 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Settings } from './Settings'
 import type { LocaleCode } from '../../locale/types'
-import { verifyButtonContrast, mockComputedStyleForElement } from '../../test/utils/accessibility-helpers'
 import { renderWithProviders } from '../../test/utils/render-helpers'
 import * as languageStorage from '../../services/languageStorage'
 import { openDB, getAllHabits } from '../../services/indexedDB'
@@ -81,14 +80,6 @@ describe('Settings', () => {
     await renderReady(<Settings onClose={() => {}} />)
 
     expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: 'Settings' })).toBeInTheDocument()
-  })
-
-  it('should render a close button with aria-label', async () => {
-    await renderReady(<Settings onClose={() => {}} />)
-
-    const closeButton = screen.getByRole('button', { name: 'Close settings' })
-    expect(closeButton).toBeInTheDocument()
   })
 
   it('should render the Changelog item', async () => {
@@ -102,12 +93,6 @@ describe('Settings', () => {
     await renderReady(<Settings onClose={() => {}} />)
 
     await user.click(screen.getByRole('button', { name: /Changelog/ }))
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: 'Changelog', level: 1 })
-      ).toBeInTheDocument()
-    })
 
     const region = screen.getByRole('region', { name: 'Changelog' })
     await waitFor(() => {
@@ -124,9 +109,6 @@ describe('Settings', () => {
       'https://keepachangelog.com/en/1.1.0/'
     )
     expect(externalLink).toHaveAccessibleName(/opens in new tab/i)
-    expect(
-      within(region).getByRole('heading', { name: 'Changelog', level: 2 })
-    ).toBeInTheDocument()
     expect(vi.mocked(globalThis.fetch)).toHaveBeenCalled()
     const firstUrl = String(vi.mocked(globalThis.fetch).mock.calls[0]?.[0] ?? '')
     expect(firstUrl).toContain('CHANGELOG.md')
@@ -151,7 +133,7 @@ describe('Settings', () => {
       expect(
         screen.getByRole('heading', {
           name: 'Atualizações',
-          level: 1,
+          level: 2,
         })
       ).toBeInTheDocument()
     })
@@ -206,7 +188,7 @@ describe('Settings', () => {
     await user.click(screen.getByRole('button', { name: /Changelog/ }))
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: 'Changelog', level: 1 })
+        screen.getByRole('button', { name: 'Back to settings list' })
       ).toBeInTheDocument()
     })
 
@@ -228,7 +210,7 @@ describe('Settings', () => {
     await user.click(screen.getByRole('button', { name: /Changelog/ }))
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: 'Changelog', level: 1 })
+        screen.getByRole('button', { name: 'Back to settings list' })
       ).toBeInTheDocument()
     })
 
@@ -247,23 +229,6 @@ describe('Settings', () => {
     await renderReady(<Settings onClose={handleClose} />)
 
     await user.keyboard('{Escape}')
-
-    expect(handleClose).toHaveBeenCalledTimes(1)
-  })
-
-  it('should call onClose when close is clicked from changelog view', async () => {
-    const user = userEvent.setup()
-    const handleClose = vi.fn()
-    await renderReady(<Settings onClose={handleClose} />)
-
-    await user.click(screen.getByRole('button', { name: /Changelog/ }))
-    await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: 'Changelog', level: 1 })
-      ).toBeInTheDocument()
-    })
-
-    await user.click(screen.getByRole('button', { name: 'Close settings' }))
 
     expect(handleClose).toHaveBeenCalledTimes(1)
   })
@@ -295,36 +260,6 @@ describe('Settings', () => {
     expect(screen.getByRole('list')).toBeInTheDocument()
   })
 
-  it('should call onClose when close button is clicked', async () => {
-    const user = userEvent.setup()
-    const handleClose = vi.fn()
-
-    await renderReady(<Settings onClose={handleClose} />)
-
-    await user.click(screen.getByRole('button', { name: 'Close settings' }))
-
-    expect(handleClose).toHaveBeenCalledTimes(1)
-  })
-
-  it('should cycle Tab focus within settings on the changelog panel', async () => {
-    const user = userEvent.setup()
-    await renderReady(<Settings onClose={() => {}} />)
-
-    await user.click(screen.getByRole('button', { name: /Changelog/ }))
-    const region = screen.getByRole('region', { name: 'Changelog' })
-    await waitFor(() => {
-      expect(
-        within(region).getByRole('link', { name: /Keep a Changelog/ })
-      ).toBeInTheDocument()
-    })
-
-    const back = screen.getByRole('button', { name: 'Back to settings list' })
-    const link = within(region).getByRole('link', { name: /Keep a Changelog/ })
-    link.focus()
-    await user.tab()
-    expect(document.activeElement).toBe(back)
-  })
-
   it('should show changelog load error when fetch fails', async () => {
     vi.stubGlobal(
       'fetch',
@@ -347,29 +282,5 @@ describe('Settings', () => {
       ).toBeInTheDocument()
     })
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
-  })
-
-  describe('Accessibility - Contrast', () => {
-    let cleanup: (() => void) | undefined
-
-    afterEach(() => {
-      if (cleanup) {
-        cleanup()
-        cleanup = undefined
-      }
-    })
-
-    it('should have sufficient contrast ratio on close button', async () => {
-      cleanup = mockComputedStyleForElement(
-        'settings__close-button',
-        'rgb(102, 102, 102)',
-        'rgb(245, 245, 245)'
-      )
-
-      await renderReady(<Settings onClose={() => {}} />)
-
-      const closeButton = screen.getByRole('button', { name: 'Close settings' })
-      expect(verifyButtonContrast(closeButton, 4.0)).toBe(true)
-    })
   })
 })
