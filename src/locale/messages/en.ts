@@ -109,6 +109,13 @@ export const en = {
     badge: 'offline',
     ariaLabel: 'Offline status indicator',
   },
+  serviceWorkerUpdate: {
+    message: 'A new version is available',
+    reloadButton: 'Reload now',
+    dismissButton: 'Later',
+    ariaLabel: 'Application update available',
+    dismissAriaLabel: 'Dismiss update notification',
+  },
   streakBadge: {
     ariaLabel: '{streak}-day streak',
   },

@@ -18,6 +18,9 @@ loadScript()
 
 // Register service worker for PWA functionality
 registerServiceWorker({
+  onUpdate: (registration) => {
+    window.dispatchEvent(new CustomEvent('sw-update-ready', { detail: { registration } }))
+  },
   onSuccess: () => {
     if (import.meta.env.DEV) {
       console.log('Service Worker registered successfully')

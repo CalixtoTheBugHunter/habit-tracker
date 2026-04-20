@@ -131,6 +131,105 @@ describe('registerServiceWorker', () => {
     })
   })
 
+  it('should call onUpdate when new service worker is installed and controller exists', async () => {
+    let updateFoundHandler: (() => void) | undefined
+    let stateChangeHandler: (() => void) | undefined
+
+    const mockNewWorker = {
+      state: 'installed',
+      addEventListener: vi.fn((event: string, handler: () => void) => {
+        if (event === 'statechange') {
+          stateChangeHandler = handler
+        }
+      }),
+    }
+
+    const mockRegistration = {
+      scope: '/',
+      installing: mockNewWorker,
+      waiting: null,
+      active: null,
+      addEventListener: vi.fn((event: string, handler: () => void) => {
+        if (event === 'updatefound') {
+          updateFoundHandler = handler
+        }
+      }),
+      unregister: vi.fn(),
+    }
+
+    mockRegister.mockResolvedValue(mockRegistration)
+
+    Object.defineProperty(globalThis.navigator, 'serviceWorker', {
+      writable: true,
+      configurable: true,
+      value: {
+        register: mockRegister,
+        getRegistrations: mockGetRegistrations,
+        controller: {},
+        addEventListener: vi.fn(),
+      },
+    })
+
+    await withMockedEnv({ DEV: false }, async () => {
+      const onUpdate = vi.fn()
+
+      registerServiceWorker({ onUpdate })
+
+      await vi.waitFor(() => {
+        expect(mockRegister).toHaveBeenCalled()
+      })
+
+      updateFoundHandler?.()
+      stateChangeHandler?.()
+
+      expect(onUpdate).toHaveBeenCalledWith(mockRegistration)
+    })
+  })
+
+  it('should not call onUpdate when there is no controller', async () => {
+    let updateFoundHandler: (() => void) | undefined
+    let stateChangeHandler: (() => void) | undefined
+
+    const mockNewWorker = {
+      state: 'installed',
+      addEventListener: vi.fn((event: string, handler: () => void) => {
+        if (event === 'statechange') {
+          stateChangeHandler = handler
+        }
+      }),
+    }
+
+    const mockRegistration = {
+      scope: '/',
+      installing: mockNewWorker,
+      waiting: null,
+      active: null,
+      addEventListener: vi.fn((event: string, handler: () => void) => {
+        if (event === 'updatefound') {
+          updateFoundHandler = handler
+        }
+      }),
+      unregister: vi.fn(),
+    }
+
+    mockRegister.mockResolvedValue(mockRegistration)
+
+    await withMockedEnv({ DEV: false }, async () => {
+      const onUpdate = vi.fn()
+
+      registerServiceWorker({ onUpdate })
+
+      await vi.waitFor(() => {
+        expect(mockRegister).toHaveBeenCalled()
+      })
+
+      updateFoundHandler?.()
+      stateChangeHandler?.()
+
+      expect(onUpdate).not.toHaveBeenCalled()
+    })
+  })
+
   it('should call onError when registration fails', async () => {
     const error = new Error('Registration failed')
     mockRegister.mockRejectedValue(error)

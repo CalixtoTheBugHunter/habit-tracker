@@ -5,7 +5,7 @@ export { HabitForm, HabitList, AnnualCalendar } from './habit'
 export { Modal, ConfirmationModal } from './modal'
 
 // PWA components
-export { OfflineIndicator, InstallPrompt } from './pwa'
+export { OfflineIndicator, InstallPrompt, ServiceWorkerUpdatePrompt } from './pwa'
 
 // Error components
 export { ErrorBoundary, ErrorFallback } from './error'
