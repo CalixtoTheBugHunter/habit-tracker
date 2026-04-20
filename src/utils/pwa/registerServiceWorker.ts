@@ -61,17 +61,6 @@ function register(options: ServiceWorkerRegistrationOptions): void {
         console.error('Service Worker registration failed:', error)
         options.onError?.(error)
       })
-
-    let refreshing = false
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (refreshing) {
-        return
-      }
-      refreshing = true
-      // TODO: Consider showing a notification to users before reloading
-      // to allow them to choose when to reload, preventing potential data loss
-      window.location.reload()
-    })
   }
 
   if (document.readyState === 'complete') {

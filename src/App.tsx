@@ -7,6 +7,7 @@ import {
   HabitList,
   HabitForm,
   OfflineIndicator,
+  ServiceWorkerUpdatePrompt,
   ErrorBoundary,
   AppHeader,
   SideMenu,
@@ -32,6 +33,7 @@ function AppContent() {
     return (
       <div className="app">
         <OfflineIndicator />
+        <ServiceWorkerUpdatePrompt />
         <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
         <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
         <div className="app-loading" role="status" aria-live="polite" aria-atomic="true">
@@ -45,6 +47,7 @@ function AppContent() {
     return (
       <div className="app">
         <OfflineIndicator />
+        <ServiceWorkerUpdatePrompt />
         <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
         <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
         <div className="app-error" role="alert" aria-live="assertive" aria-atomic="true">
@@ -57,6 +60,7 @@ function AppContent() {
   return (
     <div className="app">
       <OfflineIndicator />
+      <ServiceWorkerUpdatePrompt />
       <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
       <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
       <main className="app-main">

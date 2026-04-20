@@ -110,6 +110,13 @@ export const ptBR = {
     badge: 'offline',
     ariaLabel: 'Indicador de status offline',
   },
+  serviceWorkerUpdate: {
+    message: 'Uma nova versão está disponível',
+    reloadButton: 'Recarregar agora',
+    dismissButton: 'Depois',
+    ariaLabel: 'Atualização do aplicativo disponível',
+    dismissAriaLabel: 'Dispensar notificação de atualização',
+  },
   streakBadge: {
     ariaLabel: 'Dias de sequência: {streak}',
   },
