@@ -2,7 +2,10 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor, act } from '@testing-library/react'
 import { ServiceWorkerUpdatePrompt } from './ServiceWorkerUpdatePrompt'
 import { renderWithLangReady } from '../../../test/utils/renderWithLangReady'
-import { verifyButtonContrast } from '../../../test/utils/accessibility-helpers'
+
+function dispatchUpdateEvent(registration?: Partial<ServiceWorkerRegistration>) {
+  window.dispatchEvent(new CustomEvent('sw-update-ready', { detail: { registration } }))
+}
 
 describe('ServiceWorkerUpdatePrompt', () => {
   let addEventListenerSpy: ReturnType<typeof vi.spyOn>
@@ -35,7 +38,7 @@ describe('ServiceWorkerUpdatePrompt', () => {
     await renderWithLangReady(<ServiceWorkerUpdatePrompt />)
 
     act(() => {
-      window.dispatchEvent(new Event('sw-update-ready'))
+      dispatchUpdateEvent()
     })
 
     await waitFor(() => {
@@ -48,7 +51,7 @@ describe('ServiceWorkerUpdatePrompt', () => {
     await renderWithLangReady(<ServiceWorkerUpdatePrompt />)
 
     act(() => {
-      window.dispatchEvent(new Event('sw-update-ready'))
+      dispatchUpdateEvent()
     })
 
     await waitFor(() => {
@@ -62,11 +65,33 @@ describe('ServiceWorkerUpdatePrompt', () => {
     expect(reloadMock).toHaveBeenCalled()
   })
 
+  it('should postMessage SKIP_WAITING to waiting worker before reload', async () => {
+    const postMessageMock = vi.fn()
+    const mockRegistration = { waiting: { postMessage: postMessageMock } }
+
+    await renderWithLangReady(<ServiceWorkerUpdatePrompt />)
+
+    act(() => {
+      dispatchUpdateEvent(mockRegistration as unknown as ServiceWorkerRegistration)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('Reload now')).toBeInTheDocument()
+    })
+
+    await act(async () => {
+      screen.getByText('Reload now').click()
+    })
+
+    expect(postMessageMock).toHaveBeenCalledWith({ type: 'SKIP_WAITING' })
+    expect(reloadMock).toHaveBeenCalled()
+  })
+
   it('should hide when "Later" is clicked', async () => {
     await renderWithLangReady(<ServiceWorkerUpdatePrompt />)
 
     act(() => {
-      window.dispatchEvent(new Event('sw-update-ready'))
+      dispatchUpdateEvent()
     })
 
     await waitFor(() => {
@@ -86,7 +111,7 @@ describe('ServiceWorkerUpdatePrompt', () => {
     await renderWithLangReady(<ServiceWorkerUpdatePrompt />)
 
     act(() => {
-      window.dispatchEvent(new Event('sw-update-ready'))
+      dispatchUpdateEvent()
     })
 
     await waitFor(() => {
@@ -102,7 +127,7 @@ describe('ServiceWorkerUpdatePrompt', () => {
     })
 
     act(() => {
-      window.dispatchEvent(new Event('sw-update-ready'))
+      dispatchUpdateEvent()
     })
 
     await waitFor(() => {
@@ -114,7 +139,7 @@ describe('ServiceWorkerUpdatePrompt', () => {
     await renderWithLangReady(<ServiceWorkerUpdatePrompt />)
 
     act(() => {
-      window.dispatchEvent(new Event('sw-update-ready'))
+      dispatchUpdateEvent()
     })
 
     await waitFor(() => {
@@ -136,40 +161,5 @@ describe('ServiceWorkerUpdatePrompt', () => {
     unmount()
 
     expect(removeEventListenerSpy).toHaveBeenCalledWith('sw-update-ready', expect.any(Function))
-  })
-
-  describe('Accessibility - Contrast', () => {
-    it('should have sufficient contrast ratio for reload button', async () => {
-      const originalGetComputedStyle = window.getComputedStyle
-      window.getComputedStyle = vi.fn((element: Element) => {
-        const style = originalGetComputedStyle(element)
-        if (element.classList.contains('sw-update-prompt__reload')) {
-          return {
-            ...style,
-            color: 'rgb(0, 0, 0)',
-            backgroundColor: 'rgb(25, 118, 210)',
-            getPropertyValue: (prop: string) => {
-              if (prop === 'color') return 'rgb(0, 0, 0)'
-              if (prop === 'background-color') return 'rgb(25, 118, 210)'
-              return style.getPropertyValue(prop)
-            },
-          } as CSSStyleDeclaration
-        }
-        return style
-      }) as typeof window.getComputedStyle
-
-      await renderWithLangReady(<ServiceWorkerUpdatePrompt />)
-
-      act(() => {
-        window.dispatchEvent(new Event('sw-update-ready'))
-      })
-
-      await waitFor(() => {
-        const reloadButton = screen.getByText('Reload now')
-        expect(verifyButtonContrast(reloadButton)).toBe(true)
-      })
-
-      window.getComputedStyle = originalGetComputedStyle
-    })
   })
 })

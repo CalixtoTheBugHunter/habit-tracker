@@ -92,6 +92,12 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .sw-update-prompt {
+    animation: none;
+  }
+}
+
 @media (max-width: 600px) {
   .sw-update-prompt {
     flex-wrap: wrap;

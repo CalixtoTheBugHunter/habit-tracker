@@ -5,6 +5,12 @@ Todas as mudanças relevantes neste projeto são documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 e este projeto segue o [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-20
+
+### Adicionado
+
+- Notificação ao usuário antes de recarregar o service worker com toast dispensável e botões de recarregar/dispensar
+
 ## [0.3.3] - 2026-04-17
 
 ### Alterado

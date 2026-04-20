@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { useLanguage } from '../../../contexts/LanguageContext'
 import './ServiceWorkerUpdatePrompt.css'
@@ -6,9 +6,12 @@ import './ServiceWorkerUpdatePrompt.css'
 export function ServiceWorkerUpdatePrompt() {
   const { messages } = useLanguage()
   const [isVisible, setIsVisible] = useState(false)
+  const registrationRef = useRef<ServiceWorkerRegistration | null>(null)
 
   useEffect(() => {
-    const handleUpdateReady = () => {
+    const handleUpdateReady = (event: Event) => {
+      const customEvent = event as CustomEvent<{ registration: ServiceWorkerRegistration }>
+      registrationRef.current = customEvent.detail?.registration ?? null
       setIsVisible(true)
     }
 
@@ -20,6 +23,10 @@ export function ServiceWorkerUpdatePrompt() {
   }, [])
 
   const handleReload = () => {
+    const waiting = registrationRef.current?.waiting
+    if (waiting) {
+      waiting.postMessage({ type: 'SKIP_WAITING' })
+    }
     window.location.reload()
   }
 
