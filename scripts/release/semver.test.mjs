@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { assertStrictSemver, parseSemver } from './semver.mjs'
+import { assertStrictSemver, compareSemver, parseSemver } from './semver.mjs'
 
 describe('semver', () => {
   it('parseSemver parses 1.0.0', () => {
@@ -20,5 +20,12 @@ describe('semver', () => {
 
   it('rejects prerelease', () => {
     expect(() => assertStrictSemver('1.0.0-beta')).toThrow(/Invalid semver/)
+  })
+
+  it('compareSemver orders versions', () => {
+    expect(compareSemver('1.0.0', '1.0.1')).toBe(-1)
+    expect(compareSemver('1.0.1', '1.0.0')).toBe(1)
+    expect(compareSemver('1.0.0', '1.0.0')).toBe(0)
+    expect(compareSemver('2.0.0', '1.9.9')).toBe(1)
   })
 })

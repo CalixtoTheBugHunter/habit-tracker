@@ -1,4 +1,4 @@
-import { assertStrictSemver } from './semver.mjs'
+import { assertStrictSemver, compareSemver } from './semver.mjs'
 import { bumpVersion } from './bump-version.mjs'
 
 /**
@@ -18,6 +18,12 @@ export function resolveNextVersion({
       throw new Error('explicit_version is required when bump_kind is explicit')
     }
     assertStrictSemver(v)
+    assertStrictSemver(currentFromPackage)
+    if (compareSemver(v, currentFromPackage) <= 0) {
+      throw new Error(
+        `explicit_version must be greater than package.json version (${currentFromPackage}); got ${v}`
+      )
+    }
     return v
   }
   if (!['major', 'minor', 'patch'].includes(bumpKind)) {

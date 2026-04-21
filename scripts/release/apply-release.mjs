@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { assertReleaseChangelogManifest } from './assert-changelog-manifest.mjs'
 import { resolveNextVersion } from './resolve-next-version.mjs'
 import {
   firstChangelogReleaseVersion,
@@ -27,6 +28,7 @@ if (!releaseNotesEn.trim() || !releaseNotesPtBr.trim()) {
 const manifest = JSON.parse(
   readFileSync(join(root, 'changelog-files.json'), 'utf8')
 )
+assertReleaseChangelogManifest(manifest)
 const pkgPath = join(root, 'package.json')
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'))
 const current = pkg.version
@@ -46,8 +48,8 @@ const bulletsPt = releaseNotesPtBr
   .map((s) => s.trim())
   .filter(Boolean)
 
-for (const [locale, relPath] of Object.entries(manifest)) {
-  if (locale !== 'en' && locale !== 'pt-BR') continue
+for (const locale of ['en', 'pt-BR']) {
+  const relPath = manifest[locale]
   const filePath = join(root, relPath)
   const content = readFileSync(filePath, 'utf8')
   const first = firstChangelogReleaseVersion(content)

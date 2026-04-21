@@ -51,4 +51,34 @@ describe('resolveNextVersion', () => {
       })
     ).toThrow(/Invalid semver/)
   })
+
+  it('explicit must be greater than package version', () => {
+    expect(() =>
+      resolveNextVersion({
+        bumpKind: 'explicit',
+        explicitVersion: '1.0.0',
+        currentFromPackage: '2.0.0',
+      })
+    ).toThrow(/greater than package/)
+  })
+
+  it('explicit cannot equal package version', () => {
+    expect(() =>
+      resolveNextVersion({
+        bumpKind: 'explicit',
+        explicitVersion: '1.0.0',
+        currentFromPackage: '1.0.0',
+      })
+    ).toThrow(/greater than package/)
+  })
+
+  it('rejects explicit when current package version is invalid semver', () => {
+    expect(() =>
+      resolveNextVersion({
+        bumpKind: 'explicit',
+        explicitVersion: '2.0.0',
+        currentFromPackage: 'v1.0.0',
+      })
+    ).toThrow(/Invalid semver/)
+  })
 })
