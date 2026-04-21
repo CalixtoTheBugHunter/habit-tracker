@@ -5,6 +5,12 @@ Todas as mudanças relevantes neste projeto são documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 e este projeto segue o [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-04-22
+
+### Alterado
+
+- Versão de produção e changelogs passam a ser atualizados só pelo workflow de Tag; removida a verificação de release notes obrigatória em PRs
+
 ## [0.4.1] - 2026-04-21
 
 ### Adicionado
