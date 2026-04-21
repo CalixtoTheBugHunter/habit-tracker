@@ -291,17 +291,12 @@ Run and fix:
 Ensure all checks pass before proceeding
 ```
 
-### Step 10: Version Bump and Changelog
+### Step 10: Version and changelog (maintainers only)
 
-After all code and tests are done, bump the project version and update changelogs so that CI release-notes checks pass.
+Feature PRs to `main` do **not** change `package.json` or prepend changelog release sections. Version bumps and locale changelogs are applied by the **Tag version (production release)** workflow when a maintainer cuts a release.
 
-- **What is a version bump?** Every time we ship a change, the project's version number goes up so users (and CI) can tell that something changed. The version lives in `package.json` and follows [Semantic Versioning](https://semver.org): `MAJOR.MINOR.PATCH`.
-  - **PATCH** (e.g. 0.3.3 → 0.3.4): bug fixes or tiny tweaks that don't add new features.
-  - **MINOR** (e.g. 0.3.3 → 0.4.0): a new feature that doesn't break existing behavior.
-  - **MAJOR** (e.g. 0.3.3 → 1.0.0): a breaking change that could affect existing users.
-- **How to bump**: update the `"version"` field in `package.json` to the new number, then run `npm install` so that `package-lock.json` stays in sync (otherwise CI will complain about a version mismatch between the two files).
-- **How to update changelogs**: the project keeps changelogs in multiple languages (listed in `changelog-files.json`). Add a new `## [<new-version>] - <YYYY-MM-DD>` section at the top of each changelog file with a short, human-readable end user description (for non-coders) of what changed under the appropriate heading (`### Added`, `### Changed`, `### Fixed`, etc.).
-- **Verify**: run `node scripts/verify-release-notes.mjs` — it must exit with code 0. If it fails, read the error message and fix accordingly.
+- Use clear [Conventional Commits](https://www.conventionalcommits.org/) messages (`feat:`, `fix:`, etc.) so release notes group correctly when the Tag workflow runs.
+- **Production git tags:** Official **`v*`** tags on **`main`** are created only via `.github/workflows/tag-version.yml`, not by ad-hoc local `git tag` for production, unless the team documents an exception.
 
 ### EXECUTE Mode Transition Checkpoint
 

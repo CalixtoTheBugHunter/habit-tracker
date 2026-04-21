@@ -39,6 +39,39 @@ npm run dev
 
 The application will be available at `http://localhost:5173`
 
+## Production releases (version tags)
+
+Official production versions use **semantic versioning** (`MAJOR.MINOR.PATCH`) in `package.json` and git tags named **`vMAJOR.MINOR.PATCH`** (for example `v1.2.3`). See [Semantic Versioning](https://semver.org/) and GitHub’s [workflow_dispatch](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch) documentation.
+
+**Pull requests to `main`:** Do not bump `package.json` or add new `## [version]` changelog sections. `package.json` on `main` reflects the **last released** version (updated only by the Tag workflow). Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (enforced by Commitlint on PRs).
+
+### How we release
+
+Maintainers run **Tag version (production release)** (`.github/workflows/tag-version.yml`) from the Actions tab on **`main`** (`workflow_dispatch`).
+
+**Inputs:** `bump_kind` (`patch` / `minor` / `major` / `explicit`) and, when `explicit` is chosen, `explicit_version` (must be strictly greater than the current `package.json` version). Optional **`release_notes_en_extra`** and **`release_notes_pt_br_extra`** append bullet lines to **Changed** / **Alterado** after generated notes (for emergencies or context the commits do not carry).
+
+**What the workflow does**
+
+1. Finds **`FROM_REF`**: the highest semver tag **`vMAJOR.MINOR.PATCH`** merged into `HEAD`, if any. The repository **root** commit is recorded when there is no such tag (used for tooling only).
+2. Lists subjects: if a previous release tag exists, `git log --no-merges ${FROM_REF}..HEAD --pretty=%s` (commits **after** that tag). If there is **no** tag yet, the workflow uses **all** commits reachable from `HEAD` (so the first release is not empty on a shallow history). **Merge commits are excluded**; use squash merges with a good Conventional squash title when possible.
+3. **Fails** if that list is empty (nothing new to ship since the last tag).
+4. Runs `scripts/release/summarize-commits.mjs` to build JSON sections, then `scripts/release/apply-release.mjs` to prepend `## [version] - date` to every locale in `changelog-files.json`, bump `package.json`, run `npm install`, commit `chore(release): v…` to `main`, and push annotated tag `v…`.
+
+**English bullets:** `feat` → **Added**; `fix` and `revert` → **Fixed**; `docs`, `style`, `refactor`, `perf`, `build`, `ci`, `chore`, `test`, and `chore(deps)` → **Changed**. Subjects matching **`chore(release):`** are omitted. Anything that does not match Conventional Commits falls under **Changed**. Within each section, lines are sorted alphabetically. Each section is capped at **50** lines; if anything was truncated, an extra **Changed** line points at a GitHub **compare** URL (when a previous `v*` tag exists).
+
+**Portuguese (`CHANGELOG.pt-BR.md`):** A short **`### Nota`** states the section is generated from the same commits as the English file; the **Added / Changed / Fixed** bullets mirror the English lines (same commit subjects).
+
+**Fixing a bad release note after the fact:** Edit the markdown on `main` in a normal PR. Do **not** re-run the Tag workflow for a version that already has a `v*` tag and changelog section, or you risk duplicate sections or tag collisions.
+
+`changelog-files.json` must list exactly the locales the release scripts support (**`en`** and **`pt-BR`** today); extend the scripts before adding manifest entries.
+
+**Branch protection:** If GitHub Actions cannot push to `main` with the default `GITHUB_TOKEN`, add a fine-grained or classic PAT with **contents: write** on this repository as repository secret **`RELEASE_PUSH_TOKEN`**. The workflow uses `RELEASE_PUSH_TOKEN` when set, otherwise `github.token`.
+
+**Who can run it:** Limit who may run Actions on `main` (and who can merge there) so only trusted maintainers can dispatch this workflow. Treat **`RELEASE_PUSH_TOKEN`** like any other secret: scope it to this repo, rotate it if it leaks or a maintainer leaves, and prefer a **fine-grained** token with the smallest permission set that still allows push and tags.
+
+**If the workflow stops mid-flight:** If the version bump **commit** reached `main` but the **`v*` tag** push failed, fix forward by creating the annotated tag on that commit (for example `git tag -a vX.Y.Z -m "Release vX.Y.Z" <sha>` then `git push origin refs/tags/vX.Y.Z`) or by opening a small follow-up PR—avoid re-running the workflow for the same version if it would duplicate changelog sections or tags.
+
 ## Development
 
 ### Available Scripts
