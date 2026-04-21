@@ -19,14 +19,14 @@ on:
         description: 'Required when bump_kind is explicit (MAJOR.MINOR.PATCH)'
         type: string
         required: false
-      release_notes_en:
-        description: 'Bullet lines for CHANGELOG.md under ### Added'
+      release_notes_en_extra:
+        description: 'Optional extra bullet lines appended to English ### Changed'
         type: string
-        required: true
-      release_notes_pt_br:
-        description: 'Linhas para CHANGELOG.pt-BR.md sob ### Adicionado'
+        required: false
+      release_notes_pt_br_extra:
+        description: 'Optional extra lines appended to pt-BR ### Alterado'
         type: string
-        required: true
+        required: false
 
 jobs:
   release:
@@ -40,6 +40,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          fetch-tags: true
           token: ${{ secrets.RELEASE_PUSH_TOKEN || github.token }}
 
       - name: Setup Node
@@ -67,6 +68,43 @@ jobs:
           V=$(node scripts/release/print-next-version.mjs)
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
+      - name: Resolve git range since last release tag
+        id: range
+        run: node scripts/release/print-release-log-range.mjs
+
+      - name: Collect commit subjects in range
+        env:
+          FROM_REF: ${{ steps.range.outputs.from_ref }}
+          FROM_TAG: ${{ steps.range.outputs.from_tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "$FROM_TAG" ]; then
+            git log --no-merges --pretty=%s "${FROM_REF}..HEAD" > /tmp/release-subjects.txt
+          else
+            git log --no-merges --pretty=%s HEAD > /tmp/release-subjects.txt
+          fi
+          if [ ! -s /tmp/release-subjects.txt ]; then
+            echo '::error::No commits since the last production tag (merge commits excluded). Nothing to release.'
+            exit 1
+          fi
+
+      - name: Summarize commits for changelog JSON
+        env:
+          FROM_TAG: ${{ steps.range.outputs.from_tag }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          URL=""
+          if [ -n "$FROM_TAG" ]; then
+            URL="https://github.com/${GITHUB_REPOSITORY}/compare/${FROM_TAG}...${GITHUB_SHA}"
+          fi
+          node scripts/release/summarize-commits.mjs \
+            --input=/tmp/release-subjects.txt \
+            --output=/tmp/release-sections.json \
+            --cap=50 \
+            --compare-url="$URL"
+
       - name: Ensure tag does not exist
         env:
           VERSION: ${{ steps.next.outputs.version }}
@@ -85,8 +123,9 @@ jobs:
         env:
           BUMP_KIND: ${{ github.event.inputs.bump_kind }}
           EXPLICIT_VERSION: ${{ github.event.inputs.explicit_version }}
-          RELEASE_NOTES_EN: ${{ github.event.inputs.release_notes_en }}
-          RELEASE_NOTES_PT_BR: ${{ github.event.inputs.release_notes_pt_br }}
+          RELEASE_SECTIONS_JSON: /tmp/release-sections.json
+          RELEASE_NOTES_EN_EXTRA: ${{ github.event.inputs.release_notes_en_extra || '' }}
+          RELEASE_NOTES_PT_BR_EXTRA: ${{ github.event.inputs.release_notes_pt_br_extra || '' }}
         run: node scripts/release/apply-release.mjs
 
       - name: npm install (sync lockfile)

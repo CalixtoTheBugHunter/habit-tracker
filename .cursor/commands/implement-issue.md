@@ -190,7 +190,7 @@ Note: Browser-based testing with Cursor Browser navigation will be added when lo
 
 ## Phase 6: Version Control & PR Creation
 
-Official production **`v*`** tags on **`main`** use the **Tag version (production release)** workflow (`.github/workflows/tag-version.yml`); see `README.md` (Production releases). PR merges to `main` still require bumping `package.json` and updating every locale changelog listed in `changelog-files.json` (CI: `scripts/verify-release-notes.mjs`) before any release dispatch.
+Official production **`v*`** tags on **`main`** use the **Tag version (production release)** workflow (`.github/workflows/tag-version.yml`); see `README.md` (Production releases). PR merges to `main` do **not** bump `package.json` or changelogs; releases are cut only via that workflow.
 
 ### Step 11: Create PR
 
