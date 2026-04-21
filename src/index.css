@@ -23,6 +23,11 @@
   --color-error-border: #ffcdd2;
   --color-warning: #e65100;
   --color-warning-bg: #fff3e0;
+  --color-warning-border: #ffcc80;
+  --color-on-warning: #bf360c;
+  --color-on-warning-muted: #4e342e;
+  --color-on-warning-outline: rgba(0, 0, 0, 0.28);
+  --color-on-warning-dismiss-hover-bg: rgba(0, 0, 0, 0.06);
   
   /* Interactive Elements */
   --color-button-primary-text: #000000;
@@ -103,6 +108,11 @@
     --color-error-border: #c62828;
     --color-warning: #ff9800;
     --color-warning-bg: #e65100;
+    --color-warning-border: #ff9800;
+    --color-on-warning: #ffffff;
+    --color-on-warning-muted: #f5f5f5;
+    --color-on-warning-outline: rgba(255, 255, 255, 0.72);
+    --color-on-warning-dismiss-hover-bg: rgba(255, 255, 255, 0.14);
     
     /* Interactive Elements */
     --color-button-primary-text: #000000;
