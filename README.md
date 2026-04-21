@@ -39,6 +39,16 @@ npm run dev
 
 The application will be available at `http://localhost:5173`
 
+## Production releases (version tags)
+
+Official production versions use **semantic versioning** (`MAJOR.MINOR.PATCH`) in `package.json` and git tags named **`vMAJOR.MINOR.PATCH`** (for example `v1.2.3`). See [Semantic Versioning](https://semver.org/) and GitHub’s [workflow_dispatch](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch) documentation.
+
+**Pull requests to `main`:** Every merge still must bump `package.json` and add release notes in all locale changelogs (see `changelog-files.json`); CI runs `scripts/verify-release-notes.mjs` via the “Release notes” workflow unless the PR has the `skip-changelog` label.
+
+**Tagging `main`:** After the branch is up to date and merged, maintainers run the **Tag version (production release)** workflow (`.github/workflows/tag-version.yml`) from the Actions tab on **`main`**. It is **manual only** (`workflow_dispatch`). Inputs choose **patch / minor / major** or an **explicit** version, plus **bullet lines** for English and Portuguese changelogs; the workflow prepends a new `## [version] - date` section to each locale file, updates `package.json`, runs `npm install` to refresh `package-lock.json`, commits to `main`, and pushes an **annotated** tag `v<version>` with message `Release v<version>`. It refuses duplicate tags and duplicate first-section versions.
+
+**Branch protection:** If GitHub Actions cannot push to `main` with the default `GITHUB_TOKEN`, add a fine-grained or classic PAT with **contents: write** on this repository as repository secret **`RELEASE_PUSH_TOKEN`**. The workflow uses `RELEASE_PUSH_TOKEN` when set, otherwise `github.token`.
+
 ## Development
 
 ### Available Scripts

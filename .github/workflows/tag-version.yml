@@ -1,0 +1,111 @@
+name: Tag version (production release)
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_kind:
+        description: 'How to pick the next version (or explicit)'
+        type: choice
+        required: true
+        options:
+          - patch
+          - minor
+          - major
+          - explicit
+      explicit_version:
+        description: 'Required when bump_kind is explicit (MAJOR.MINOR.PATCH)'
+        type: string
+        required: false
+      release_notes_en:
+        description: 'Bullet lines for CHANGELOG.md under ### Added'
+        type: string
+        required: true
+      release_notes_pt_br:
+        description: 'Linhas para CHANGELOG.pt-BR.md sob ### Adicionado'
+        type: string
+        required: true
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: '0'
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PUSH_TOKEN || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '18'
+          cache: npm
+
+      - name: Validate explicit_version when bump_kind is explicit
+        env:
+          BUMP_KIND: ${{ github.event.inputs.bump_kind }}
+          EXPLICIT_VERSION: ${{ github.event.inputs.explicit_version }}
+        run: |
+          if [ "$BUMP_KIND" = explicit ] && [ -z "${EXPLICIT_VERSION// }" ]; then
+            echo 'explicit_version is required when bump_kind is explicit'
+            exit 1
+          fi
+
+      - name: Compute next version
+        id: next
+        env:
+          BUMP_KIND: ${{ github.event.inputs.bump_kind }}
+          EXPLICIT_VERSION: ${{ github.event.inputs.explicit_version }}
+        run: |
+          V=$(node scripts/release/print-next-version.mjs)
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure tag does not exist
+        env:
+          VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          git fetch --tags origin
+          if git rev-parse -q --verify "refs/tags/v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists locally"
+            exit 1
+          fi
+          if git ls-remote --tags origin "refs/tags/v${VERSION}" | grep -q .; then
+            echo "Tag v${VERSION} already exists on remote"
+            exit 1
+          fi
+
+      - name: Apply version and prepend changelogs
+        env:
+          BUMP_KIND: ${{ github.event.inputs.bump_kind }}
+          EXPLICIT_VERSION: ${{ github.event.inputs.explicit_version }}
+          RELEASE_NOTES_EN: ${{ github.event.inputs.release_notes_en }}
+          RELEASE_NOTES_PT_BR: ${{ github.event.inputs.release_notes_pt_br }}
+        run: node scripts/release/apply-release.mjs
+
+      - name: npm install (sync lockfile)
+        run: npm install
+
+      - name: Git commit and push
+        env:
+          VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json CHANGELOG.md CHANGELOG.pt-BR.md
+          git diff --staged --quiet && { echo 'No staged changes'; exit 1; }
+          git commit -m "chore(release): v${VERSION}"
+          git push origin HEAD:main
+
+      - name: Create and push annotated tag
+        env:
+          VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin "refs/tags/v${VERSION}"

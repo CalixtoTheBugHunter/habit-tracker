@@ -303,6 +303,8 @@ After all code and tests are done, bump the project version and update changelog
 - **How to update changelogs**: the project keeps changelogs in multiple languages (listed in `changelog-files.json`). Add a new `## [<new-version>] - <YYYY-MM-DD>` section at the top of each changelog file with a short, human-readable end user description (for non-coders) of what changed under the appropriate heading (`### Added`, `### Changed`, `### Fixed`, etc.).
 - **Verify**: run `node scripts/verify-release-notes.mjs` — it must exit with code 0. If it fails, read the error message and fix accordingly.
 
+**Production git tags:** Official **`v*`** tags on **`main`** are created only via the GitHub Actions workflow **Tag version (production release)** (`.github/workflows/tag-version.yml`), not by ad-hoc local `git tag` for production, unless the team documents an exception.
+
 ### EXECUTE Mode Transition Checkpoint
 
 **User Approval Required**: Before proceeding to REVIEW mode
