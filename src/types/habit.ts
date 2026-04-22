@@ -27,5 +27,6 @@ export interface Habit {
   stackingCompletions?: Record<string, string[]>
   stackingStepLabels?: Record<string, string>
   autoCompletedDates?: string[]
+  goalDays?: number[]
 }
 

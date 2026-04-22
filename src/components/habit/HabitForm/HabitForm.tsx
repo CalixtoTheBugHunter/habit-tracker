@@ -23,6 +23,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
   const [description, setDescription] = useState(habit?.description || '')
   const [stackingHabitIds, setStackingHabitIds] = useState<string[]>(habit?.stackingHabits ?? [])
   const [stackingStepLabels, setStackingStepLabels] = useState<Record<string, string>>(habit?.stackingStepLabels ?? {})
+  const [goalDays, setGoalDays] = useState<number[]>(habit?.goalDays ?? [])
   const [nameError, setNameError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -38,12 +39,14 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       setDescription(habit.description || '')
       setStackingHabitIds(habit.stackingHabits ?? [])
       setStackingStepLabels(habit.stackingStepLabels ?? {})
+      setGoalDays(habit.goalDays ?? [])
       setShowDescription(true)
     } else {
       setName('')
       setDescription('')
       setStackingHabitIds([])
       setStackingStepLabels({})
+      setGoalDays([])
       setShowDescription(false)
     }
   }, [habit])
@@ -105,6 +108,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
         stackingCompletions: hasStacking && Object.keys(stackingCompletions ?? {}).length > 0 ? stackingCompletions : undefined,
         stackingStepLabels: labelsForStack && Object.keys(labelsForStack).length > 0 ? labelsForStack : undefined,
         autoCompletedDates: hasStacking ? habit?.autoCompletedDates : undefined,
+        goalDays: goalDays.length > 0 ? goalDays : undefined,
       }
 
       if (isEditMode) {
@@ -152,6 +156,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       setDescription('')
       setStackingHabitIds([])
       setStackingStepLabels({})
+      setGoalDays([])
       setShowDescription(false)
     }
     setNameError(null)
@@ -229,6 +234,31 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
             excludeId={habit?.id}
             disabled={isSubmitting}
           />
+          <fieldset className="habit-form-field habit-form-goaldays" disabled={isSubmitting}>
+            <legend className="habit-form-label">{messages.habitForm.labels.goalDays}</legend>
+            <div className="habit-form-goaldays__grid">
+              {([1, 2, 3, 4, 5, 6, 0] as const).map((jsDay) => {
+                const labelKey = (['weekdaySun', 'weekdayMon', 'weekdayTue', 'weekdayWed', 'weekdayThu', 'weekdayFri', 'weekdaySat'] as const)[jsDay]
+                const label = messages.habitForm.labels[labelKey]
+                const checked = goalDays.includes(jsDay)
+                return (
+                  <label key={jsDay} className={`habit-form-goaldays__day${checked ? ' habit-form-goaldays__day--checked' : ''}`}>
+                    <input
+                      type="checkbox"
+                      className="habit-form-goaldays__checkbox"
+                      checked={checked}
+                      onChange={() => {
+                        setGoalDays(prev =>
+                          prev.includes(jsDay) ? prev.filter(d => d !== jsDay) : [...prev, jsDay]
+                        )
+                      }}
+                    />
+                    {label}
+                  </label>
+                )
+              })}
+            </div>
+          </fieldset>
         </>
       )}
 

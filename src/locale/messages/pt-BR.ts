@@ -18,6 +18,14 @@ export const ptBR = {
       name: 'Nome',
       description: 'Descrição',
       required: '*',
+      goalDays: 'Dias da meta (opcional)',
+      weekdaySun: 'Dom',
+      weekdayMon: 'Seg',
+      weekdayTue: 'Ter',
+      weekdayWed: 'Qua',
+      weekdayThu: 'Qui',
+      weekdayFri: 'Sex',
+      weekdaySat: 'Sáb',
     },
     buttons: {
       create: 'Criar Hábito',
@@ -49,6 +57,9 @@ export const ptBR = {
       addButton: 'Adicionar',
       removeAria: 'Remover {name} da cadeia de hábitos',
     },
+  },
+  goalBadge: {
+    goalMetAriaLabel: 'Meta atingida: {completed} de {target} dias esta semana',
   },
   habitList: {
     loading: 'Carregando hábitos...',
@@ -152,6 +163,9 @@ export const ptBR = {
     monthlyRate: 'Últimos 30 dias',
     totalDaysTracked: 'Dias rastreados',
     daysUnit: 'dias',
+    goalProgress: 'Progresso da meta',
+    goalProgressValue: '{completed}/{target} esta semana',
+    goalMet: 'Meta atingida!',
   },
   settings: {
     title: 'Configurações',

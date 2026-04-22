@@ -5,7 +5,9 @@ import {
   calculateTotalDaysTracked,
   calculateWeeklyCompletionRate,
   calculateMonthlyCompletionRate,
+  calculateGoalProgress,
 } from './statisticsCalculations'
+
 
 describe('statisticsCalculations', () => {
   beforeEach(() => {
@@ -217,6 +219,59 @@ describe('statisticsCalculations', () => {
         dates.push(date.toISOString())
       }
       expect(calculateMonthlyCompletionRate(dates)).toBe(33) // 10/30 = 33.33 rounded
+    })
+  })
+
+  describe('calculateGoalProgress', () => {
+    // Fake time: 2025-01-15 (Wednesday). ISO week: Mon 2025-01-13 – Sun 2025-01-19.
+    // goalDays uses JS weekday numbers: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+    // Mon/Wed/Fri = [1, 3, 5] → dates 2025-01-13, 2025-01-15, 2025-01-17
+
+    it('should return 0 completed and 0% for empty dates', () => {
+      expect(calculateGoalProgress([], [1, 3, 5])).toEqual({ completed: 0, target: 3, percentage: 0 })
+    })
+
+    it('should count completions on goal days within the current ISO week', () => {
+      const dates = [
+        '2025-01-13T00:00:00.000Z', // Monday (1) — goal day ✓
+        '2025-01-15T00:00:00.000Z', // Wednesday (3) — goal day ✓
+        '2025-01-12T00:00:00.000Z', // Sunday previous week — NOT in current week
+      ]
+      // Fri (2025-01-17) not yet completed
+      expect(calculateGoalProgress(dates, [1, 3, 5])).toEqual({ completed: 2, target: 3, percentage: 67 })
+    })
+
+    it('should return 100% when all goal days are completed', () => {
+      const dates = [
+        '2025-01-13T00:00:00.000Z', // Mon
+        '2025-01-15T00:00:00.000Z', // Wed
+        '2025-01-17T00:00:00.000Z', // Fri
+      ]
+      expect(calculateGoalProgress(dates, [1, 3, 5])).toEqual({ completed: 3, target: 3, percentage: 100 })
+    })
+
+    it('should ignore completions from the previous week', () => {
+      const dates = [
+        '2025-01-06T00:00:00.000Z', // Mon of previous week
+        '2025-01-08T00:00:00.000Z', // Wed of previous week
+        '2025-01-10T00:00:00.000Z', // Fri of previous week
+      ]
+      expect(calculateGoalProgress(dates, [1, 3, 5])).toEqual({ completed: 0, target: 3, percentage: 0 })
+    })
+
+    it('should correctly map Sunday (0) to 2025-01-19 in the current ISO week', () => {
+      const dates = [
+        '2025-01-19T00:00:00.000Z', // Sunday of current ISO week
+      ]
+      expect(calculateGoalProgress(dates, [0])).toEqual({ completed: 1, target: 1, percentage: 100 })
+    })
+
+    it('should not count completions on non-goal days', () => {
+      const dates = [
+        '2025-01-14T00:00:00.000Z', // Tuesday — not a goal day for [1,3,5]
+        '2025-01-16T00:00:00.000Z', // Thursday — not a goal day for [1,3,5]
+      ]
+      expect(calculateGoalProgress(dates, [1, 3, 5])).toEqual({ completed: 0, target: 3, percentage: 0 })
     })
   })
 })

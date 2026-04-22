@@ -93,3 +93,37 @@ export function calculateMonthlyCompletionRate(completionDates: string[]): numbe
   const count = last30Days.filter(d => uniqueDates.includes(d)).length
   return Math.round((count / 30) * 100)
 }
+
+export function calculateGoalProgress(
+  completionDates: string[],
+  goalDays: number[]
+): { completed: number; target: number; percentage: number } {
+  const today = getTodayLocalDateString()
+  const parts = today.split('-')
+  const year = Number(parts[0])
+  const month = Number(parts[1])
+  const day = Number(parts[2])
+
+  // Find Monday of the current ISO week
+  const todayDate = new Date(Date.UTC(year, month - 1, day))
+  const dayOfWeek = todayDate.getUTCDay() // 0=Sun, 1=Mon, ...6=Sat
+  const daysFromMonday = (dayOfWeek + 6) % 7
+
+  // Build a map from JS weekday number (0=Sun…6=Sat) to its date string in this ISO week
+  const weekDayToDate: Record<number, string> = {}
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(Date.UTC(year, month - 1, day - daysFromMonday + i))
+    const y = d.getUTCFullYear()
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0')
+    const dd = String(d.getUTCDate()).padStart(2, '0')
+    weekDayToDate[d.getUTCDay()] = `${y}-${m}-${dd}`
+  }
+
+  const goalDates = goalDays.map(jsDay => weekDayToDate[jsDay]!).filter(Boolean)
+  const uniqueDates = getUniqueSortedDates(completionDates)
+  const completed = goalDates.filter(d => uniqueDates.includes(d)).length
+  const target = goalDays.length
+  const percentage = Math.min(Math.round((completed / target) * 100), 100)
+
+  return { completed, target, percentage }
+}
