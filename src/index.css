@@ -10,7 +10,7 @@
   --color-border-hover: #d0d0d0;
   
   /* Primary Colors */
-  --color-primary: #1976d2;
+  --color-primary: #000000;
   --color-primary-hover: #1565c0;
   --color-primary-light: #e3f2fd;
   
@@ -85,7 +85,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     /* Colors - Dark Mode */
-    --color-background: #121212;
+    --color-background: #1e1e1e;
     --color-surface: #1e1e1e;
     --color-surface-hover: #2a2a2a;
     --color-text-primary: #e0e0e0;
