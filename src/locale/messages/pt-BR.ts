@@ -1,6 +1,6 @@
 export const ptBR = {
   app: {
-    title: 'Rastreador de Hábitos',
+    title: 'Rastreador de Hábitos Atômicos',
     loading: 'Carregando...',
     error: 'Erro: {error}',
     initError: 'Falha ao inicializar o aplicativo',
@@ -114,8 +114,8 @@ export const ptBR = {
   },
   installPrompt: {
     button: 'Instalar',
-    ariaLabel: 'Instalar aplicativo Rastreador de Hábitos',
-    title: 'Instalar aplicativo Rastreador de Hábitos',
+    ariaLabel: 'Instalar aplicativo Rastreador de Hábitos Atômicos',
+    title: 'Instalar aplicativo Rastreador de Hábitos Atômicos',
   },
   offlineIndicator: {
     badge: 'offline',

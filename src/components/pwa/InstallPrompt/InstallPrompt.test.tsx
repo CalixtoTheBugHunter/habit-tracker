@@ -185,8 +185,8 @@ describe('InstallPrompt', () => {
 
     await waitFor(() => {
       const installButton = screen.getByRole('button', { name: /install/i })
-      expect(installButton).toHaveAttribute('aria-label', 'Install Habit Tracker app')
-      expect(installButton).toHaveAttribute('title', 'Install Habit Tracker app')
+      expect(installButton).toHaveAttribute('aria-label', 'Install Atomic Habit Tracker app')
+      expect(installButton).toHaveAttribute('title', 'Install Atomic Habit Tracker app')
     })
   })
 

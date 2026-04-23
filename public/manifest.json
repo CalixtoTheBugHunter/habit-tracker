@@ -1,6 +1,6 @@
 {
-  "name": "Habit Tracker",
-  "short_name": "Habit Tracker",
+  "name": "Atomic Habit Tracker",
+  "short_name": "Atomic Habit Tracker",
   "description": "A simple, free and offline habit tracker application. Available in English and Brazilian Portuguese.",
   "start_url": "/",
   "display": "standalone",
@@ -8,12 +8,6 @@
   "theme_color": "#4a90e2",
   "orientation": "portrait-primary",
   "icons": [
-    {
-      "src": "/icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
     {
       "src": "/icon.png",
       "sizes": "512x512",

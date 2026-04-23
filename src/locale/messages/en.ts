@@ -1,6 +1,6 @@
 export const en = {
   app: {
-    title: 'Habit Tracker',
+    title: 'Atomic Habit Tracker',
     loading: 'Loading...',
     error: 'Error: {error}',
     initError: 'Failed to initialize application',
@@ -113,8 +113,8 @@ export const en = {
   },
   installPrompt: {
     button: 'Install',
-    ariaLabel: 'Install Habit Tracker app',
-    title: 'Install Habit Tracker app',
+    ariaLabel: 'Install Atomic Habit Tracker app',
+    title: 'Install Atomic Habit Tracker app',
   },
   offlineIndicator: {
     badge: 'offline',
