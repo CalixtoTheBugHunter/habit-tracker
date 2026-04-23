@@ -30,7 +30,7 @@ describe('App', () => {
   })
 
   it('renders title after initialization', async () => {
-    const text = /habit tracker/i
+    const text = /atomic habit tracker/i
     const role = 'heading'
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
     vi.mocked(getAllHabits).mockResolvedValue([])

@@ -6,10 +6,13 @@
   padding: var(--spacing-lg) var(--spacing-2xl);
   padding-top: calc(var(--spacing-lg) + env(safe-area-inset-top));
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-background);
+  background-color: rgba(0,0,0,0.4);
   position: sticky;
   top: 0;
-  z-index: var(--z-index-base);
+  z-index: var(--z-index-indicator);
+  backdrop-filter: saturate(10.5) blur(24px);
+  mix-blend-mode: difference;
+
 }
 
 .app-header__menu-button {
@@ -32,23 +35,41 @@
   background-color: var(--color-surface-hover);
 }
 
-.app-header__logo {
-  font-family: 'Sansita Swashed', 'Brush Script MT', 'Lucida Handwriting', cursive;
-  font-weight: 600;
-  font-size: clamp(1.5rem, 4vw, 2rem);
-  letter-spacing: 0;
-  margin: 0;
-  color: var(--color-text-primary);
-  line-height: 1.2;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  flex: 1;
-  min-width: 0;
-}
-
 .app-header__actions {
   flex-shrink: 0;
 }
+
+.app-header__logo {
+  display: inline-block;
+  margin: 0 0 var(--spacing-lg) 0;
+  padding: 0;
+  position: relative;
+  font-size: inherit;
+  font-weight: normal;
+  line-height: 0;
+}
+
+.app-header__logo-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.app-header__logo img {
+  display: block;
+  width: 200px;
+  height: 50px;
+  max-width: none;
+  object-fit: cover;
+  transform: translateY(15px);
+}
+
 
 @media (max-width: 600px) {
   .app-header {
@@ -56,25 +77,8 @@
     padding-top: calc(var(--spacing-md) + env(safe-area-inset-top));
   }
 
-  .app-header__logo {
-    font-size: clamp(1.25rem, 5vw, 1.5rem);
-  }
-
   .app-header__menu-button {
     width: 40px;
     height: 40px;
-  }
-}
-
-@media (display-mode: standalone) {
-  .app-header__logo {
-    font-size: clamp(1.5rem, 4.5vw, 2rem);
-  }
-}
-
-@supports (-webkit-touch-callout: none) {
-  .app-header__logo {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
   }
 }

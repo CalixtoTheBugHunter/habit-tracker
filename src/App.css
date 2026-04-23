@@ -15,7 +15,9 @@
   padding: var(--spacing-lg);
 }
 
-.app-loading p {
+.app-loading p,
+.app-header p {
+  margin: 0;
   font-size: var(--font-size-xl);
   color: var(--color-text-secondary);
 }

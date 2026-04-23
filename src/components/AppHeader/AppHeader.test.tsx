@@ -26,7 +26,7 @@ vi.mock('../pwa/InstallPrompt/InstallPrompt', () => ({
 describe('AppHeader', () => {
   it('should render logo', () => {
     render(<AppHeader onMenuToggle={vi.fn()} menuOpen={false} />)
-    expect(screen.getByRole('heading', { name: /habit tracker/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /atomic habit tracker/i })).toBeInTheDocument()
   })
 
   it('should render menu button with open aria when closed', () => {
