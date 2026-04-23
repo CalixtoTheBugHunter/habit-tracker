@@ -26,7 +26,7 @@ export function AppHeader({ onMenuToggle, menuOpen }: AppHeaderProps) {
           <Menu size={24} aria-hidden="true" />
         )}
       </button>
-      <h1 className="app-header__logo">{messages.app.title}</h1>
+      <div className="app-header__logo" ><img src="logo.png" width="214px" /></div>
       <div className="app-header__actions">
         <InstallPrompt />
       </div>

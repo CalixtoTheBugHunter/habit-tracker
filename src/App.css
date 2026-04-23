@@ -15,20 +15,6 @@
   padding: var(--spacing-lg);
 }
 
-.app-header__logo {
-  display: inline-block;
-  margin: 0 0 var(--spacing-lg) 0;
-  padding: 0;
-}
-
-.app-header__logo img {
-  display: block;
-  width: auto;
-  height: 368px; /* ou 5rem, 3rem, etc */
-  max-width: none;
-  object-fit: contain;
-}
-
 .app-header p {
   margin: 0;
   font-size: var(--font-size-xl);

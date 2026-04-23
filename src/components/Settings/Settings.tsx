@@ -4,6 +4,7 @@ import { useLanguage } from '../../contexts/LanguageContext'
 import type { LocaleCode } from '../../locale/types'
 import { SettingsChangelogPanel } from './SettingsChangelogPanel'
 import './Settings.css'
+import { AppHeader } from '../AppHeader/AppHeader'
 
 interface SettingsProps {
   onClose: () => void
@@ -15,6 +16,7 @@ export function Settings({ onClose }: SettingsProps) {
   const { messages, locale, setLanguage, supportedLanguages } = useLanguage()
   const [panel, setPanel] = useState<SettingsPanel>('list')
   const settingsRef = useRef<HTMLDivElement>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
   const settingsTitleId = useId()
 
   useEffect(() => {
@@ -39,23 +41,13 @@ export function Settings({ onClose }: SettingsProps) {
         className="settings"
         aria-labelledby="settings-changelog-title"
       >
-        <header className="settings__header settings__header--sub">
-          <button
-            type="button"
-            className="settings__back-button"
-            onClick={() => setPanel('list')}
-            aria-label={messages.settings.changelogBack}
-          >
-            <ChevronLeft size={24} aria-hidden="true" />
-          </button>
+        <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
           <h2
             id="settings-changelog-title"
             className="settings__title settings__title--sub"
           >
             {messages.settings.changelogTitle}
           </h2>
-          <div />
-        </header>
         <div className="settings__changelog-scroll">
           <SettingsChangelogPanel />
         </div>
