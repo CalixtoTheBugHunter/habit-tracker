@@ -8,6 +8,7 @@ import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stac
 import { HabitStackingAccordion } from '../HabitStackingAccordion/HabitStackingAccordion'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
 import { StreakBadge } from '../StreakBadge/StreakBadge'
+import { GoalBadge } from '../GoalBadge/GoalBadge'
 import type { Habit } from '../../../types/habit'
 import './HabitList.css'
 
@@ -121,6 +122,9 @@ export function HabitList({ onEdit }: HabitListProps) {
             <div className="habit-header">
               <h3 className="habit-name">{habit.name || messages.habitList.unnamedHabit}</h3>
               <StreakBadge streak={habit.streak} />
+              {habit.goalDays !== undefined && habit.goalDays.length > 0 && (
+                <GoalBadge goalDays={habit.goalDays} completionDates={habit.completionDates} />
+              )}
             </div>
             {habit.description && (
               <p className="habit-description">{habit.description}</p>

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { formatMessage } from '../../locale'
 import { calculateStreak } from '../../utils/habit/calculateStreak'
 import {
   calculateLongestStreak,
@@ -7,6 +8,7 @@ import {
   calculateTotalDaysTracked,
   calculateWeeklyCompletionRate,
   calculateMonthlyCompletionRate,
+  calculateGoalProgress,
 } from '../../utils/habit/statisticsCalculations'
 import { AnnualCalendar } from '../habit/AnnualCalendar/AnnualCalendar'
 import type { Habit } from '../../types/habit'
@@ -26,7 +28,10 @@ export function HabitStatisticsCard({ habit }: HabitStatisticsCardProps) {
     weeklyRate: calculateWeeklyCompletionRate(habit.completionDates),
     monthlyRate: calculateMonthlyCompletionRate(habit.completionDates),
     totalDaysTracked: calculateTotalDaysTracked(habit.createdDate),
-  }), [habit.completionDates, habit.createdDate])
+    goalProgress: habit.goalDays !== undefined && habit.goalDays.length > 0
+      ? calculateGoalProgress(habit.completionDates, habit.goalDays)
+      : null,
+  }), [habit.completionDates, habit.createdDate, habit.goalDays])
 
   return (
     <article className="habit-stats-card">
@@ -80,6 +85,21 @@ export function HabitStatisticsCard({ habit }: HabitStatisticsCardProps) {
           </div>
         </div>
       </div>
+
+      {stats.goalProgress !== null && (
+        <div className="habit-stats-card__goal">
+          <span className="habit-stats-card__stat-label">{messages.statistics.goalProgress}</span>
+          <span className="habit-stats-card__stat-value">
+            {formatMessage(messages.statistics.goalProgressValue, {
+              completed: stats.goalProgress.completed,
+              target: stats.goalProgress.target,
+            })}
+          </span>
+          <div className="habit-stats-card__progress-bar" role="progressbar" aria-valuenow={stats.goalProgress.percentage} aria-valuemin={0} aria-valuemax={100} aria-label={messages.statistics.goalProgress}>
+            <div className="habit-stats-card__progress-fill" style={{ width: `${stats.goalProgress.percentage}%` }} />
+          </div>
+        </div>
+      )}
 
       <AnnualCalendar habit={habit} />
     </article>

@@ -18,6 +18,14 @@ export const en = {
       name: 'Name',
       description: 'Description',
       required: '*',
+      goalDays: 'Goal days (optional)',
+      weekdaySun: 'Sun',
+      weekdayMon: 'Mon',
+      weekdayTue: 'Tue',
+      weekdayWed: 'Wed',
+      weekdayThu: 'Thu',
+      weekdayFri: 'Fri',
+      weekdaySat: 'Sat',
     },
     buttons: {
       create: 'Create Habit',
@@ -49,6 +57,9 @@ export const en = {
       addButton: 'Add',
       removeAria: 'Remove {name} from stack',
     },
+  },
+  goalBadge: {
+    goalMetAriaLabel: 'Goal met: {completed} of {target} days this week',
   },
   habitList: {
     loading: 'Loading habits...',
@@ -151,6 +162,9 @@ export const en = {
     monthlyRate: 'Last 30 days',
     totalDaysTracked: 'Days tracked',
     daysUnit: 'days',
+    goalProgress: 'Goal progress',
+    goalProgressValue: '{completed}/{target} this week',
+    goalMet: 'Goal met!',
   },
   settings: {
     title: 'Settings',

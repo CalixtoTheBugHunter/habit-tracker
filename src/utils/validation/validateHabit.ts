@@ -113,6 +113,23 @@ export function validateHabit(habit: unknown): asserts habit is Habit {
     }
   }
 
+  if (habitObj.goalDays !== undefined) {
+    if (!Array.isArray(habitObj.goalDays)) {
+      throw new Error('Habit goalDays must be an array if provided')
+    }
+    if (habitObj.goalDays.length < 1 || habitObj.goalDays.length > 7) {
+      throw new Error('Habit goalDays must have between 1 and 7 elements')
+    }
+    for (const day of habitObj.goalDays) {
+      if (typeof day !== 'number' || !Number.isInteger(day) || day < 0 || day > 6) {
+        throw new Error('Habit goalDays elements must be integers between 0 and 6')
+      }
+    }
+    if (new Set(habitObj.goalDays).size !== habitObj.goalDays.length) {
+      throw new Error('Habit goalDays must not contain duplicate values')
+    }
+  }
+
   const stringFields = ['name', 'description']
   for (const field of stringFields) {
     if (habitObj[field] !== undefined && typeof habitObj[field] !== 'string') {

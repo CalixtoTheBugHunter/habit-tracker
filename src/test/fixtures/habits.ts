@@ -37,9 +37,15 @@ export const mockHabits = {
 
   /**
    * Creates a habit with completion dates.
-   * 
+   *
    * @param dates - Array of ISO 8601 date strings
    */
   withCompletions: (dates: string[]): Habit => createMockHabit({ completionDates: dates }),
+
+  /**
+   * Creates a habit with a goal set.
+   */
+  withGoal: (goalDays: number[], completionDates: string[] = []): Habit =>
+    createMockHabit({ goalDays, completionDates }),
 }
 

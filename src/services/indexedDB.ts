@@ -263,7 +263,11 @@ export async function getAllHabits(): Promise<Habit[]> {
   const { objectStore } = await getObjectStore('readonly')
   const request = objectStore.getAll()
   const result = await handleRequestError(request, 'Failed to get all habits')
-  return result || []
+  const habits = result || []
+  for (const habit of habits) {
+    validateHabit(habit)
+  }
+  return habits
 }
 
 export async function updateHabit(habit: Habit): Promise<string> {
