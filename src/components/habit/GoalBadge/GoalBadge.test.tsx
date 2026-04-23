@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen } from '@testing-library/react'
 import { GoalBadge } from './GoalBadge'
 import { renderWithProviders } from '../../../test/utils/render-helpers'
-import { openDB } from '../../../services/indexedDB'
 
 vi.mock('../../../services/indexedDB', () => ({
   openDB: vi.fn(),
@@ -21,8 +20,6 @@ vi.mock('../../../services/migration', () => ({
 
 describe('GoalBadge', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
     vi.useFakeTimers()
     // 2025-01-15 = Wednesday; ISO week Mon 2025-01-13 – Sun 2025-01-19
     // Mon/Wed/Fri = [1,3,5] → 2025-01-13, 2025-01-15, 2025-01-17

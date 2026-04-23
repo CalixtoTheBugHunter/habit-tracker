@@ -117,6 +117,11 @@
   color: var(--color-primary);
 }
 
+.habit-form-goaldays__day:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .habit-form-goaldays__day--checked {
   border-color: var(--color-primary);
   background-color: var(--color-primary-light);

@@ -151,6 +151,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       setDescription(habit.description || '')
       setStackingHabitIds(habit.stackingHabits ?? [])
       setStackingStepLabels(habit.stackingStepLabels ?? {})
+      setGoalDays(habit.goalDays ?? [])
     } else {
       setName('')
       setDescription('')
