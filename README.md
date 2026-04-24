@@ -1,4 +1,4 @@
-# Habit Tracker
+# Atomic Habit Tracker
 
 A simple, free, and offline habit tracker built with React and TypeScript. Track your daily habits with streak counting, all stored locally in your browser using IndexedDB.
 
@@ -180,7 +180,7 @@ Contributions are welcome! Please follow these guidelines:
 2. **Follow TDD**: Write tests first, then implement the feature
 3. **Run tests**: Ensure all tests pass before submitting
 4. **Lint code**: Run `npm run lint:fix` to fix formatting issues
-5. **Commit changes**: Use clear, descriptive commit messages
+5. **Commit changes**: Use `git commit -m "type(scope): description"` — messages must follow [Conventional Commits](https://www.conventionalcommits.org/) and are enforced by the Husky `commit-msg` hook (e.g. `feat(habits): add reminder support`)
 6. **Submit PR**: Create a pull request with a detailed description
 
 ### Code Quality Standards
