@@ -84,7 +84,6 @@ Maintainers run **Tag version (production release)** (`.github/workflows/tag-ver
 - `npm run test:coverage` - Run tests with coverage report
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
-- `npm run commit` - Interactive commit helper (commitizen + conventional commits)
 
 ### Project Structure
 
@@ -181,7 +180,7 @@ Contributions are welcome! Please follow these guidelines:
 2. **Follow TDD**: Write tests first, then implement the feature
 3. **Run tests**: Ensure all tests pass before submitting
 4. **Lint code**: Run `npm run lint:fix` to fix formatting issues
-5. **Commit changes**: Use `npm run commit` for an interactive prompt that formats your message according to [Conventional Commits](https://www.conventionalcommits.org/). Direct `git commit` is also enforced by the Husky hook — messages must follow the `type(scope): description` format (e.g. `feat(habits): add reminder support`)
+5. **Commit changes**: Use `git commit -m "type(scope): description"` — messages must follow [Conventional Commits](https://www.conventionalcommits.org/) and are enforced by the Husky `commit-msg` hook (e.g. `feat(habits): add reminder support`)
 6. **Submit PR**: Create a pull request with a detailed description
 
 ### Code Quality Standards
