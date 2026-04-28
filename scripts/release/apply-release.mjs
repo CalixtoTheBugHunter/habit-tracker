@@ -8,6 +8,8 @@ import {
   firstChangelogReleaseVersion,
   prependReleaseWithSections,
   SECTION_ORDER,
+  SUMMARY_HEADING_EN,
+  SUMMARY_HEADING_PT,
 } from './prepend-changelog.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -18,7 +20,13 @@ const explicitVersion = process.env.EXPLICIT_VERSION ?? ''
 const sectionsJsonPath = process.env.RELEASE_SECTIONS_JSON ?? ''
 const releaseNotesEnExtra = process.env.RELEASE_NOTES_EN_EXTRA ?? ''
 const releaseNotesPtBrExtra = process.env.RELEASE_NOTES_PT_BR_EXTRA ?? ''
+const aiSummariesJsonPath = process.env.AI_SUMMARIES_JSON ?? ''
 const dateIso = process.env.RELEASE_DATE ?? new Date().toISOString().slice(0, 10)
+
+const SUMMARY_HEADINGS = {
+  en: SUMMARY_HEADING_EN,
+  'pt-BR': SUMMARY_HEADING_PT,
+}
 
 const PT_DISCLAIMER =
   'Esta seção foi gerada automaticamente a partir dos mesmos commits que o [CHANGELOG em inglês](CHANGELOG.md). Os itens abaixo repetem o texto original dos commits.'
@@ -105,6 +113,28 @@ const manifest = JSON.parse(
   readFileSync(join(root, 'changelog-files.json'), 'utf8')
 )
 assertReleaseChangelogManifest(manifest)
+
+/** @type {Record<string, string>} */
+let aiSummaries = {}
+if (aiSummariesJsonPath.trim()) {
+  try {
+    const raw = JSON.parse(readFileSync(aiSummariesJsonPath, 'utf8'))
+    if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+      throw new Error('AI_SUMMARIES_JSON must be a JSON object')
+    }
+    for (const locale of Object.keys(manifest)) {
+      const v = raw[locale]
+      if (typeof v !== 'string' || !v.trim()) {
+        throw new Error(`AI_SUMMARIES_JSON missing or empty summary for locale: ${locale}`)
+      }
+      aiSummaries[locale] = v.trim()
+    }
+  } catch (e) {
+    console.error('Failed to read AI_SUMMARIES_JSON:', e.message ?? e)
+    process.exit(1)
+  }
+}
+
 const pkgPath = join(root, 'package.json')
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'))
 const current = pkg.version
@@ -134,6 +164,8 @@ for (const locale of ['en', 'pt-BR']) {
     locale,
     sections,
     ptDisclaimerMarkdown: locale === 'pt-BR' ? PT_DISCLAIMER : undefined,
+    summary: aiSummaries[locale],
+    summaryHeading: SUMMARY_HEADINGS[locale],
   })
   writeFileSync(filePath, updated)
 }

@@ -2,6 +2,7 @@ name: Tag version (production release)
 
 permissions:
   contents: write
+  models: read
 
 on:
   workflow_dispatch:
@@ -25,6 +26,14 @@ on:
         required: false
       release_notes_pt_br_extra:
         description: 'Optional extra lines appended to pt-BR ### Alterado'
+        type: string
+        required: false
+      release_summary_en:
+        description: 'English AI summary paragraph (leave empty on first run to draft with AI, then re-run)'
+        type: string
+        required: false
+      release_summary_pt_br:
+        description: 'Brazilian Portuguese AI summary paragraph (leave empty on first run to draft with AI, then re-run)'
         type: string
         required: false
 
@@ -105,7 +114,80 @@ jobs:
             --cap=50 \
             --compare-url="$URL"
 
+      - name: Determine summary mode
+        id: summary_mode
+        env:
+          EN: ${{ github.event.inputs.release_summary_en }}
+          PT: ${{ github.event.inputs.release_summary_pt_br }}
+        run: |
+          if [ -z "${EN// }" ] && [ -z "${PT// }" ]; then
+            echo "mode=draft" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=apply" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build AI summary prompt
+        if: steps.summary_mode.outputs.mode == 'draft'
+        env:
+          VERSION: ${{ steps.next.outputs.version }}
+          FROM_TAG: ${{ steps.range.outputs.from_tag }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          URL=""
+          if [ -n "$FROM_TAG" ]; then
+            URL="https://github.com/${GITHUB_REPOSITORY}/compare/${FROM_TAG}...${GITHUB_SHA}"
+          fi
+          LOCALES=$(node -e "console.log(Object.keys(JSON.parse(require('fs').readFileSync('changelog-files.json','utf8'))).join(','))")
+          node scripts/release/build-ai-summary-prompt.mjs \
+            --sections=/tmp/release-sections.json \
+            --locales="$LOCALES" \
+            --version="$VERSION" \
+            --compare-url="$URL" \
+            --output=/tmp/ai-prompt.txt
+
+      - name: Generate AI draft summary
+        id: ai_draft
+        if: steps.summary_mode.outputs.mode == 'draft'
+        uses: actions/ai-inference@v1
+        continue-on-error: true
+        with:
+          model: openai/gpt-4o-mini
+          max-completion-tokens: 600
+          prompt-file: /tmp/ai-prompt.txt
+
+      - name: Render AI draft to step summary
+        if: steps.summary_mode.outputs.mode == 'draft'
+        env:
+          RAW: ${{ steps.ai_draft.outputs.response }}
+          VERSION: ${{ steps.next.outputs.version }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## AI-drafted release summary for v${VERSION}"
+            echo ""
+            echo "Copy the text below into \`release_summary_en\` / \`release_summary_pt_br\` and re-run the workflow."
+            echo ""
+            echo "### Raw AI response"
+            echo ""
+            echo '```'
+            if [ -z "${RAW// }" ]; then
+              echo "(AI call failed or returned empty — write summaries manually and re-run.)"
+            else
+              echo "$RAW"
+            fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Abort draft run
+        if: steps.summary_mode.outputs.mode == 'draft'
+        run: |
+          echo "::notice::Draft mode complete. Re-run the workflow with release_summary_* inputs filled in."
+          exit 0
+
       - name: Ensure tag does not exist
+        if: steps.summary_mode.outputs.mode == 'apply'
         env:
           VERSION: ${{ steps.next.outputs.version }}
         run: |
@@ -119,19 +201,36 @@ jobs:
             exit 1
           fi
 
+      - name: Write AI summaries JSON
+        if: steps.summary_mode.outputs.mode == 'apply'
+        env:
+          EN: ${{ github.event.inputs.release_summary_en }}
+          PT: ${{ github.event.inputs.release_summary_pt_br }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EN// }" ] || [ -z "${PT// }" ]; then
+            echo "::error::Both release_summary_en and release_summary_pt_br must be provided in apply mode."
+            exit 1
+          fi
+          node -e "const fs=require('fs');const o={'en':process.env.EN.trim(),'pt-BR':process.env.PT.trim()};fs.writeFileSync('/tmp/ai-summaries.json', JSON.stringify(o));"
+
       - name: Apply version and prepend changelogs
+        if: steps.summary_mode.outputs.mode == 'apply'
         env:
           BUMP_KIND: ${{ github.event.inputs.bump_kind }}
           EXPLICIT_VERSION: ${{ github.event.inputs.explicit_version }}
           RELEASE_SECTIONS_JSON: /tmp/release-sections.json
           RELEASE_NOTES_EN_EXTRA: ${{ github.event.inputs.release_notes_en_extra || '' }}
           RELEASE_NOTES_PT_BR_EXTRA: ${{ github.event.inputs.release_notes_pt_br_extra || '' }}
+          AI_SUMMARIES_JSON: /tmp/ai-summaries.json
         run: node scripts/release/apply-release.mjs
 
       - name: npm install (sync lockfile)
+        if: steps.summary_mode.outputs.mode == 'apply'
         run: npm install
 
       - name: Git commit and push
+        if: steps.summary_mode.outputs.mode == 'apply'
         env:
           VERSION: ${{ steps.next.outputs.version }}
         run: |
@@ -143,6 +242,7 @@ jobs:
           git push origin HEAD:main
 
       - name: Create and push annotated tag
+        if: steps.summary_mode.outputs.mode == 'apply'
         env:
           VERSION: ${{ steps.next.outputs.version }}
         run: |
