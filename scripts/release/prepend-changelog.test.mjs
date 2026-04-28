@@ -128,6 +128,69 @@ describe('prepend-changelog', () => {
     expect(out).toContain('### Corrigido')
   })
 
+  it('prepends ### Summary before ### Added when summary provided (en)', () => {
+    const out = prependReleaseWithSections({
+      fileContent: enHeader,
+      version: '0.2.0',
+      dateIso: '2026-04-21',
+      locale: 'en',
+      sections: { Added: ['feat: a'] },
+      summary: 'A short paragraph describing this release.',
+      summaryHeading: 'Summary',
+    })
+    const idxSummary = out.indexOf('### Summary')
+    const idxAdded = out.indexOf('### Added')
+    expect(idxSummary).toBeGreaterThan(-1)
+    expect(idxSummary).toBeLessThan(idxAdded)
+    expect(out).toContain('A short paragraph describing this release.')
+  })
+
+  it('prepends ### Resumo after ### Nota and before ### Adicionado (pt-BR)', () => {
+    const pt = `# X\n\n## [0.1.0] - 2020-01-01\n\n### Adicionado\n\n- A\n`
+    const out = prependReleaseWithSections({
+      fileContent: pt,
+      version: '0.2.0',
+      dateIso: '2026-04-21',
+      locale: 'pt-BR',
+      sections: { Added: ['feat: x'] },
+      ptDisclaimerMarkdown: 'Disclaimer PT.',
+      summary: 'Resumo da release em PT.',
+      summaryHeading: 'Resumo',
+    })
+    const idxNota = out.indexOf('### Nota')
+    const idxResumo = out.indexOf('### Resumo')
+    const idxAdic = out.indexOf('### Adicionado')
+    expect(idxNota).toBeLessThan(idxResumo)
+    expect(idxResumo).toBeLessThan(idxAdic)
+    expect(out).toContain('Resumo da release em PT.')
+  })
+
+  it('omits summary block when summary is empty or whitespace', () => {
+    const out = prependReleaseWithSections({
+      fileContent: enHeader,
+      version: '0.2.0',
+      dateIso: '2026-04-21',
+      locale: 'en',
+      sections: { Added: ['feat: a'] },
+      summary: '   ',
+      summaryHeading: 'Summary',
+    })
+    expect(out).not.toContain('### Summary')
+  })
+
+  it('omits summary block when summaryHeading is missing even if summary text is present', () => {
+    const out = prependReleaseWithSections({
+      fileContent: enHeader,
+      version: '0.2.0',
+      dateIso: '2026-04-21',
+      locale: 'en',
+      sections: { Added: ['feat: a'] },
+      summary: 'Some text',
+    })
+    expect(out).not.toContain('### Summary')
+    expect(out).not.toContain('Some text')
+  })
+
   it('integration: summarize then prepend en', () => {
     const subjects = ['feat: one', 'fix: two', 'chore(release): v0.1.0']
     const sec = summarizeCommitSubjects(subjects)

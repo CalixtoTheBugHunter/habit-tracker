@@ -18,6 +18,9 @@ export function firstChangelogReleaseVersion(content) {
 /** @type {SectionKey[]} */
 export const SECTION_ORDER = ['Added', 'Changed', 'Fixed']
 
+export const SUMMARY_HEADING_EN = 'Summary'
+export const SUMMARY_HEADING_PT = 'Resumo'
+
 const HEADINGS_EN = {
   Added: '### Added',
   Changed: '### Changed',
@@ -48,6 +51,8 @@ function normalizeBullet(line) {
  * @param {'en' | 'pt-BR'} opts.locale
  * @param {Partial<Record<SectionKey, string[]>>} opts.sections
  * @param {string} [opts.ptDisclaimerMarkdown] inserted under ### Nota (pt-BR only)
+ * @param {string} [opts.summary] prose paragraph inserted above the sections
+ * @param {string} [opts.summaryHeading] heading text for the summary block (e.g. "Summary", "Resumo")
  */
 export function prependReleaseWithSections({
   fileContent,
@@ -56,6 +61,8 @@ export function prependReleaseWithSections({
   locale,
   sections,
   ptDisclaimerMarkdown,
+  summary,
+  summaryHeading,
 }) {
   const lines = fileContent.split(/\r?\n/)
   let insertIdx = -1
@@ -76,6 +83,11 @@ export function prependReleaseWithSections({
 
   if (locale === 'pt-BR' && ptDisclaimerMarkdown?.trim()) {
     block.push('### Nota', '', ptDisclaimerMarkdown.trim(), '')
+  }
+
+  const summaryText = summary?.trim()
+  if (summaryText && summaryHeading?.trim()) {
+    block.push(`### ${summaryHeading.trim()}`, '', summaryText, '')
   }
 
   for (const key of SECTION_ORDER) {
