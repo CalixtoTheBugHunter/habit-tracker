@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import { formatMessage } from './locale'
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
 import {
   HabitList,
@@ -87,13 +88,15 @@ function AppContent() {
 
 function App() {
   return (
-    <LanguageProvider>
-      <ErrorBoundary>
-        <HabitProvider>
-          <AppContent />
-        </HabitProvider>
-      </ErrorBoundary>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <ErrorBoundary>
+          <HabitProvider>
+            <AppContent />
+          </HabitProvider>
+        </ErrorBoundary>
+      </LanguageProvider>
+    </ThemeProvider>
   )
 }
 

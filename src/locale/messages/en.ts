@@ -176,6 +176,13 @@ export const en = {
     changelogLoadError: 'Could not load changelog. Check your connection and try again.',
     changelogRetry: 'Try again',
     changelogExternalLinkSuffix: ', opens in new tab',
+    theme: {
+      title: 'Theme',
+      light: 'Light',
+      dark: 'Dark',
+      system: 'System',
+      ariaLabel: 'Theme',
+    },
     items: {
       changelog: 'Changelog',
     },

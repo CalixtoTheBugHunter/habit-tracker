@@ -6,6 +6,7 @@ import { Settings } from './Settings'
 import type { LocaleCode } from '../../locale/types'
 import { renderWithProviders } from '../../test/utils/render-helpers'
 import * as languageStorage from '../../services/languageStorage'
+import * as themeStorage from '../../services/themeStorage'
 import { openDB, getAllHabits } from '../../services/indexedDB'
 
 vi.mock('../../services/indexedDB', () => ({
@@ -50,6 +51,8 @@ describe('Settings', () => {
     vi.mocked(getAllHabits).mockResolvedValue([])
     vi.mocked(languageStorage.getPreferredLanguage).mockResolvedValue('en')
     vi.mocked(languageStorage.setPreferredLanguage).mockResolvedValue(undefined)
+    vi.spyOn(themeStorage, 'getPreferredTheme').mockResolvedValue(undefined)
+    vi.spyOn(themeStorage, 'setPreferredTheme').mockResolvedValue(undefined)
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
@@ -61,6 +64,8 @@ describe('Settings', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    document.documentElement.removeAttribute('data-theme')
   })
 
   async function renderReady(
@@ -258,6 +263,45 @@ describe('Settings', () => {
 
     expect(screen.getByRole('navigation')).toBeInTheDocument()
     expect(screen.getByRole('list')).toBeInTheDocument()
+  })
+
+  it('should render theme radio group with three options', async () => {
+    await renderReady(<Settings onClose={() => {}} />)
+
+    const group = screen.getByRole('radiogroup', { name: 'Theme' })
+    expect(group).toBeInTheDocument()
+    expect(within(group).getByRole('radio', { name: 'Light' })).toBeInTheDocument()
+    expect(within(group).getByRole('radio', { name: 'Dark' })).toBeInTheDocument()
+    expect(within(group).getByRole('radio', { name: 'System' })).toBeInTheDocument()
+  })
+
+  it('should persist theme and set data-theme attribute when user picks Dark', async () => {
+    const user = userEvent.setup()
+    await renderReady(<Settings onClose={() => {}} />)
+
+    await user.click(screen.getByRole('radio', { name: 'Dark' }))
+
+    expect(themeStorage.setPreferredTheme).toHaveBeenCalledWith('dark')
+    await waitFor(() => {
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
+    })
+  })
+
+  it('should remove data-theme attribute when user picks System', async () => {
+    const user = userEvent.setup()
+    await renderReady(<Settings onClose={() => {}} />)
+
+    await user.click(screen.getByRole('radio', { name: 'Light' }))
+    await waitFor(() => {
+      expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+    })
+
+    await user.click(screen.getByRole('radio', { name: 'System' }))
+
+    expect(themeStorage.setPreferredTheme).toHaveBeenLastCalledWith('system')
+    await waitFor(() => {
+      expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
+    })
   })
 
   it('should show changelog load error when fetch fails', async () => {
