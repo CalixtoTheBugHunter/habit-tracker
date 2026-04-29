@@ -92,7 +92,9 @@ function AppContent() {
               onSuccess={() => setEditingHabit(undefined)}
               onCancel={() => setEditingHabit(undefined)}
             />
-            <HabitList onEdit={setEditingHabit} />
+            <section className="habit-list-container">
+              <HabitList onEdit={setEditingHabit} />
+            </section>
           </>
         )}
         {activeView === 'settings' && (

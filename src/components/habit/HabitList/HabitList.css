@@ -3,7 +3,7 @@
   padding: 0;
   margin: var(--spacing-3xl) 0;
   width: 100%;
-  max-width: 800px;
+  max-width: 600px;
 }
 
 .habit-list > .empty-state {
@@ -199,6 +199,25 @@
   .habit-actions {
     gap: var(--spacing-sm);
     margin-top: var(--spacing-md);
+  }
+}
+
+@media (min-width: 768px) {
+  .habit-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    max-width: none;
+    width: 100%;
+    gap: var(--spacing-lg);
+    align-items: start;
+  }
+
+  .habit-list > p {
+    grid-column: 1 / -1;
+  }
+
+  .habit-item {
+    margin-bottom: 0;
   }
 }
 
