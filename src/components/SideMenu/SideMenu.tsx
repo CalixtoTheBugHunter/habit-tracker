@@ -103,6 +103,7 @@ export function SideMenu({ isOpen, onClose, activeView, onNavigate }: SideMenuPr
       )}
       <nav
         ref={menuRef}
+        id="side-menu"
         className={`side-menu ${isOpen ? 'side-menu--open' : ''}`}
         role="navigation"
         aria-label={messages.sideMenu.navigationAria}

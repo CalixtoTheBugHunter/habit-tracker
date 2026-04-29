@@ -34,10 +34,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 0 var(--spacing-lg);
-  max-width: 1200px;
-  margin: 0 auto;
   flex: 1;
 }
 
@@ -45,4 +42,9 @@
   .app-main {
     padding: 0 var(--spacing-3xl);
   }
+}
+
+.habit-list-container {
+  width: 100%;
+  max-width: 100%;
 }

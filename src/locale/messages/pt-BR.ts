@@ -178,6 +178,12 @@ export const ptBR = {
       'Não foi possível carregar as atualizações. Verifique a conexão e tente novamente.',
     changelogRetry: 'Tentar novamente',
     changelogExternalLinkSuffix: ', abre em nova aba',
+    theme: {
+      title: 'Tema',
+      light: 'Claro',
+      dark: 'Escuro',
+      system: 'Sistema',
+    },
     items: {
       changelog: 'Atualizações',
     },

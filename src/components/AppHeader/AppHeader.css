@@ -6,13 +6,16 @@
   padding: var(--spacing-lg) var(--spacing-2xl);
   padding-top: calc(var(--spacing-lg) + env(safe-area-inset-top));
   border-bottom: 1px solid var(--color-border);
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   position: sticky;
   top: 0;
   z-index: var(--z-index-indicator);
-  backdrop-filter: saturate(10.5) blur(24px);
-  mix-blend-mode: difference;
+  -webkit-backdrop-filter: saturate(1.8) blur(24px);
+  backdrop-filter: saturate(1.8) blur(24px);
+}
 
+:root[data-theme='light'] .app-header {
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 .app-header__menu-button {
@@ -40,13 +43,30 @@
 }
 
 .app-header__logo {
-  display: inline-block;
-  margin: 0 0 var(--spacing-lg) 0;
   padding: 0;
-  position: relative;
   font-size: inherit;
   font-weight: normal;
   line-height: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.app-header__logo-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  max-width: 100%;
+  transition: background-color var(--transition-fast);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin: calc(-1 * var(--spacing-xs)) calc(-1 * var(--spacing-sm));
+}
+
+.app-header__logo-link:hover {
+  background-color: var(--color-surface-hover);
 }
 
 .app-header__logo-text {
@@ -61,15 +81,22 @@
   border: 0;
 }
 
-.app-header__logo img {
+.app-header__logo-mark {
   display: block;
   width: 200px;
   height: 50px;
-  max-width: none;
-  object-fit: cover;
-  transform: translateY(15px);
+  max-width: 100%;
+  flex-shrink: 0;
+  background-color: var(--app-header-logo-fill, var(--color-text-primary));
+  -webkit-mask-image: url('/logo.png');
+  mask-image: url('/logo.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
-
 
 @media (max-width: 600px) {
   .app-header {

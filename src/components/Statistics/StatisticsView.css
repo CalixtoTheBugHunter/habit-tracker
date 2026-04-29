@@ -28,3 +28,24 @@
     font-size: var(--font-size-2xl);
   }
 }
+
+@media (min-width: 768px) {
+  .statistics-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    max-width: none;
+    width: 100%;
+    margin: var(--spacing-3xl) 0;
+    gap: var(--spacing-lg);
+    align-items: start;
+  }
+
+  .statistics-view__title,
+  .statistics-view__empty {
+    grid-column: 1 / -1;
+  }
+
+  .statistics-view .habit-stats-card {
+    margin-bottom: 0;
+  }
+}

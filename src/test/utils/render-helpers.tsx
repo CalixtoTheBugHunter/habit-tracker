@@ -2,23 +2,32 @@ import { ReactElement, ReactNode, Component, ErrorInfo } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { HabitProvider } from '../../contexts/HabitContext'
 import { LanguageProvider } from '../../contexts/LanguageContext'
+import { ThemeProvider } from '../../contexts/ThemeContext'
 import type { LocaleCode } from '../../locale/types'
+import type { ThemePreference } from '../../services/themeStorage'
 
 type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
   initialLocale?: LocaleCode
+  initialTheme?: ThemePreference
 }
 
 export function renderWithProviders(
   ui: ReactElement,
   options?: CustomRenderOptions
 ) {
-  const { initialLocale = 'en', ...renderOptions } = options ?? {}
+  const {
+    initialLocale = 'en',
+    initialTheme = 'system',
+    ...renderOptions
+  } = options ?? {}
 
   function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <LanguageProvider initialLocale={initialLocale}>
-        <HabitProvider>{children}</HabitProvider>
-      </LanguageProvider>
+      <ThemeProvider initialTheme={initialTheme}>
+        <LanguageProvider initialLocale={initialLocale}>
+          <HabitProvider>{children}</HabitProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     )
   }
 

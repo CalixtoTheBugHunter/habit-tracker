@@ -68,29 +68,28 @@
   opacity: 0.2;
 }
 
-@media (prefers-color-scheme: dark) {
-  .annual-calendar-day {
-    background-color: #21262d;
-    border-color: rgba(240, 246, 252, 0.1);
-  }
+/* ThemeProvider sets data-theme to the resolved value ('light' or 'dark'). */
+:root[data-theme='dark'] .annual-calendar-day {
+  background-color: #21262d;
+  border-color: rgba(240, 246, 252, 0.1);
+}
 
-  .annual-calendar-day.completed {
-    background-color: #26a641;
-    border-color: transparent;
-  }
+:root[data-theme='dark'] .annual-calendar-day.completed {
+  background-color: #26a641;
+  border-color: transparent;
+}
 
-  .annual-calendar-day.completed:hover {
-    background-color: #39d353;
-  }
+:root[data-theme='dark'] .annual-calendar-day.completed:hover {
+  background-color: #39d353;
+}
 
-  .annual-calendar-day.today {
-    border-color: #58a6ff;
-  }
+:root[data-theme='dark'] .annual-calendar-day.today {
+  border-color: #58a6ff;
+}
 
-  .annual-calendar-day.today.completed {
-    background-color: #26a641;
-    border-color: #58a6ff;
-  }
+:root[data-theme='dark'] .annual-calendar-day.today.completed {
+  background-color: #26a641;
+  border-color: #58a6ff;
 }
 
 @media (max-width: 1200px) {
