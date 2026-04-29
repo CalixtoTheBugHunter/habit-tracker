@@ -17,6 +17,14 @@ export async function getPreferredTheme(): Promise<ThemePreference | undefined> 
 }
 
 export async function setPreferredTheme(theme: ThemePreference): Promise<void> {
-  if (!isThemePreference(theme)) return
+  // Mirror to localStorage so the inline script in index.html can apply the
+  // theme synchronously on next load and avoid a flash of the wrong theme.
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(PREFERRED_THEME_KEY, theme)
+    }
+  } catch {
+    // Safari private mode / disabled storage: ignore, IndexedDB is source of truth.
+  }
   await setSetting(PREFERRED_THEME_KEY, theme)
 }

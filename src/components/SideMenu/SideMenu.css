@@ -72,11 +72,8 @@
   font-weight: 500;
 }
 
-/* Only when system or app is not forcing light; matches index.css system/dark theming. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .side-menu__backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-  }
+:root[data-theme='dark'] .side-menu__backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 600px) {

@@ -14,6 +14,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Sansita+Swashed:wght@400;600;700&display=swap" rel="stylesheet" media="all">
   </head>
   <body>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('preferredTheme')
+          var resolved
+          if (t === 'light' || t === 'dark') {
+            resolved = t
+          } else {
+            resolved = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+          }
+          document.documentElement.setAttribute('data-theme', resolved)
+        } catch (e) {}
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

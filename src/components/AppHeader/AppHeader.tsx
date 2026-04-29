@@ -29,6 +29,7 @@ export function AppHeader({ onMenuToggle, menuOpen, onHomeClick, homeIsActive }:
         onClick={onMenuToggle}
         aria-label={menuOpen ? messages.appHeader.menuButtonCloseAria : messages.appHeader.menuButtonOpenAria}
         aria-expanded={menuOpen}
+        aria-controls="side-menu"
       >
         {menuOpen ? (
           <X size={24} aria-hidden="true" />

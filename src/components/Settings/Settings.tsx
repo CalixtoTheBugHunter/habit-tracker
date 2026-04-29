@@ -21,7 +21,6 @@ export function Settings({ onClose }: SettingsProps) {
   const [panel, setPanel] = useState<SettingsPanel>('list')
   const settingsRef = useRef<HTMLDivElement>(null)
   const settingsTitleId = useId()
-  const themeLegendId = useId()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -83,18 +82,11 @@ export function Settings({ onClose }: SettingsProps) {
       <nav className="settings__nav">
         <ul className="settings__list">
           <li className="settings__theme-row">
-            <fieldset
-              className="settings__theme-fieldset"
-              aria-labelledby={themeLegendId}
-            >
-              <legend id={themeLegendId} className="settings__theme-legend">
+            <fieldset className="settings__theme-fieldset">
+              <legend className="settings__theme-legend">
                 {messages.settings.theme.title}
               </legend>
-              <div
-                className="settings__theme-options"
-                role="radiogroup"
-                aria-label={messages.settings.theme.ariaLabel}
-              >
+              <div className="settings__theme-options">
                 {THEME_OPTIONS.map((option) => (
                   <label
                     key={option}

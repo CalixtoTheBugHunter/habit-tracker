@@ -183,7 +183,6 @@ export const ptBR = {
       light: 'Claro',
       dark: 'Escuro',
       system: 'Sistema',
-      ariaLabel: 'Tema',
     },
     items: {
       changelog: 'Atualizações',

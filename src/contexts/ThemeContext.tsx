@@ -41,13 +41,9 @@ function getSystemResolvedTheme(): ResolvedTheme {
   return window.matchMedia(DARK_MEDIA_QUERY).matches ? 'dark' : 'light'
 }
 
-function applyThemeAttribute(theme: ThemePreference): void {
+function applyThemeAttribute(resolved: ResolvedTheme): void {
   if (typeof document === 'undefined') return
-  if (theme === 'system') {
-    document.documentElement.removeAttribute('data-theme')
-  } else {
-    document.documentElement.setAttribute('data-theme', theme)
-  }
+  document.documentElement.setAttribute('data-theme', resolved)
 }
 
 interface ThemeProviderProps {
@@ -65,11 +61,14 @@ export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
   )
   const mountedRef = useRef(true)
 
+  const resolvedTheme: ResolvedTheme = theme === 'system' ? systemResolved : theme
+
   useEffect(() => {
-    if (initialTheme !== undefined) {
-      applyThemeAttribute(initialTheme)
-      return
-    }
+    applyThemeAttribute(resolvedTheme)
+  }, [resolvedTheme])
+
+  useEffect(() => {
+    if (initialTheme !== undefined) return
 
     mountedRef.current = true
 
@@ -78,7 +77,6 @@ export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
         const stored = await getPreferredTheme()
         if (mountedRef.current && stored !== undefined) {
           setThemeState(stored)
-          applyThemeAttribute(stored)
         }
       } catch {
         // fall back to 'system'; no-op
@@ -105,11 +103,8 @@ export function ThemeProvider({ children, initialTheme }: ThemeProviderProps) {
 
   const setTheme = useCallback(async (next: ThemePreference) => {
     setThemeState(next)
-    applyThemeAttribute(next)
     await persistPreferredTheme(next)
   }, [])
-
-  const resolvedTheme: ResolvedTheme = theme === 'system' ? systemResolved : theme
 
   const value = useMemo(
     (): ThemeContextValue => ({ theme, resolvedTheme, setTheme }),

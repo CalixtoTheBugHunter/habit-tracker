@@ -181,7 +181,6 @@ export const en = {
       light: 'Light',
       dark: 'Dark',
       system: 'System',
-      ariaLabel: 'Theme',
     },
     items: {
       changelog: 'Changelog',

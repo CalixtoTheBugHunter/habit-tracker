@@ -14,7 +14,6 @@
   backdrop-filter: saturate(1.8) blur(24px);
 }
 
-/* Forced light theme: avoid dark frosted bar + heavy blur (only blur in the app; dark OS + app light is common). */
 :root[data-theme='light'] .app-header {
   background-color: rgba(255, 255, 255, 0.4);
 }

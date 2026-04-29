@@ -268,7 +268,7 @@ describe('Settings', () => {
   it('should render theme radio group with three options', async () => {
     await renderReady(<Settings onClose={() => {}} />)
 
-    const group = screen.getByRole('radiogroup', { name: 'Theme' })
+    const group = screen.getByRole('group', { name: 'Theme' })
     expect(group).toBeInTheDocument()
     expect(within(group).getByRole('radio', { name: 'Light' })).toBeInTheDocument()
     expect(within(group).getByRole('radio', { name: 'Dark' })).toBeInTheDocument()
@@ -287,20 +287,21 @@ describe('Settings', () => {
     })
   })
 
-  it('should remove data-theme attribute when user picks System', async () => {
+  it('should persist system and resolve data-theme attribute when user picks System', async () => {
     const user = userEvent.setup()
     await renderReady(<Settings onClose={() => {}} />)
 
-    await user.click(screen.getByRole('radio', { name: 'Light' }))
+    await user.click(screen.getByRole('radio', { name: 'Dark' }))
     await waitFor(() => {
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark')
     })
 
     await user.click(screen.getByRole('radio', { name: 'System' }))
 
     expect(themeStorage.setPreferredTheme).toHaveBeenLastCalledWith('system')
     await waitFor(() => {
-      expect(document.documentElement.hasAttribute('data-theme')).toBe(false)
+      const attr = document.documentElement.getAttribute('data-theme')
+      expect(attr === 'light' || attr === 'dark').toBe(true)
     })
   })
 
