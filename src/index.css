@@ -29,8 +29,8 @@
   --color-on-warning-outline: rgba(0, 0, 0, 0.28);
   --color-on-warning-dismiss-hover-bg: rgba(0, 0, 0, 0.06);
   
-  /* Interactive Elements */
-  --color-button-primary-text: #000000;
+  /* Text on --color-primary (black) */
+  --color-button-primary-text: #ffffff;
   --color-button-secondary-bg: #f5f5f5;
   --color-button-secondary-hover: #e0e0e0;
   --color-button-secondary-text: #333333;
@@ -197,6 +197,19 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-background);
   color: var(--color-text-primary);
+}
+
+/* Light UIs: body was forced `antialiased`, which on many systems looks soft/muddy on light backdrops. Logs round2: html `auto`, body `antialiased` while data-theme=light. */
+:root[data-theme='light'] body {
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) body {
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+  }
 }
 
 #root {

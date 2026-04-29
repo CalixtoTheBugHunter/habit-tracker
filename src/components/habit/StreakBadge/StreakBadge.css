@@ -44,19 +44,6 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .streak-badge-simple {
-    background-color: var(--color-primary-light);
-    color: var(--color-primary);
-    border-color: var(--color-primary);
-  }
-
-  .streak-badge-colorful {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-success) 100%);
-    color: var(--color-button-primary-text);
-  }
-}
-
 @media (max-width: 600px) {
   .streak-badge {
     font-size: var(--font-size-xs);
