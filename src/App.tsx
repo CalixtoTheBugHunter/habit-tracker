@@ -30,12 +30,22 @@ function AppContent() {
     setEditingHabit(undefined)
   }
 
+  const goHome = () => {
+    handleNavigate('home')
+    setMenuOpen(false)
+  }
+
   if (isLoading) {
     return (
       <div className="app">
         <OfflineIndicator />
         <ServiceWorkerUpdatePrompt />
-        <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
+        <AppHeader
+          onMenuToggle={() => setMenuOpen(prev => !prev)}
+          menuOpen={menuOpen}
+          onHomeClick={goHome}
+          homeIsActive={activeView === 'home'}
+        />
         <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
         <div className="app-loading" role="status" aria-live="polite" aria-atomic="true">
           <p>{messages.app.loading}</p>
@@ -49,7 +59,12 @@ function AppContent() {
       <div className="app">
         <OfflineIndicator />
         <ServiceWorkerUpdatePrompt />
-        <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
+        <AppHeader
+          onMenuToggle={() => setMenuOpen(prev => !prev)}
+          menuOpen={menuOpen}
+          onHomeClick={goHome}
+          homeIsActive={activeView === 'home'}
+        />
         <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
         <div className="app-error" role="alert" aria-live="assertive" aria-atomic="true">
           <p className="error">{formatMessage(messages.app.error, { error })}</p>
@@ -62,7 +77,12 @@ function AppContent() {
     <div className="app">
       <OfflineIndicator />
       <ServiceWorkerUpdatePrompt />
-      <AppHeader onMenuToggle={() => setMenuOpen(prev => !prev)} menuOpen={menuOpen} />
+      <AppHeader
+        onMenuToggle={() => setMenuOpen(prev => !prev)}
+        menuOpen={menuOpen}
+        onHomeClick={goHome}
+        homeIsActive={activeView === 'home'}
+      />
       <SideMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} activeView={activeView} onNavigate={handleNavigate} />
       <main className="app-main">
         {activeView === 'home' && (

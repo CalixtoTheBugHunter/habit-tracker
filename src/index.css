@@ -40,6 +40,9 @@
   
   /* Focus */
   --color-focus: #0066cc;
+
+  /* App header mask logo (can diverge from body text) */
+  --app-header-logo-fill: var(--color-text-primary);
   
   /* Shadows */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -126,10 +129,16 @@
     /* Focus */
     --color-focus: #42a5f5;
 
+    --app-header-logo-fill: var(--color-text-primary);
+
     /* Shadows */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
   }
+}
+
+:root[data-theme='light'] {
+  --app-header-logo-fill: var(--color-text-primary);
 }
 
 :root[data-theme='dark'] {
@@ -174,6 +183,8 @@
 
   /* Focus */
   --color-focus: #42a5f5;
+
+  --app-header-logo-fill: var(--color-text-primary);
 
   /* Shadows */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
