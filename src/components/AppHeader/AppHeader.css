@@ -6,13 +6,12 @@
   padding: var(--spacing-lg) var(--spacing-2xl);
   padding-top: calc(var(--spacing-lg) + env(safe-area-inset-top));
   border-bottom: 1px solid var(--color-border);
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   position: sticky;
   top: 0;
   z-index: var(--z-index-indicator);
-  backdrop-filter: saturate(10.5) blur(24px);
-  mix-blend-mode: difference;
-
+  -webkit-backdrop-filter: saturate(1.8) blur(24px);
+  backdrop-filter: saturate(1.8) blur(24px);
 }
 
 .app-header__menu-button {
