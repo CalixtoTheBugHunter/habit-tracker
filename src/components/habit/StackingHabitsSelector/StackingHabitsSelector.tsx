@@ -33,6 +33,7 @@ export function StackingHabitsSelector({
   const options = habits.filter(h => {
     if (excludeId && h.id === excludeId) return false
     if (value.includes(h.id)) return false
+    if (h.archivedAt) return false
     if (excludeId && wouldCreateStackingCycle(excludeId, h.id, habits)) return false
     const search = filterText.trim().toLowerCase()
     if (!search) return true

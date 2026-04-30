@@ -130,6 +130,15 @@ export function validateHabit(habit: unknown): asserts habit is Habit {
     }
   }
 
+  if (habitObj.archivedAt !== undefined) {
+    if (typeof habitObj.archivedAt !== 'string' || habitObj.archivedAt.trim() === '') {
+      throw new Error('Habit archivedAt must be a non-empty string if provided')
+    }
+    if (!isValidISO8601(habitObj.archivedAt)) {
+      throw new Error('Habit archivedAt must be a valid ISO 8601 date string')
+    }
+  }
+
   const stringFields = ['name', 'description']
   for (const field of stringFields) {
     if (habitObj[field] !== undefined && typeof habitObj[field] !== 'string') {

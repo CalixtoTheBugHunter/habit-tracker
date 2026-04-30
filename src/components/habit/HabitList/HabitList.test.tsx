@@ -5,7 +5,7 @@ import { HabitList } from './HabitList'
 import { renderWithProviders } from '../../../test/utils/render-helpers'
 import { createMockHabit } from '../../../test/fixtures/habits'
 import { createDateString, createDateStrings } from '../../../test/utils/date-helpers'
-import { getAllHabits, openDB, updateHabit, deleteHabit } from '../../../services/indexedDB'
+import { getAllHabits, openDB, updateHabit } from '../../../services/indexedDB'
 import type { Habit } from '../../../types/habit'
 import { verifyButtonContrast, mockComputedStyleForElement } from '../../../test/utils/accessibility-helpers'
 
@@ -210,7 +210,7 @@ describe('HabitList', () => {
     expect(completedButton).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('should render delete button for each habit', async () => {
+  it('should render archive button for each habit', async () => {
     const habits = [
       createMockHabit({
         id: '1',
@@ -223,11 +223,11 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />)
 
-    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
-    expect(deleteButton).toBeInTheDocument()
+    const archiveButton = await screen.findByRole('button', { name: /archive exercise/i })
+    expect(archiveButton).toBeInTheDocument()
   })
 
-  it('should show confirmation modal when delete button is clicked', async () => {
+  it('should show confirmation modal when archive button is clicked', async () => {
     const user = userEvent.setup()
     const habits = [
       createMockHabit({
@@ -241,15 +241,15 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />)
 
-    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
-    await user.click(deleteButton)
+    const archiveButton = await screen.findByRole('button', { name: /archive exercise/i })
+    await user.click(archiveButton)
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('Delete Habit')).toBeInTheDocument()
-    expect(screen.getByText(/are you sure you want to delete "exercise"/i)).toBeInTheDocument()
+    expect(screen.getByText('Archive Habit')).toBeInTheDocument()
+    expect(screen.getByText(/archive "exercise"/i)).toBeInTheDocument()
   })
 
-  it('should delete habit when confirmed in modal', async () => {
+  it('should archive habit when confirmed in modal', async () => {
     const user = userEvent.setup()
     const habits = [
       createMockHabit({
@@ -262,22 +262,27 @@ describe('HabitList', () => {
     vi.mocked(getAllHabits)
       .mockResolvedValueOnce(habits)
       .mockResolvedValueOnce([])
-    vi.mocked(deleteHabit).mockResolvedValue()
+    vi.mocked(updateHabit).mockResolvedValue('1')
 
     renderWithProviders(<HabitList />)
 
-    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
-    await user.click(deleteButton)
+    const archiveButton = await screen.findByRole('button', { name: /archive exercise/i })
+    await user.click(archiveButton)
 
-    const confirmButton = await screen.findByRole('button', { name: 'Delete' })
+    const confirmButton = await screen.findByRole('button', { name: 'Archive' })
     await user.click(confirmButton)
 
     await waitFor(() => {
-      expect(deleteHabit).toHaveBeenCalledWith('1')
+      expect(updateHabit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: '1',
+          archivedAt: expect.any(String),
+        })
+      )
     })
   })
 
-  it('should not delete habit when modal is cancelled', async () => {
+  it('should not archive habit when modal is cancelled', async () => {
     const user = userEvent.setup()
     const habits = [
       createMockHabit({
@@ -291,8 +296,8 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />)
 
-    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
-    await user.click(deleteButton)
+    const archiveButton = await screen.findByRole('button', { name: /archive exercise/i })
+    await user.click(archiveButton)
 
     const cancelButton = await screen.findByRole('button', { name: 'Cancel' })
     await user.click(cancelButton)
@@ -301,10 +306,10 @@ describe('HabitList', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })
 
-    expect(deleteHabit).not.toHaveBeenCalled()
+    expect(updateHabit).not.toHaveBeenCalled()
   })
 
-  it('should handle delete errors', async () => {
+  it('should handle archive errors', async () => {
     const user = userEvent.setup()
     const habits = [
       createMockHabit({
@@ -315,22 +320,22 @@ describe('HabitList', () => {
     ]
 
     vi.mocked(getAllHabits).mockResolvedValue(habits)
-    vi.mocked(deleteHabit).mockRejectedValue(new Error('Failed to delete habit'))
+    vi.mocked(updateHabit).mockRejectedValue(new Error('Failed to update habit'))
 
     renderWithProviders(<HabitList />)
 
-    const deleteButton = await screen.findByRole('button', { name: /delete exercise/i })
-    await user.click(deleteButton)
+    const archiveButton = await screen.findByRole('button', { name: /archive exercise/i })
+    await user.click(archiveButton)
 
-    const confirmButton = await screen.findByRole('button', { name: 'Delete' })
+    const confirmButton = await screen.findByRole('button', { name: 'Archive' })
     await user.click(confirmButton)
 
     await waitFor(() => {
-      expect(screen.getByText(/failed to delete habit/i)).toBeInTheDocument()
+      expect(screen.getByText(/failed to update habit/i)).toBeInTheDocument()
     })
   })
 
-  it('should handle delete button for habit without name', async () => {
+  it('should handle archive button for habit without name', async () => {
     const user = userEvent.setup()
     const habits = [
       createMockHabit({
@@ -344,13 +349,31 @@ describe('HabitList', () => {
 
     renderWithProviders(<HabitList />)
 
-    const deleteButton = await screen.findByRole('button', { name: /delete habit/i })
-    expect(deleteButton).toBeInTheDocument()
+    const archiveButton = await screen.findByRole('button', { name: /archive habit/i })
+    expect(archiveButton).toBeInTheDocument()
 
-    await user.click(deleteButton)
+    await user.click(archiveButton)
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText(/are you sure you want to delete "this habit"/i)).toBeInTheDocument()
+    expect(screen.getByText(/archive "this habit"/i)).toBeInTheDocument()
+  })
+
+  it('should not render archived habits in the list', async () => {
+    const habits = [
+      createMockHabit({ id: '1', name: 'ActiveHabit' }),
+      createMockHabit({
+        id: '2',
+        name: 'ArchivedHabit',
+        archivedAt: '2026-04-30T00:00:00.000Z',
+      }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    expect(await screen.findByText('ActiveHabit')).toBeInTheDocument()
+    expect(screen.queryByText('ArchivedHabit')).not.toBeInTheDocument()
   })
 
   describe('Button positioning and layout', () => {
@@ -397,11 +420,11 @@ describe('HabitList', () => {
 
       const toggleButton = screen.getByRole('button', { name: /mark as completed today/i })
       const editButton = screen.getByRole('button', { name: /edit exercise/i })
-      const deleteButton = screen.getByRole('button', { name: /delete exercise/i })
+      const archiveButton = screen.getByRole('button', { name: /archive exercise/i })
 
       expect(actionsContainer).toContainElement(toggleButton)
       expect(actionsContainer).toContainElement(editButton)
-      expect(actionsContainer).toContainElement(deleteButton)
+      expect(actionsContainer).toContainElement(archiveButton)
     })
 
     it('should maintain logical keyboard navigation order', async () => {
@@ -570,11 +593,11 @@ describe('HabitList', () => {
         renderOptions: { onEdit: vi.fn() },
       },
       {
-        name: 'delete button on hover',
-        matcher: 'habit-delete-button',
-        bgColor: 'rgb(211, 47, 47)',
+        name: 'archive button on hover',
+        matcher: 'habit-archive-button',
+        bgColor: 'rgb(237, 108, 2)',
         minRatio: 4.0,
-        buttonName: /delete/i,
+        buttonName: /archive/i,
         setupHabits: () => [
           createMockHabit({
             id: '1',

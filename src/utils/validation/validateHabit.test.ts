@@ -363,5 +363,56 @@ describe('validateHabit', () => {
       expect(() => validateHabit(habit)).not.toThrow()
     })
   })
+
+  describe('archivedAt validation', () => {
+    it('should accept habit with valid ISO 8601 archivedAt', () => {
+      const habit: Habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        archivedAt: '2026-04-30T12:34:56.000Z',
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
+
+    it('should accept undefined archivedAt', () => {
+      const habit: Habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
+
+    it('should reject non-string archivedAt', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        archivedAt: 123,
+      }
+      expect(() => validateHabit(habit)).toThrow('archivedAt')
+    })
+
+    it('should reject empty-string archivedAt', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        archivedAt: '',
+      }
+      expect(() => validateHabit(habit)).toThrow('archivedAt')
+    })
+
+    it('should reject invalid ISO 8601 archivedAt', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        archivedAt: 'not-a-date',
+      }
+      expect(() => validateHabit(habit)).toThrow('ISO 8601')
+    })
+  })
 })
 

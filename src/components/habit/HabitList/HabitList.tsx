@@ -5,6 +5,7 @@ import { formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stackingCompletionCoordinator'
+import { archiveHabit } from '../../../utils/habit/archiveHabit'
 import { HabitStackingAccordion } from '../HabitStackingAccordion/HabitStackingAccordion'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
 import { StreakBadge } from '../StreakBadge/StreakBadge'
@@ -18,18 +19,18 @@ interface HabitListProps {
 
 export function HabitList({ onEdit }: HabitListProps) {
   const { messages } = useLanguage()
-  const { habits, isLoading, error, toggleHabitCompletion, updateHabit, deleteHabit } = useHabits()
+  const { habits, activeHabits, isLoading, error, toggleHabitCompletion, updateHabit } = useHabits()
   const [togglingId, setTogglingId] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [habitToDelete, setHabitToDelete] = useState<{ id: string; name?: string } | null>(null)
+  const [archivingId, setArchivingId] = useState<string | null>(null)
+  const [habitToArchive, setHabitToArchive] = useState<{ id: string; name?: string } | null>(null)
 
   const habitsWithCalculations = useMemo(() => {
-    return habits.map(habit => ({
+    return activeHabits.map(habit => ({
       ...habit,
       streak: calculateStreak(habit.completionDates),
       completedToday: isTodayCompleted(habit.completionDates),
     }))
-  }, [habits])
+  }, [activeHabits])
 
   const handleToggle = async (habitId: string) => {
     setTogglingId(habitId)
@@ -42,26 +43,32 @@ export function HabitList({ onEdit }: HabitListProps) {
     }
   }
 
-  const handleDeleteClick = (habitId: string, habitName?: string) => {
-    setHabitToDelete({ id: habitId, name: habitName })
+  const handleArchiveClick = (habitId: string, habitName?: string) => {
+    setHabitToArchive({ id: habitId, name: habitName })
   }
 
-  const handleDeleteConfirm = async () => {
-    if (!habitToDelete) return
+  const handleArchiveConfirm = async () => {
+    if (!habitToArchive) return
 
-    setDeletingId(habitToDelete.id)
+    const target = habits.find(h => h.id === habitToArchive.id)
+    if (!target) {
+      setHabitToArchive(null)
+      return
+    }
+
+    setArchivingId(habitToArchive.id)
     try {
-      await deleteHabit(habitToDelete.id)
-      setHabitToDelete(null)
+      await updateHabit(archiveHabit(target))
+      setHabitToArchive(null)
     } catch {
       // Error is already handled in context, but we catch to prevent unhandled promise rejection
     } finally {
-      setDeletingId(null)
+      setArchivingId(null)
     }
   }
 
-  const handleDeleteCancel = () => {
-    setHabitToDelete(null)
+  const handleArchiveCancel = () => {
+    setHabitToArchive(null)
   }
 
   const handleToggleStackingHabit = async (parentHabitId: string, stackingHabitId: string) => {
@@ -101,20 +108,21 @@ export function HabitList({ onEdit }: HabitListProps) {
     )
   }
 
-  const habitDisplayName = habitToDelete?.name || messages.habitList.thisHabit
+  const habitDisplayName = habitToArchive?.name || messages.habitList.thisHabit
 
   return (
     <>
       <ConfirmationModal
-        isOpen={habitToDelete !== null}
-        title={messages.habitList.deleteModal.title}
-        message={formatMessage(messages.habitList.deleteModal.message, { name: habitDisplayName })}
-        confirmLabel={messages.habitList.deleteModal.confirm}
-        cancelLabel={messages.habitList.deleteModal.cancel}
-        confirmingLabel={messages.habitList.deleteModal.confirming}
-        onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
-        isConfirming={deletingId !== null}
+        isOpen={habitToArchive !== null}
+        title={messages.habitList.archiveModal.title}
+        message={formatMessage(messages.habitList.archiveModal.message, { name: habitDisplayName })}
+        confirmLabel={messages.habitList.archiveModal.confirm}
+        cancelLabel={messages.habitList.archiveModal.cancel}
+        confirmingLabel={messages.habitList.archiveModal.confirming}
+        buttonVariant="warning"
+        onConfirm={handleArchiveConfirm}
+        onCancel={handleArchiveCancel}
+        isConfirming={archivingId !== null}
       />
       <ul className="habit-list" aria-label={messages.habitList.aria.list}>
         {habitsWithCalculations.map(habit => (
@@ -161,13 +169,13 @@ export function HabitList({ onEdit }: HabitListProps) {
               )}
               <button
                 type="button"
-                className="habit-delete-button"
-                onClick={() => handleDeleteClick(habit.id, habit.name)}
-                disabled={deletingId === habit.id}
-                aria-label={formatMessage(messages.habitList.aria.deleteHabit, { name: habit.name || messages.habitList.aria.habitNameFallback })}
-                aria-busy={deletingId === habit.id}
+                className="habit-archive-button"
+                onClick={() => handleArchiveClick(habit.id, habit.name)}
+                disabled={archivingId === habit.id}
+                aria-label={formatMessage(messages.habitList.aria.archiveHabit, { name: habit.name || messages.habitList.aria.habitNameFallback })}
+                aria-busy={archivingId === habit.id}
               >
-                {messages.habitList.buttons.delete}
+                {messages.habitList.buttons.archive}
               </button>
             </div>
           </li>

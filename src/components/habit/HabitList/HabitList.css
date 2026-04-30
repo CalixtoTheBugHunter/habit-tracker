@@ -167,6 +167,30 @@
   cursor: not-allowed;
 }
 
+.habit-archive-button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-warning);
+  background-color: transparent;
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-base), color var(--transition-base);
+  white-space: nowrap;
+}
+
+.habit-archive-button:hover:not(:disabled) {
+  background-color: var(--color-warning);
+  color: var(--color-button-primary-text);
+  font-weight: bold;
+}
+
+.habit-archive-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .habit-list {
     margin: var(--spacing-lg) 0;

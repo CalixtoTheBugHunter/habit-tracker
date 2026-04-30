@@ -20,3 +20,6 @@ export type { AppView } from './SideMenu/SideMenu'
 
 // Statistics components
 export { StatisticsView } from './Statistics/StatisticsView'
+
+// Archived habits components
+export { ArchivedHabitsView } from './ArchivedHabitsView/ArchivedHabitsView'
