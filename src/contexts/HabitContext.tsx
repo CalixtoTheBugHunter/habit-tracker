@@ -10,6 +10,8 @@ import type { Habit } from '../types/habit'
 
 interface HabitContextType {
   habits: Habit[]
+  activeHabits: Habit[]
+  archivedHabits: Habit[]
   isLoading: boolean
   error: string | null
   refreshHabits: () => Promise<void>
@@ -136,9 +138,14 @@ export function HabitProvider({ children }: HabitProviderProps) {
     initializeApp()
   }, [messages.app.initError, refreshHabits])
 
+  const activeHabits = useMemo(() => habits.filter(h => !h.archivedAt), [habits])
+  const archivedHabits = useMemo(() => habits.filter(h => !!h.archivedAt), [habits])
+
   const value: HabitContextType = useMemo(
     () => ({
       habits,
+      activeHabits,
+      archivedHabits,
       isLoading,
       error,
       refreshHabits,
@@ -146,7 +153,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       updateHabit,
       deleteHabit,
     }),
-    [habits, isLoading, error, refreshHabits, toggleHabitCompletion, updateHabit, deleteHabit]
+    [habits, activeHabits, archivedHabits, isLoading, error, refreshHabits, toggleHabitCompletion, updateHabit, deleteHabit]
   )
 
   return <HabitContext.Provider value={value}>{children}</HabitContext.Provider>

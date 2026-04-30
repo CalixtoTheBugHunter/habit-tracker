@@ -244,4 +244,27 @@ describe('StackingHabitsSelector', () => {
     expect(screen.getByRole('button', { name: /^add$/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /remove habit a from stack/i })).toBeInTheDocument()
   })
+
+  it('excludes archived habits from the dropdown options', async () => {
+    const user = userEvent.setup()
+    const archivedB = createMockHabit({ id: 'habit-b', name: 'Habit B', archivedAt: '2026-04-30T00:00:00.000Z' })
+    const habitsWithArchived = [habitA, archivedB, habitC]
+    renderWithProviders(
+      <StackingHabitsSelector value={[]} onChange={vi.fn()} habits={habitsWithArchived} />
+    )
+    const input = screen.getByPlaceholderText(/type to search habits/i)
+    await user.click(input)
+    const listbox = screen.getByRole('listbox')
+    expect(within(listbox).getByText('Habit A')).toBeInTheDocument()
+    expect(within(listbox).getByText('Habit C')).toBeInTheDocument()
+    expect(within(listbox).queryByText('Habit B')).not.toBeInTheDocument()
+  })
+
+  it('preserves pre-selected archived habit chip with its name', () => {
+    const archivedB = createMockHabit({ id: 'habit-b', name: 'Habit B', archivedAt: '2026-04-30T00:00:00.000Z' })
+    renderWithProviders(
+      <StackingHabitsSelector value={['habit-b']} onChange={vi.fn()} habits={[habitA, archivedB, habitC]} />
+    )
+    expect(screen.getByText('Habit B')).toBeInTheDocument()
+  })
 })

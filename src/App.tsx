@@ -14,6 +14,7 @@ import {
   SideMenu,
   Settings,
   StatisticsView,
+  ArchivedHabitsView,
 } from './components'
 import type { AppView } from './components'
 import type { Habit } from './types/habit'
@@ -102,6 +103,9 @@ function AppContent() {
         )}
         {activeView === 'statistics' && (
           <StatisticsView />
+        )}
+        {activeView === 'archived' && (
+          <ArchivedHabitsView />
         )}
       </main>
     </div>

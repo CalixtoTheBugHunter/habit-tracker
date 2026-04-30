@@ -140,4 +140,45 @@ describe('StatisticsView', () => {
       expect(bar).toHaveAttribute('aria-valuenow', '0')
     })
   })
+
+  it('should exclude archived habits from statistics', async () => {
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'ActiveHabit',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+      }),
+      createMockHabit({
+        id: '2',
+        name: 'ArchivedHabit',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        archivedAt: '2026-04-30T00:00:00.000Z',
+      }),
+    ]
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<StatisticsView />)
+
+    expect(await screen.findByText('ActiveHabit')).toBeInTheDocument()
+    expect(screen.queryByText('ArchivedHabit')).not.toBeInTheDocument()
+  })
+
+  it('should render empty state when all habits are archived', async () => {
+    const habits = [
+      createMockHabit({
+        id: '1',
+        name: 'ArchivedHabit',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        archivedAt: '2026-04-30T00:00:00.000Z',
+      }),
+    ]
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<StatisticsView />)
+
+    expect(await screen.findByText(/no habits yet/i)).toBeInTheDocument()
+  })
 })

@@ -479,5 +479,48 @@ describe('HabitContext', () => {
       expect(screen.getByText(/failed to update habit/i)).toBeInTheDocument()
     })
   })
+
+  describe('derived habit lists', () => {
+    function TestDerivedLists() {
+      const { activeHabits, archivedHabits } = useHabits()
+      return (
+        <div>
+          <div data-testid="active-ids">{activeHabits.map(h => h.id).join(',')}</div>
+          <div data-testid="archived-ids">{archivedHabits.map(h => h.id).join(',')}</div>
+        </div>
+      )
+    }
+
+    it('exposes activeHabits excluding habits with archivedAt', async () => {
+      const mockHabits = [
+        createMockHabit({ id: '1', name: 'Active' }),
+        createMockHabit({ id: '2', name: 'Archived', archivedAt: '2026-04-30T00:00:00.000Z' }),
+        createMockHabit({ id: '3', name: 'Active2' }),
+      ]
+      vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+      vi.mocked(getAllHabits).mockResolvedValue(mockHabits)
+
+      renderWithProviders(<TestDerivedLists />)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('active-ids').textContent).toBe('1,3')
+      })
+    })
+
+    it('exposes archivedHabits containing only archived habits', async () => {
+      const mockHabits = [
+        createMockHabit({ id: '1', name: 'Active' }),
+        createMockHabit({ id: '2', name: 'Archived', archivedAt: '2026-04-30T00:00:00.000Z' }),
+      ]
+      vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+      vi.mocked(getAllHabits).mockResolvedValue(mockHabits)
+
+      renderWithProviders(<TestDerivedLists />)
+
+      await waitFor(() => {
+        expect(screen.getByTestId('archived-ids').textContent).toBe('2')
+      })
+    })
+  })
 })
 

@@ -5,9 +5,9 @@ import './StatisticsView.css'
 
 export function StatisticsView() {
   const { messages } = useLanguage()
-  const { habits } = useHabits()
+  const { activeHabits } = useHabits()
 
-  if (habits.length === 0) {
+  if (activeHabits.length === 0) {
     return (
       <div className="statistics-view">
         <h2 className="statistics-view__title">{messages.statistics.title}</h2>
@@ -19,7 +19,7 @@ export function StatisticsView() {
   return (
     <div className="statistics-view">
       <h2 className="statistics-view__title">{messages.statistics.title}</h2>
-      {habits.map(habit => (
+      {activeHabits.map(habit => (
         <HabitStatisticsCard key={habit.id} habit={habit} />
       ))}
     </div>

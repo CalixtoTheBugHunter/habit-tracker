@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { Home, BarChart3, Settings } from 'lucide-react'
+import { Home, BarChart3, Archive, Settings } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import './SideMenu.css'
 
-export type AppView = 'home' | 'settings' | 'statistics'
+export type AppView = 'home' | 'settings' | 'statistics' | 'archived'
 
 interface SideMenuProps {
   isOpen: boolean
@@ -89,6 +89,7 @@ export function SideMenu({ isOpen, onClose, activeView, onNavigate }: SideMenuPr
   const navItems: { view: AppView; label: string; icon: typeof Home }[] = [
     { view: 'home', label: messages.sideMenu.home, icon: Home },
     { view: 'statistics', label: messages.sideMenu.statistics, icon: BarChart3 },
+    { view: 'archived', label: messages.sideMenu.archived, icon: Archive },
     { view: 'settings', label: messages.sideMenu.settings, icon: Settings },
   ]
 

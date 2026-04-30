@@ -37,6 +37,17 @@ describe('Habit Type', () => {
       }
       expect(habit[field as keyof Habit]).toBe(value)
     })
+
+    it('should accept optional archivedAt field', () => {
+      const archivedAt = '2026-04-30T00:00:00.000Z'
+      const habit: Habit = {
+        id: 'test-id',
+        createdDate: new Date().toISOString(),
+        completionDates: [],
+        archivedAt,
+      }
+      expect(habit.archivedAt).toBe(archivedAt)
+    })
   })
 
   describe('Constraints', () => {

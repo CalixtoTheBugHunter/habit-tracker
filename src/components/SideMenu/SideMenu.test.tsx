@@ -36,7 +36,17 @@ describe('SideMenu', () => {
     render(<SideMenu {...defaultProps} />)
     expect(screen.getByRole('button', { name: /home/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /statistics/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /archived/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument()
+  })
+
+  it('should navigate to archived view when archived nav item is clicked', async () => {
+    const user = userEvent.setup()
+    const onNavigate = vi.fn()
+    render(<SideMenu {...defaultProps} onNavigate={onNavigate} />)
+
+    await user.click(screen.getByRole('button', { name: /archived/i }))
+    expect(onNavigate).toHaveBeenCalledWith('archived')
   })
 
   it('should highlight active view', () => {
