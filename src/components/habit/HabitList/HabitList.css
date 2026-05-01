@@ -209,7 +209,7 @@
     max-width: none;
     width: 100%;
     gap: var(--spacing-lg);
-    align-items: start;
+    align-items: stretch;
   }
 
   .habit-list > p {
@@ -218,6 +218,12 @@
 
   .habit-item {
     margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .habit-item .habit-actions {
+    margin-top: auto;
   }
 }
 
