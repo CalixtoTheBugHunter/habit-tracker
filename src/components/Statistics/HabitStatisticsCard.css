@@ -6,6 +6,12 @@
   margin-bottom: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base), border-color var(--transition-base);
+  display: flex;
+  flex-direction: column;
+}
+
+.habit-stats-card > :last-child {
+  margin-top: auto;
 }
 
 .habit-stats-card:hover {

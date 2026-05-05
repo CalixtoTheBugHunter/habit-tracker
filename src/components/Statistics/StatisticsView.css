@@ -37,7 +37,7 @@
     width: 100%;
     margin: var(--spacing-3xl) 0;
     gap: var(--spacing-lg);
-    align-items: start;
+    align-items: stretch;
   }
 
   .statistics-view__title,
