@@ -1,11 +1,15 @@
-const CACHE_NAME = 'habit-tracker-v1'
-const RUNTIME_CACHE = 'habit-tracker-runtime-v1'
+const CACHE_NAME = 'habit-tracker-v3'
+const RUNTIME_CACHE = 'habit-tracker-runtime-v3'
 
 const PRECACHE_URLS = [
   '/',
   '/index.html',
+  '/icon.png',
   '/icon-192.png',
   '/icon-512.png',
+  '/icon-maskable-512.png',
+  '/favicon-32.png',
+  '/apple-touch-icon.png',
 ]
 
 self.addEventListener('install', (event) => {
