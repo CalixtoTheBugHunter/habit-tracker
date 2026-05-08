@@ -9,6 +9,7 @@ import {
 import type { Migration } from './types'
 import type { Habit } from '../../types/habit'
 import { createMockHabit } from '../../test/fixtures/habits'
+import { migrations as appMigrations } from './migrations'
 
 function createMockStoreBackedByMap(data: Map<string, unknown>) {
   return {
@@ -325,6 +326,26 @@ describe('Migration Runner', () => {
 
     it('handles missing backup gracefully', async () => {
       await expect(restoreFromBackup(mockDB)).resolves.toBeUndefined()
+    })
+  })
+
+  describe('app migration backfill-sort-order', () => {
+    it('assigns contiguous sortOrder by createdDate then id', async () => {
+      habitsData.clear()
+      habitsData.set(
+        'b',
+        createMockHabit({ id: 'b', name: 'Second', createdDate: '2025-02-01T00:00:00.000Z' })
+      )
+      habitsData.set(
+        'a',
+        createMockHabit({ id: 'a', name: 'First', createdDate: '2025-01-01T00:00:00.000Z' })
+      )
+      const migration = appMigrations.find(m => m.name === 'backfill-sort-order')
+      expect(migration).toBeDefined()
+      await migration!.migrate(mockDB)
+      const byId = new Map((Array.from(habitsData.values()) as Habit[]).map(h => [h.id, h]))
+      expect(byId.get('a')?.sortOrder).toBe(0)
+      expect(byId.get('b')?.sortOrder).toBe(1)
     })
   })
 

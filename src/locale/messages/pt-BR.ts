@@ -67,6 +67,7 @@ export const ptBR = {
     empty: 'Ainda não há hábitos. Comece criando seu primeiro hábito!',
     unnamedHabit: 'Hábito Sem Nome',
     thisHabit: 'este hábito',
+    reorderAnnouncement: 'Ordem dos hábitos salva.',
     buttons: {
       markDone: 'Marcar como feito',
       completed: '✓ Concluído',
@@ -83,6 +84,7 @@ export const ptBR = {
       archiveHabit: 'Arquivar {name}',
       habitNameFallback: 'hábito',
       list: 'Lista de hábitos',
+      reorderHandle: 'Reordenar {name}',
     },
     deleteModal: {
       title: 'Excluir Hábito',

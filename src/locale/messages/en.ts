@@ -67,6 +67,7 @@ export const en = {
     empty: 'No habits yet. Start by creating your first habit!',
     unnamedHabit: 'Unnamed Habit',
     thisHabit: 'this habit',
+    reorderAnnouncement: 'Habit order saved.',
     buttons: {
       markDone: 'Mark as done',
       completed: '✓ Completed',
@@ -83,6 +84,7 @@ export const en = {
       archiveHabit: 'Archive {name}',
       habitNameFallback: 'habit',
       list: 'List of habits',
+      reorderHandle: 'Reorder {name}',
     },
     deleteModal: {
       title: 'Delete Habit',

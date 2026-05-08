@@ -364,6 +364,47 @@ describe('validateHabit', () => {
     })
   })
 
+  describe('sortOrder validation', () => {
+    it('should accept valid sortOrder', () => {
+      const habit: Habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        sortOrder: 0,
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
+
+    it('should accept undefined sortOrder', () => {
+      const habit: Habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
+
+    it('should reject negative sortOrder', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        sortOrder: -1,
+      }
+      expect(() => validateHabit(habit)).toThrow('sortOrder')
+    })
+
+    it('should reject non-integer sortOrder', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        sortOrder: 1.5,
+      }
+      expect(() => validateHabit(habit)).toThrow('sortOrder')
+    })
+  })
+
   describe('archivedAt validation', () => {
     it('should accept habit with valid ISO 8601 archivedAt', () => {
       const habit: Habit = {

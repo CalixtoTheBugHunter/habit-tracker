@@ -14,6 +14,7 @@ vi.mock('../../../services/indexedDB', () => ({
   getAllHabits: vi.fn(),
   updateHabit: vi.fn(),
   deleteHabit: vi.fn(),
+  putHabits: vi.fn(),
   testUtils: {
     resetDB: vi.fn(),
   },
@@ -65,6 +66,20 @@ describe('HabitList', () => {
     expect(await screen.findByText('Daily workout')).toBeInTheDocument()
     expect(await screen.findByText('Read')).toBeInTheDocument()
     expect(await screen.findByText('Read for 30 minutes')).toBeInTheDocument()
+  })
+
+  it('renders reorder drag handles with accessible names', async () => {
+    const habits = [
+      createMockHabit({ id: '1', name: 'Exercise' }),
+      createMockHabit({ id: '2', name: 'Read' }),
+    ]
+
+    vi.mocked(getAllHabits).mockResolvedValue(habits)
+
+    renderWithProviders(<HabitList />)
+
+    expect(await screen.findByRole('button', { name: /^reorder exercise$/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /^reorder read$/i })).toBeInTheDocument()
   })
 
   it('should display streak badge for each habit', async () => {

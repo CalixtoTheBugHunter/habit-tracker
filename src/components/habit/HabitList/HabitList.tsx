@@ -1,4 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useCallback } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useHabits } from '../../../contexts/HabitContext'
 import { useLanguage } from '../../../contexts/LanguageContext'
 import { formatMessage } from '../../../locale'
@@ -6,10 +16,8 @@ import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stackingCompletionCoordinator'
 import { archiveHabit } from '../../../utils/habit/archiveHabit'
-import { HabitStackingAccordion } from '../HabitStackingAccordion/HabitStackingAccordion'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
-import { StreakBadge } from '../StreakBadge/StreakBadge'
-import { GoalBadge } from '../GoalBadge/GoalBadge'
+import { SortableHabitItem } from './SortableHabitItem'
 import type { Habit } from '../../../types/habit'
 import './HabitList.css'
 
@@ -19,10 +27,22 @@ interface HabitListProps {
 
 export function HabitList({ onEdit }: HabitListProps) {
   const { messages } = useLanguage()
-  const { habits, activeHabits, isLoading, error, toggleHabitCompletion, updateHabit } = useHabits()
+  const { habits, activeHabits, isLoading, error, toggleHabitCompletion, updateHabit, reorderActiveHabits } =
+    useHabits()
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [archivingId, setArchivingId] = useState<string | null>(null)
   const [habitToArchive, setHabitToArchive] = useState<{ id: string; name?: string } | null>(null)
+  const [reorderAnnouncement, setReorderAnnouncement] = useState<string | null>(null)
+  const announcementClearRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   const habitsWithCalculations = useMemo(() => {
     return activeHabits.map(habit => ({
@@ -31,6 +51,38 @@ export function HabitList({ onEdit }: HabitListProps) {
       completedToday: isTodayCompleted(habit.completionDates),
     }))
   }, [activeHabits])
+
+  const sortableItemIds = useMemo(() => habitsWithCalculations.map(h => h.id), [habitsWithCalculations])
+
+  const scheduleClearAnnouncement = useCallback(() => {
+    if (announcementClearRef.current !== null) {
+      globalThis.clearTimeout(announcementClearRef.current)
+    }
+    announcementClearRef.current = globalThis.setTimeout(() => {
+      setReorderAnnouncement(null)
+      announcementClearRef.current = null
+    }, 3000)
+  }, [])
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) {
+      return
+    }
+    const oldIndex = sortableItemIds.indexOf(String(active.id))
+    const newIndex = sortableItemIds.indexOf(String(over.id))
+    if (oldIndex === -1 || newIndex === -1) {
+      return
+    }
+    const nextOrder = arrayMove(sortableItemIds, oldIndex, newIndex)
+    try {
+      await reorderActiveHabits(nextOrder)
+      setReorderAnnouncement(messages.habitList.reorderAnnouncement)
+      scheduleClearAnnouncement()
+    } catch {
+      // Error surfaced via HabitContext
+    }
+  }
 
   const handleToggle = async (habitId: string) => {
     setTogglingId(habitId)
@@ -124,64 +176,31 @@ export function HabitList({ onEdit }: HabitListProps) {
         onCancel={handleArchiveCancel}
         isConfirming={archivingId !== null}
       />
-      <ul className="habit-list" aria-label={messages.habitList.aria.list}>
-        {habitsWithCalculations.map(habit => (
-          <li key={habit.id} className="habit-item">
-            <div className="habit-header">
-              <h3 className="habit-name">{habit.name || messages.habitList.unnamedHabit}</h3>
-              <StreakBadge streak={habit.streak} />
-              {habit.goalDays !== undefined && habit.goalDays.length > 0 && (
-                <GoalBadge goalDays={habit.goalDays} completionDates={habit.completionDates} />
-              )}
-            </div>
-            {habit.description && (
-              <p className="habit-description">{habit.description}</p>
-            )}
-            {habit.stackingHabits && habit.stackingHabits.length > 0 && (
-              <HabitStackingAccordion
-                parentHabit={habit}
-                stackingHabitsResolved={habit.stackingHabits.map(id => habits.find(h => h.id === id))}
-                onToggleStackingHabit={handleToggleStackingHabit}
-                updateHabit={updateHabit}
-              />
-            )}
-            <div className="habit-actions">
-              <button
-                type="button"
-                className={`completion-toggle ${habit.completedToday ? 'completed' : 'not-completed'}`}
-                onClick={() => handleToggle(habit.id)}
-                disabled={togglingId === habit.id}
-                aria-label={habit.completedToday ? messages.habitList.aria.markNotCompleted : messages.habitList.aria.markCompleted}
-                aria-pressed={habit.completedToday}
-                aria-busy={togglingId === habit.id}
-              >
-                {togglingId === habit.id ? messages.habitList.buttons.updating : habit.completedToday ? messages.habitList.buttons.completed : messages.habitList.buttons.markDone}
-              </button>
-              {onEdit && (
-                <button
-                  type="button"
-                  className="habit-edit-button"
-                  onClick={() => onEdit(habit)}
-                  aria-label={formatMessage(messages.habitList.aria.editHabit, { name: habit.name || messages.habitList.aria.habitNameFallback })}
-                >
-                  {messages.habitList.buttons.edit}
-                </button>
-              )}
-              <button
-                type="button"
-                className="habit-archive-button"
-                onClick={() => handleArchiveClick(habit.id, habit.name)}
-                disabled={archivingId === habit.id}
-                aria-label={formatMessage(messages.habitList.aria.archiveHabit, { name: habit.name || messages.habitList.aria.habitNameFallback })}
-                aria-busy={archivingId === habit.id}
-              >
-                {messages.habitList.buttons.archive}
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="habit-list-wrapper">
+        <div className="habit-list__sr-announcement" role="status" aria-live="polite" aria-atomic="true">
+          {reorderAnnouncement}
+        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={sortableItemIds} strategy={verticalListSortingStrategy}>
+            <ul className="habit-list" aria-label={messages.habitList.aria.list}>
+              {habitsWithCalculations.map(habit => (
+                <SortableHabitItem
+                  key={habit.id}
+                  habit={habit}
+                  habits={habits}
+                  togglingId={togglingId}
+                  archivingId={archivingId}
+                  onEdit={onEdit}
+                  onToggle={handleToggle}
+                  onArchiveClick={handleArchiveClick}
+                  onToggleStackingHabit={handleToggleStackingHabit}
+                  updateHabit={updateHabit}
+                />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
+      </div>
     </>
   )
 }
-

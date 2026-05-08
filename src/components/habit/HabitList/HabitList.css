@@ -1,3 +1,21 @@
+.habit-list-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+}
+
+.habit-list__sr-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .habit-list {
   list-style: none;
   padding: 0;
@@ -43,6 +61,43 @@
   margin-bottom: var(--spacing-md);
   flex-wrap: wrap;
   gap: var(--spacing-sm);
+}
+
+.habit-header--with-handle {
+  align-items: center;
+}
+
+.habit-drag-handle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  margin: calc(-1 * var(--spacing-xs)) var(--spacing-sm) calc(-1 * var(--spacing-xs)) calc(-1 * var(--spacing-xs));
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: grab;
+  border-radius: var(--radius-sm);
+  touch-action: none;
+}
+
+.habit-drag-handle:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-border-hover, rgba(0, 0, 0, 0.04));
+}
+
+.habit-drag-handle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.habit-drag-handle:active {
+  cursor: grabbing;
+}
+
+.habit-item--dragging {
+  box-shadow: var(--shadow-md);
 }
 
 .habit-name {

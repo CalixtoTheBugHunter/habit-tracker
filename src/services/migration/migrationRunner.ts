@@ -37,7 +37,7 @@ function settingsPut(db: IDBDatabase, key: string, value: string): Promise<void>
   })
 }
 
-function habitsGetAll(db: IDBDatabase): Promise<Habit[]> {
+export function habitsGetAll(db: IDBDatabase): Promise<Habit[]> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([STORE_NAME], 'readonly')
     const store = transaction.objectStore(STORE_NAME)
@@ -50,7 +50,7 @@ function habitsGetAll(db: IDBDatabase): Promise<Habit[]> {
   })
 }
 
-function habitsClearAndRestore(db: IDBDatabase, habits: Habit[]): Promise<void> {
+export function habitsClearAndRestore(db: IDBDatabase, habits: Habit[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([STORE_NAME], 'readwrite')
     const store = transaction.objectStore(STORE_NAME)
