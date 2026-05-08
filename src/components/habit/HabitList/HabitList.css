@@ -258,6 +258,10 @@
 }
 
 @media (min-width: 768px) {
+  .habit-list-wrapper {
+    max-width: none;
+  }
+
   .habit-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));

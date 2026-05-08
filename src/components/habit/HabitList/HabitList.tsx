@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useCallback } from 'react'
+import { useMemo, useState, useRef, useCallback, useSyncExternalStore } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -8,7 +8,13 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core'
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable'
 import { useHabits } from '../../../contexts/HabitContext'
 import { useLanguage } from '../../../contexts/LanguageContext'
 import { formatMessage } from '../../../locale'
@@ -23,6 +29,29 @@ import './HabitList.css'
 
 interface HabitListProps {
   onEdit?: (habit: Habit) => void
+}
+
+/** Matches `HabitList.css` @media (min-width: 768px) grid layout. */
+const GRID_LAYOUT_MEDIA_QUERY = '(min-width: 768px)'
+
+function subscribeGridLayoutMatch(onChange: () => void) {
+  if (typeof globalThis.matchMedia !== 'function') {
+    return () => {}
+  }
+  const mq = globalThis.matchMedia(GRID_LAYOUT_MEDIA_QUERY)
+  mq.addEventListener('change', onChange)
+  return () => mq.removeEventListener('change', onChange)
+}
+
+function getGridLayoutMatchSnapshot() {
+  if (typeof globalThis.matchMedia !== 'function') {
+    return false
+  }
+  return globalThis.matchMedia(GRID_LAYOUT_MEDIA_QUERY).matches
+}
+
+function getGridLayoutMatchServerSnapshot() {
+  return false
 }
 
 export function HabitList({ onEdit }: HabitListProps) {
@@ -54,6 +83,13 @@ export function HabitList({ onEdit }: HabitListProps) {
 
   const sortableItemIds = useMemo(() => habitsWithCalculations.map(h => h.id), [habitsWithCalculations])
 
+  const useGridSortableStrategy = useSyncExternalStore(
+    subscribeGridLayoutMatch,
+    getGridLayoutMatchSnapshot,
+    getGridLayoutMatchServerSnapshot
+  )
+  const sortableStrategy = useGridSortableStrategy ? rectSortingStrategy : verticalListSortingStrategy
+
   const scheduleClearAnnouncement = useCallback(() => {
     if (announcementClearRef.current !== null) {
       globalThis.clearTimeout(announcementClearRef.current)
@@ -64,25 +100,28 @@ export function HabitList({ onEdit }: HabitListProps) {
     }, 3000)
   }, [])
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) {
-      return
-    }
-    const oldIndex = sortableItemIds.indexOf(String(active.id))
-    const newIndex = sortableItemIds.indexOf(String(over.id))
-    if (oldIndex === -1 || newIndex === -1) {
-      return
-    }
-    const nextOrder = arrayMove(sortableItemIds, oldIndex, newIndex)
-    try {
-      await reorderActiveHabits(nextOrder)
-      setReorderAnnouncement(messages.habitList.reorderAnnouncement)
-      scheduleClearAnnouncement()
-    } catch {
-      // Error surfaced via HabitContext
-    }
-  }
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) {
+        return
+      }
+      const oldIndex = sortableItemIds.indexOf(String(active.id))
+      const newIndex = sortableItemIds.indexOf(String(over.id))
+      if (oldIndex === -1 || newIndex === -1) {
+        return
+      }
+      const nextOrder = arrayMove(sortableItemIds, oldIndex, newIndex)
+      try {
+        await reorderActiveHabits(nextOrder)
+        setReorderAnnouncement(messages.habitList.reorderAnnouncement)
+        scheduleClearAnnouncement()
+      } catch {
+        // Error surfaced via HabitContext
+      }
+    },
+    [sortableItemIds, reorderActiveHabits, messages.habitList.reorderAnnouncement, scheduleClearAnnouncement]
+  )
 
   const handleToggle = async (habitId: string) => {
     setTogglingId(habitId)
@@ -181,7 +220,7 @@ export function HabitList({ onEdit }: HabitListProps) {
           {reorderAnnouncement}
         </div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={sortableItemIds} strategy={verticalListSortingStrategy}>
+          <SortableContext items={sortableItemIds} strategy={sortableStrategy}>
             <ul className="habit-list" aria-label={messages.habitList.aria.list}>
               {habitsWithCalculations.map(habit => (
                 <SortableHabitItem
