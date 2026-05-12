@@ -130,6 +130,12 @@ export function validateHabit(habit: unknown): asserts habit is Habit {
     }
   }
 
+  if (habitObj.sortOrder !== undefined) {
+    if (typeof habitObj.sortOrder !== 'number' || !Number.isInteger(habitObj.sortOrder) || habitObj.sortOrder < 0) {
+      throw new Error('Habit sortOrder must be a non-negative integer if provided')
+    }
+  }
+
   if (habitObj.archivedAt !== undefined) {
     if (typeof habitObj.archivedAt !== 'string' || habitObj.archivedAt.trim() === '') {
       throw new Error('Habit archivedAt must be a non-empty string if provided')

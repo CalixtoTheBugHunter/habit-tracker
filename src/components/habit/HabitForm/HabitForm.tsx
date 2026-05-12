@@ -5,6 +5,7 @@ import { addHabit, updateHabit } from '../../../services/indexedDB'
 import { track } from '../../../analytics/umami'
 import type { Habit } from '../../../types/habit'
 import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../../utils/validation/validateHabit'
+import { nextSortOrderForNewHabit } from '../../../utils/habit/nextSortOrderForNewHabit'
 import { StackingHabitsSelector } from '../StackingHabitsSelector/StackingHabitsSelector'
 import './HabitForm.css'
 
@@ -109,6 +110,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
         stackingStepLabels: labelsForStack && Object.keys(labelsForStack).length > 0 ? labelsForStack : undefined,
         autoCompletedDates: hasStacking ? habit?.autoCompletedDates : undefined,
         goalDays: goalDays.length > 0 ? goalDays : undefined,
+        sortOrder: isEditMode ? habit?.sortOrder : nextSortOrderForNewHabit(habits),
       }
 
       if (isEditMode) {

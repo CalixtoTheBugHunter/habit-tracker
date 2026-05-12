@@ -11,6 +11,7 @@
  * @property stackingStepLabels - Optional map of stacking-step ID to display name; used when that ID is not in the main habits list (stacking-only steps)
  * @property autoCompletedDates - Optional array of ISO 8601 date strings for days the main habit was marked complete only because all stacked steps were done that day (not manual main completion)
  * @property archivedAt - Optional ISO 8601 date string marking when the habit was archived; undefined means the habit is active
+ * @property sortOrder - Optional non-negative display order among all habits; lower values appear first. Assigned on create and by migration; updated when reordering.
  *
  * Constraints:
  * - id must be a non-empty string
@@ -30,5 +31,6 @@ export interface Habit {
   autoCompletedDates?: string[]
   goalDays?: number[]
   archivedAt?: string
+  sortOrder?: number
 }
 

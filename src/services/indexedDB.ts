@@ -279,6 +279,36 @@ export async function updateHabit(habit: Habit): Promise<string> {
   return String(result)
 }
 
+/**
+ * Writes multiple habits in a single IndexedDB transaction (e.g. batch sortOrder updates).
+ */
+export async function putHabits(habits: Habit[]): Promise<void> {
+  if (habits.length === 0) return
+  for (const h of habits) {
+    validateHabit(h)
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    openDB()
+      .then((db) => {
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          reject(new Error(`Object store "${STORE_NAME}" does not exist`))
+          return
+        }
+        const transaction = db.transaction([STORE_NAME], 'readwrite')
+        const objectStore = transaction.objectStore(STORE_NAME)
+        transaction.oncomplete = () => resolve()
+        transaction.onerror = () => {
+          reject(transaction.error ?? new Error('Transaction failed'))
+        }
+        for (const habit of habits) {
+          objectStore.put(habit)
+        }
+      })
+      .catch(reject)
+  })
+}
+
 export async function deleteHabit(id: string): Promise<void> {
   validateId(id)
 

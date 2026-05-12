@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react'
 import { useLanguage } from './LanguageContext'
-import { openDB, getAllHabits, updateHabit as updateHabitInDB, deleteHabit as deleteHabitFromDB } from '../services/indexedDB'
+import { openDB, getAllHabits, updateHabit as updateHabitInDB, deleteHabit as deleteHabitFromDB, putHabits } from '../services/indexedDB'
 import { runMigrations, migrations } from '../services/migration'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
 import { stripTodayFromAutoCompletedDates } from '../utils/habit/checkAutoCompletion'
 import { createAppError } from '../utils/error/errorTypes'
 import { logError } from '../utils/error/errorLogger'
 import type { Habit } from '../types/habit'
+import { sortHabitsByDisplayOrder } from '../utils/habit/sortHabitsByDisplayOrder'
 
 interface HabitContextType {
   habits: Habit[]
@@ -18,6 +19,7 @@ interface HabitContextType {
   toggleHabitCompletion: (habitId: string) => Promise<void>
   updateHabit: (habit: Habit) => Promise<void>
   deleteHabit: (habitId: string) => Promise<void>
+  reorderActiveHabits: (orderedIds: string[]) => Promise<void>
 }
 
 const HabitContext = createContext<HabitContextType | undefined>(undefined)
@@ -114,6 +116,46 @@ export function HabitProvider({ children }: HabitProviderProps) {
     }
   }, [messages.app.deleteHabitError, refreshHabits])
 
+  const reorderActiveHabits = useCallback(
+    async (orderedIds: string[]) => {
+      try {
+        setError(null)
+        const active = habits.filter(h => !h.archivedAt)
+        if (orderedIds.length !== active.length) {
+          return
+        }
+        const activeIdSet = new Set(active.map(h => h.id))
+        if (!orderedIds.every(id => activeIdSet.has(id))) {
+          return
+        }
+        const byId = new Map(habits.map(h => [h.id, h]))
+        const updated: Habit[] = orderedIds.map((id, index) => {
+          const h = byId.get(id)
+          if (!h) {
+            throw new Error(`Habit ${id} not found`)
+          }
+          return { ...h, sortOrder: index }
+        })
+        const anyChanged = updated.some(h => byId.get(h.id)?.sortOrder !== h.sortOrder)
+        if (!anyChanged) {
+          return
+        }
+        await putHabits(updated)
+        await refreshHabits()
+      } catch (err) {
+        const appError = createAppError(
+          err,
+          'UNKNOWN_ERROR',
+          messages.app.updateHabitError
+        )
+        logError(appError)
+        setError(appError.userMessage)
+        throw err
+      }
+    },
+    [habits, messages.app.updateHabitError, refreshHabits]
+  )
+
   useEffect(() => {
     async function initializeApp() {
       try {
@@ -138,8 +180,14 @@ export function HabitProvider({ children }: HabitProviderProps) {
     initializeApp()
   }, [messages.app.initError, refreshHabits])
 
-  const activeHabits = useMemo(() => habits.filter(h => !h.archivedAt), [habits])
-  const archivedHabits = useMemo(() => habits.filter(h => !!h.archivedAt), [habits])
+  const activeHabits = useMemo(() => {
+    const active = habits.filter(h => !h.archivedAt)
+    return sortHabitsByDisplayOrder(active)
+  }, [habits])
+  const archivedHabits = useMemo(() => {
+    const archived = habits.filter(h => !!h.archivedAt)
+    return sortHabitsByDisplayOrder(archived)
+  }, [habits])
 
   const value: HabitContextType = useMemo(
     () => ({
@@ -152,8 +200,20 @@ export function HabitProvider({ children }: HabitProviderProps) {
       toggleHabitCompletion,
       updateHabit,
       deleteHabit,
+      reorderActiveHabits,
     }),
-    [habits, activeHabits, archivedHabits, isLoading, error, refreshHabits, toggleHabitCompletion, updateHabit, deleteHabit]
+    [
+      habits,
+      activeHabits,
+      archivedHabits,
+      isLoading,
+      error,
+      refreshHabits,
+      toggleHabitCompletion,
+      updateHabit,
+      deleteHabit,
+      reorderActiveHabits,
+    ]
   )
 
   return <HabitContext.Provider value={value}>{children}</HabitContext.Provider>

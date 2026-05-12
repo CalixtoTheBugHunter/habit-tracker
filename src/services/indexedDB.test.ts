@@ -6,6 +6,7 @@ import {
   getAllHabits,
   updateHabit,
   deleteHabit,
+  putHabits,
   closeDB,
   testUtils,
 } from './indexedDB'
@@ -321,6 +322,35 @@ describe('IndexedDB Service', () => {
       await triggerIDBRequestError(getAllRequest, error)
 
       await expect(getAllPromise).rejects.toThrow('Unable to access storage. Please refresh the page.')
+    })
+  })
+
+  describe('putHabits', () => {
+    beforeEach(async () => {
+      await setupMockDB()
+      ;(mockObjectStore.put as ReturnType<typeof vi.fn>).mockReturnValue(createMockIDBRequest<string>())
+    })
+
+    it('puts all habits and resolves when the transaction completes', async () => {
+      const h1 = createMockHabit({ id: '1', name: 'A', sortOrder: 0 })
+      const h2 = createMockHabit({ id: '2', name: 'B', sortOrder: 1 })
+
+      const promise = putHabits([h1, h2])
+      await Promise.resolve()
+      if (mockTransaction.oncomplete) {
+        ;(mockTransaction.oncomplete as () => void)()
+      }
+      await promise
+
+      expect(mockObjectStore.put).toHaveBeenCalledTimes(2)
+      expect(mockObjectStore.put).toHaveBeenNthCalledWith(1, h1)
+      expect(mockObjectStore.put).toHaveBeenNthCalledWith(2, h2)
+    })
+
+    it('resolves immediately when the list is empty', async () => {
+      await setupMockDB()
+      await expect(putHabits([])).resolves.toBeUndefined()
+      expect(mockDB.transaction).not.toHaveBeenCalled()
     })
   })
 
