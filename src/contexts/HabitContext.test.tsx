@@ -542,10 +542,10 @@ describe('HabitContext', () => {
   })
 
   describe('reorderActiveHabits', () => {
-    function TestReorder() {
+    function TestReorder({ ids }: { ids: string[] }) {
       const { reorderActiveHabits } = useHabits()
       return (
-        <button type="button" onClick={() => void reorderActiveHabits(['2', '1'])}>
+        <button type="button" onClick={() => void reorderActiveHabits(ids)}>
           reorder
         </button>
       )
@@ -561,7 +561,7 @@ describe('HabitContext', () => {
       vi.mocked(getAllHabits).mockResolvedValue(initial)
       vi.mocked(putHabits).mockResolvedValue(undefined)
 
-      renderWithProviders(<TestReorder />)
+      renderWithProviders(<TestReorder ids={['2', '1']} />)
 
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /reorder/i })).toBeEnabled()
@@ -575,6 +575,78 @@ describe('HabitContext', () => {
           expect.objectContaining({ id: '1', sortOrder: 1 }),
         ])
       })
+    })
+
+    it('returns early when orderedIds length does not match active habits count', async () => {
+      const user = userEvent.setup()
+      const initial = [
+        createMockHabit({ id: '1', name: 'A', sortOrder: 0 }),
+        createMockHabit({ id: '2', name: 'B', sortOrder: 1 }),
+      ]
+      vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+      vi.mocked(getAllHabits).mockResolvedValue(initial)
+      vi.mocked(putHabits).mockResolvedValue(undefined)
+
+      renderWithProviders(<TestReorder ids={['1']} />)
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /reorder/i })).toBeEnabled()
+      })
+
+      await user.click(screen.getByRole('button', { name: /reorder/i }))
+
+      await waitFor(() => {
+        expect(getAllHabits).toHaveBeenCalled()
+      })
+      expect(putHabits).not.toHaveBeenCalled()
+    })
+
+    it('returns early when orderedIds contains an id not in the active set', async () => {
+      const user = userEvent.setup()
+      const initial = [
+        createMockHabit({ id: '1', name: 'A', sortOrder: 0 }),
+        createMockHabit({ id: '2', name: 'B', sortOrder: 1 }),
+      ]
+      vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+      vi.mocked(getAllHabits).mockResolvedValue(initial)
+      vi.mocked(putHabits).mockResolvedValue(undefined)
+
+      renderWithProviders(<TestReorder ids={['1', 'bogus']} />)
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /reorder/i })).toBeEnabled()
+      })
+
+      await user.click(screen.getByRole('button', { name: /reorder/i }))
+
+      await waitFor(() => {
+        expect(getAllHabits).toHaveBeenCalled()
+      })
+      expect(putHabits).not.toHaveBeenCalled()
+    })
+
+    it('returns early when sortOrder would be unchanged', async () => {
+      const user = userEvent.setup()
+      const initial = [
+        createMockHabit({ id: '1', name: 'A', sortOrder: 0 }),
+        createMockHabit({ id: '2', name: 'B', sortOrder: 1 }),
+      ]
+      vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
+      vi.mocked(getAllHabits).mockResolvedValue(initial)
+      vi.mocked(putHabits).mockResolvedValue(undefined)
+
+      renderWithProviders(<TestReorder ids={['1', '2']} />)
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /reorder/i })).toBeEnabled()
+      })
+
+      await user.click(screen.getByRole('button', { name: /reorder/i }))
+
+      await waitFor(() => {
+        expect(getAllHabits).toHaveBeenCalled()
+      })
+      expect(putHabits).not.toHaveBeenCalled()
     })
   })
 })
