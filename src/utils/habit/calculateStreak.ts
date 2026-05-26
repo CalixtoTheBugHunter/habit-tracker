@@ -19,15 +19,24 @@ function isGoalDay(dateStr: string, goalDays: number[]): boolean {
   return goalDays.includes(getJsWeekdayFromDateString(dateStr))
 }
 
+/**
+ * Streak is active when the most recent completed goal day is still “alive”:
+ * - Today’s goal day can be incomplete (not due until end of day).
+ * - Any earlier goal day without a completion breaks the streak.
+ */
 function isGoalDaysStreakActive(dateSet: Set<string>, goalDays: number[], todayStr: string): boolean {
   let current = todayStr
-  let goalDaysFound = 0
 
-  for (let i = 0; i < MAX_STREAK_LOOKBACK_DAYS && goalDaysFound < 2; i++) {
+  for (let i = 0; i < MAX_STREAK_LOOKBACK_DAYS; i++) {
     if (isGoalDay(current, goalDays)) {
-      goalDaysFound++
-      if (dateSet.has(current)) {
+      if (current === todayStr) {
+        if (dateSet.has(current)) {
+          return true
+        }
+      } else if (dateSet.has(current)) {
         return true
+      } else {
+        return false
       }
     }
     current = getPreviousDayDateString(current)

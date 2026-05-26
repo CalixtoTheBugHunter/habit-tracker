@@ -87,9 +87,12 @@ export async function seedGoalDaysStreakAcceptance(): Promise<void> {
     },
   ]
 
+  const acceptanceIds = new Set<string>(ACCEPTANCE_HABIT_IDS)
   const existing = await getAllHabits()
   for (const habit of existing) {
-    await deleteHabit(habit.id)
+    if (acceptanceIds.has(habit.id)) {
+      await deleteHabit(habit.id)
+    }
   }
 
   await upsertHabits(habits)

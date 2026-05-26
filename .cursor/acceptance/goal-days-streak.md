@@ -34,7 +34,7 @@ Per `cursor-ide-browser` MCP (`INSTRUCTIONS.md` + tool schemas):
 
 | # | Criterion | Pass condition |
 |---|-----------|----------------|
-| AC1 | Weekend does not reset streak | `PR Review` → **`Dias de sequência: 3`** (Wed–Fri done, no weekend marks) |
+| AC1 | Weekend does not reset streak | `PR Review` → **`Dias de sequência: 3`** (Wed–Fri done, no weekend marks). On a **weekday**, re-seed or complete Mon so the chain is not broken. |
 | AC2 | Missed goal day breaks streak | `PR Review (Fri missed)` → **no** 3-day badge (current 0 or 2 in Statistics) |
 | AC3 | Statistics longest streak | **Estatísticas** → `PR Review`: **Sequência atual 3**, **Maior sequência 3** |
 | AC4 | Daily habit unchanged | `Daily Habit` → **`Dias de sequência: 2`** |

@@ -192,13 +192,34 @@ describe('calculateStreak', () => {
       expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(0)
     })
 
+    it('should return 0 when a past goal day after the last completion was missed', () => {
+      vi.setSystemTime(new Date('2025-01-21T12:00:00.000Z')) // Tuesday
+      const completionDates = [
+        '2025-01-15T00:00:00.000Z', // Wed
+        '2025-01-16T00:00:00.000Z', // Thu
+        '2025-01-17T00:00:00.000Z', // Fri — Monday missed
+      ]
+      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(0)
+    })
+
+    it('should keep streak when today is incomplete but the previous goal day was completed', () => {
+      vi.setSystemTime(new Date('2025-01-21T12:00:00.000Z')) // Tuesday
+      const completionDates = [
+        '2025-01-15T00:00:00.000Z', // Wed
+        '2025-01-16T00:00:00.000Z', // Thu
+        '2025-01-17T00:00:00.000Z', // Fri
+        '2025-01-20T00:00:00.000Z', // Mon
+      ]
+      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(4)
+    })
+
     it('should break streak when a goal day in the chain was missed', () => {
       vi.setSystemTime(new Date('2025-01-18T12:00:00.000Z')) // Saturday
       const completionDates = [
         '2025-01-15T00:00:00.000Z', // Wed
         '2025-01-16T00:00:00.000Z', // Thu — Fri missing
       ]
-      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(2)
+      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(0)
     })
 
     it('should behave like daily streak when goalDays is not provided', () => {
