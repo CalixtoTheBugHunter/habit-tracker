@@ -80,3 +80,15 @@ export function getPreviousDayDateString(dateStr: string): string {
   return `${prevYear}-${prevMonth}-${prevDay}`
 }
 
+/**
+ * Gets the JavaScript weekday (0=Sun … 6=Sat) for a YYYY-MM-DD date string.
+ * Uses UTC parsing for timezone-agnostic date strings (same as goal-day streak logic).
+ */
+export function getJsWeekdayFromDateString(dateStr: string): number {
+  const parts = dateStr.split('-')
+  const year = Number(parts[0])
+  const month = Number(parts[1])
+  const day = Number(parts[2])
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+}
+

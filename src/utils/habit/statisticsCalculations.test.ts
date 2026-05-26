@@ -78,6 +78,44 @@ describe('statisticsCalculations', () => {
       expect(calculateLongestStreak(dates)).toBe(1)
     })
 
+    describe('goal days', () => {
+      const weekdayGoalDays = [1, 2, 3, 4, 5]
+
+      it('should count consecutive weekday completions across a weekend gap', () => {
+        const dates = [
+          '2025-01-15T00:00:00.000Z', // Wed
+          '2025-01-16T00:00:00.000Z', // Thu
+          '2025-01-17T00:00:00.000Z', // Fri
+        ]
+        expect(calculateLongestStreak(dates, weekdayGoalDays)).toBe(3)
+      })
+
+      it('should not bridge goal days when a weekday between completions was missed', () => {
+        const dates = [
+          '2025-01-15T00:00:00.000Z', // Wed
+          '2025-01-17T00:00:00.000Z', // Fri — Thu missing
+        ]
+        expect(calculateLongestStreak(dates, weekdayGoalDays)).toBe(1)
+      })
+
+      it('should bridge Fri to Mon when weekend days are non-goal', () => {
+        const dates = [
+          '2025-01-17T00:00:00.000Z', // Fri
+          '2025-01-20T00:00:00.000Z', // Mon
+        ]
+        expect(calculateLongestStreak(dates, weekdayGoalDays)).toBe(2)
+      })
+
+      it('should behave like calendar streak when goalDays is not provided', () => {
+        const dates = [
+          '2025-01-10T00:00:00.000Z',
+          '2025-01-11T00:00:00.000Z',
+          '2025-01-12T00:00:00.000Z',
+        ]
+        expect(calculateLongestStreak(dates)).toBe(3)
+      })
+    })
+
     it('should handle long streaks', () => {
       const dates: string[] = []
       for (let i = 0; i < 30; i++) {

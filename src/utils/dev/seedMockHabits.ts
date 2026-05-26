@@ -1,5 +1,101 @@
-import { addHabit } from '../../services/indexedDB'
+import { addHabit, deleteHabit, getAllHabits, openDB, updateHabit } from '../../services/indexedDB'
 import type { Habit } from '../../types/habit'
+
+const ACCEPTANCE_HABIT_IDS = [
+  'acceptance-goal-a',
+  'acceptance-goal-b',
+  'acceptance-daily-c',
+] as const
+
+function createDateStringFromNow(now: Date, daysAgo: number): string {
+  const date = new Date(now)
+  date.setDate(date.getDate() - daysAgo)
+  date.setHours(0, 0, 0, 0)
+  return date.toISOString()
+}
+
+/** Days ago for the most recent occurrence of a JS weekday (0=Sun … 6=Sat). */
+function daysAgoForJsWeekday(now: Date, jsWeekday: number, maxLookback = 14): number {
+  for (let daysAgo = 0; daysAgo <= maxLookback; daysAgo++) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - daysAgo)
+    if (date.getDay() === jsWeekday) {
+      return daysAgo
+    }
+  }
+  throw new Error(`No ${jsWeekday} weekday found within ${maxLookback} days`)
+}
+
+async function upsertHabits(habits: Habit[]): Promise<void> {
+  await openDB()
+  for (const habit of habits) {
+    try {
+      await addHabit(habit)
+      console.log(`✓ Added habit: ${habit.name}`)
+    } catch {
+      await updateHabit(habit)
+      console.log(`✓ Updated habit: ${habit.name}`)
+    }
+  }
+}
+
+/**
+ * Seeds habits for Cursor Browser acceptance of goal-days streak (AC1–AC4).
+ * Call from dev console: `await window.seedGoalDaysStreakAcceptance()` then refresh.
+ */
+export async function seedGoalDaysStreakAcceptance(): Promise<void> {
+  const now = new Date()
+  const weekdayGoalDays = [1, 2, 3, 4, 5] // Mon–Fri
+  const wed = daysAgoForJsWeekday(now, 3)
+  const thu = daysAgoForJsWeekday(now, 4)
+  const fri = daysAgoForJsWeekday(now, 5)
+  const created = createDateStringFromNow(now, 30)
+
+  const habits: Habit[] = [
+    {
+      id: 'acceptance-goal-a',
+      name: 'PR Review',
+      description: 'AC1: Mon–Fri goal; Wed–Fri done; weekend skipped',
+      createdDate: created,
+      goalDays: weekdayGoalDays,
+      completionDates: [
+        createDateStringFromNow(now, wed),
+        createDateStringFromNow(now, thu),
+        createDateStringFromNow(now, fri),
+      ],
+    },
+    {
+      id: 'acceptance-goal-b',
+      name: 'PR Review (Fri missed)',
+      description: 'AC2: Mon–Fri goal; Wed–Thu only',
+      createdDate: created,
+      goalDays: weekdayGoalDays,
+      completionDates: [
+        createDateStringFromNow(now, wed),
+        createDateStringFromNow(now, thu),
+      ],
+    },
+    {
+      id: 'acceptance-daily-c',
+      name: 'Daily Habit',
+      description: 'AC4: no goalDays; today + yesterday',
+      createdDate: created,
+      completionDates: [
+        createDateStringFromNow(now, 0),
+        createDateStringFromNow(now, 1),
+      ],
+    },
+  ]
+
+  const existing = await getAllHabits()
+  for (const habit of existing) {
+    await deleteHabit(habit.id)
+  }
+
+  await upsertHabits(habits)
+  console.log('\n✅ Goal-days streak acceptance data seeded (AC1–AC4).')
+  console.log('Refresh the page to verify streak badges and Statistics.')
+}
 
 /**
  * Creates mock habits with various completion patterns for testing.
@@ -86,23 +182,7 @@ export async function seedMockHabits(): Promise<void> {
   ]
 
   try {
-    // Open DB first
-    const { openDB } = await import('../../services/indexedDB')
-    await openDB()
-
-    // Add all habits
-    for (const habit of mockHabits) {
-      try {
-        await addHabit(habit)
-        console.log(`✓ Added habit: ${habit.name}`)
-      } catch {
-        // If habit already exists, try to update it
-        const { updateHabit } = await import('../../services/indexedDB')
-        await updateHabit(habit)
-        console.log(`✓ Updated habit: ${habit.name}`)
-      }
-    }
-
+    await upsertHabits(mockHabits)
     console.log(`\n✅ Successfully seeded ${mockHabits.length} mock habits!`)
     console.log('Refresh the page to see them in the HabitList component.')
   } catch (error) {

@@ -76,7 +76,7 @@ export function HabitList({ onEdit }: HabitListProps) {
   const habitsWithCalculations = useMemo(() => {
     return activeHabits.map(habit => ({
       ...habit,
-      streak: calculateStreak(habit.completionDates),
+      streak: calculateStreak(habit.completionDates, habit.goalDays),
       completedToday: isTodayCompleted(habit.completionDates),
     }))
   }, [activeHabits])

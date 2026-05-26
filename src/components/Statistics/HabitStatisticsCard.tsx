@@ -22,8 +22,8 @@ export function HabitStatisticsCard({ habit }: HabitStatisticsCardProps) {
   const { messages } = useLanguage()
 
   const stats = useMemo(() => ({
-    currentStreak: calculateStreak(habit.completionDates),
-    longestStreak: calculateLongestStreak(habit.completionDates),
+    currentStreak: calculateStreak(habit.completionDates, habit.goalDays),
+    longestStreak: calculateLongestStreak(habit.completionDates, habit.goalDays),
     completionRate: calculateCompletionRate(habit.completionDates, habit.createdDate),
     weeklyRate: calculateWeeklyCompletionRate(habit.completionDates),
     monthlyRate: calculateMonthlyCompletionRate(habit.completionDates),

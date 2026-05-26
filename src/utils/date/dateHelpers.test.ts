@@ -4,6 +4,7 @@ import {
   getTodayLocalDateString,
   getYesterdayLocalDateString,
   getPreviousDayDateString,
+  getJsWeekdayFromDateString,
 } from './dateHelpers'
 
 describe('dateHelpers', () => {
@@ -158,6 +159,16 @@ describe('dateHelpers', () => {
     it('should throw error for invalid date values', () => {
       expect(() => getPreviousDayDateString('2025-13-01')).toThrow('Invalid date string: 2025-13-01')
       expect(() => getPreviousDayDateString('2025-01-32')).toThrow('Invalid date string: 2025-01-32')
+    })
+  })
+
+  describe('getJsWeekdayFromDateString', () => {
+    it('should return JS weekday 0=Sun through 6=Sat', () => {
+      expect(getJsWeekdayFromDateString('2025-01-19')).toBe(0) // Sunday
+      expect(getJsWeekdayFromDateString('2025-01-13')).toBe(1) // Monday
+      expect(getJsWeekdayFromDateString('2025-01-15')).toBe(3) // Wednesday
+      expect(getJsWeekdayFromDateString('2025-01-17')).toBe(5) // Friday
+      expect(getJsWeekdayFromDateString('2025-01-18')).toBe(6) // Saturday
     })
   })
 })

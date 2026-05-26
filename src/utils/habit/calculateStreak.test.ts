@@ -153,5 +153,64 @@ describe('calculateStreak', () => {
       expect(calculateStreak(completionDates)).toBe(3)
     })
   })
+
+  describe('goal days', () => {
+    const weekdayGoalDays = [1, 2, 3, 4, 5] // Mon–Fri
+
+    it('should not reset streak on a non-goal weekend day when weekdays are completed', () => {
+      vi.setSystemTime(new Date('2025-01-18T12:00:00.000Z')) // Saturday
+      const completionDates = [
+        '2025-01-15T00:00:00.000Z', // Wed
+        '2025-01-16T00:00:00.000Z', // Thu
+        '2025-01-17T00:00:00.000Z', // Fri
+      ]
+      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(3)
+    })
+
+    it('should keep streak on Sunday when Friday was completed', () => {
+      vi.setSystemTime(new Date('2025-01-19T12:00:00.000Z')) // Sunday
+      const completionDates = ['2025-01-17T00:00:00.000Z'] // Fri only
+      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(1)
+    })
+
+    it('should show streak on Monday morning when Friday is done but Monday is not yet', () => {
+      vi.setSystemTime(new Date('2025-01-20T12:00:00.000Z')) // Monday
+      const completionDates = [
+        '2025-01-15T00:00:00.000Z',
+        '2025-01-16T00:00:00.000Z',
+        '2025-01-17T00:00:00.000Z',
+      ]
+      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(3)
+    })
+
+    it('should return 0 when the most recent goal days were both missed', () => {
+      vi.setSystemTime(new Date('2025-01-18T12:00:00.000Z')) // Saturday
+      const completionDates = [
+        '2025-01-13T00:00:00.000Z', // Mon (stale)
+        '2025-01-14T00:00:00.000Z', // Tue (stale)
+      ]
+      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(0)
+    })
+
+    it('should break streak when a goal day in the chain was missed', () => {
+      vi.setSystemTime(new Date('2025-01-18T12:00:00.000Z')) // Saturday
+      const completionDates = [
+        '2025-01-15T00:00:00.000Z', // Wed
+        '2025-01-16T00:00:00.000Z', // Thu — Fri missing
+      ]
+      expect(calculateStreak(completionDates, weekdayGoalDays)).toBe(2)
+    })
+
+    it('should behave like daily streak when goalDays is not provided', () => {
+      vi.setSystemTime(new Date('2025-01-15T12:00:00.000Z'))
+      const completionDates = [
+        '2025-01-13T00:00:00.000Z',
+        '2025-01-14T00:00:00.000Z',
+        '2025-01-15T00:00:00.000Z',
+      ]
+      expect(calculateStreak(completionDates)).toBe(3)
+      expect(calculateStreak(completionDates, undefined)).toBe(3)
+    })
+  })
 })
 
