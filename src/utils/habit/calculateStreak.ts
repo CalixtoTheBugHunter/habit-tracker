@@ -19,25 +19,57 @@ function isGoalDay(dateStr: string, goalDays: number[]): boolean {
   return goalDays.includes(getJsWeekdayFromDateString(dateStr))
 }
 
+function getNextDayDateString(dateStr: string): string {
+  const parts = dateStr.split('-')
+  const year = Number(parts[0])
+  const month = Number(parts[1])
+  const day = Number(parts[2])
+  const nextDay = new Date(Date.UTC(year, month - 1, day + 1))
+  const nextYear = nextDay.getUTCFullYear()
+  const nextMonth = String(nextDay.getUTCMonth() + 1).padStart(2, '0')
+  const nextDayStr = String(nextDay.getUTCDate()).padStart(2, '0')
+  return `${nextYear}-${nextMonth}-${nextDayStr}`
+}
+
 /**
- * Streak is active when the most recent completed goal day is still “alive”:
+ * True when every goal day from anchor through today is completed, except today
+ * (still in progress). Non-goal days are ignored.
+ */
+function isGoalDayChainIntactFromAnchor(
+  dateSet: Set<string>,
+  goalDays: number[],
+  anchor: string,
+  todayStr: string
+): boolean {
+  let current = getNextDayDateString(anchor)
+
+  while (current <= todayStr) {
+    if (isGoalDay(current, goalDays)) {
+      const todayGrace = current === todayStr && !dateSet.has(current)
+      if (!dateSet.has(current) && !todayGrace) {
+        return false
+      }
+    }
+    current = getNextDayDateString(current)
+  }
+
+  return true
+}
+
+/**
+ * Streak is active when the most recent completed goal day still connects to today:
  * - Today’s goal day can be incomplete (not due until end of day).
- * - Any earlier goal day without a completion breaks the streak.
+ * - Any other goal day on or after that anchor without a completion breaks the streak.
  */
 function isGoalDaysStreakActive(dateSet: Set<string>, goalDays: number[], todayStr: string): boolean {
   let current = todayStr
 
   for (let i = 0; i < MAX_STREAK_LOOKBACK_DAYS; i++) {
-    if (isGoalDay(current, goalDays)) {
+    if (isGoalDay(current, goalDays) && dateSet.has(current)) {
       if (current === todayStr) {
-        if (dateSet.has(current)) {
-          return true
-        }
-      } else if (dateSet.has(current)) {
         return true
-      } else {
-        return false
       }
+      return isGoalDayChainIntactFromAnchor(dateSet, goalDays, current, todayStr)
     }
     current = getPreviousDayDateString(current)
   }
