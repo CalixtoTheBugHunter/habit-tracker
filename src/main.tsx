@@ -35,9 +35,14 @@ registerServiceWorker({
 
 // Expose dev utilities in development mode
 if (import.meta.env.DEV) {
-  import('./utils/dev/seedMockHabits').then(({ seedMockHabits }) => {
-    ;(window as unknown as { seedMockHabits: () => Promise<void> }).seedMockHabits = seedMockHabits
-    console.log('💡 Dev utility available: window.seedMockHabits()')
+  import('./utils/dev/seedMockHabits').then(({ seedMockHabits, seedGoalDaysStreakAcceptance }) => {
+    const devWindow = window as unknown as {
+      seedMockHabits: () => Promise<void>
+      seedGoalDaysStreakAcceptance: () => Promise<void>
+    }
+    devWindow.seedMockHabits = seedMockHabits
+    devWindow.seedGoalDaysStreakAcceptance = seedGoalDaysStreakAcceptance
+    console.log('💡 Dev utilities: window.seedMockHabits(), window.seedGoalDaysStreakAcceptance()')
   })
 }
 

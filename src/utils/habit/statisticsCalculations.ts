@@ -2,6 +2,7 @@ import {
   getDateString,
   getTodayLocalDateString,
   getPreviousDayDateString,
+  getJsWeekdayFromDateString,
 } from '../date/dateHelpers'
 
 function getUniqueSortedDates(completionDates: string[]): string[] {
@@ -23,7 +24,70 @@ function getNextDayDateString(dateStr: string): string {
   return `${nextYear}-${nextMonth}-${nextDayStr}`
 }
 
-export function calculateLongestStreak(completionDates: string[]): number {
+function isGoalDay(dateStr: string, goalDays: number[]): boolean {
+  return goalDays.includes(getJsWeekdayFromDateString(dateStr))
+}
+
+function getNextGoalDayDateString(dateStr: string, goalDays: number[]): string {
+  let current = getNextDayDateString(dateStr)
+  for (let i = 0; i < 7; i++) {
+    if (isGoalDay(current, goalDays)) {
+      return current
+    }
+    current = getNextDayDateString(current)
+  }
+  return current
+}
+
+function areConsecutiveGoalDayCompletions(
+  earlier: string,
+  later: string,
+  goalDays: number[],
+  dateSet: Set<string>
+): boolean {
+  if (earlier >= later) {
+    return false
+  }
+
+  let current = getNextGoalDayDateString(earlier, goalDays)
+  while (current < later) {
+    if (!dateSet.has(current)) {
+      return false
+    }
+    current = getNextGoalDayDateString(current, goalDays)
+  }
+
+  return current === later
+}
+
+function calculateLongestStreakWithGoalDays(
+  completionDates: string[],
+  goalDays: number[]
+): number {
+  const dateSet = new Set(getUniqueSortedDates(completionDates))
+  const goalDayDates = [...dateSet].filter(d => isGoalDay(d, goalDays)).sort()
+
+  if (goalDayDates.length === 0) return 0
+  if (goalDayDates.length === 1) return 1
+
+  let longest = 1
+  let current = 1
+
+  for (let i = 1; i < goalDayDates.length; i++) {
+    const prev = goalDayDates[i - 1]!
+    const next = goalDayDates[i]!
+    if (areConsecutiveGoalDayCompletions(prev, next, goalDays, dateSet)) {
+      current++
+      if (current > longest) longest = current
+    } else {
+      current = 1
+    }
+  }
+
+  return longest
+}
+
+function calculateLongestDailyStreak(completionDates: string[]): number {
   const dates = getUniqueSortedDates(completionDates)
   if (dates.length === 0) return 0
 
@@ -42,6 +106,16 @@ export function calculateLongestStreak(completionDates: string[]): number {
   }
 
   return longest
+}
+
+export function calculateLongestStreak(completionDates: string[], goalDays?: number[]): number {
+  if (completionDates.length === 0) return 0
+
+  if (goalDays !== undefined && goalDays.length > 0) {
+    return calculateLongestStreakWithGoalDays(completionDates, goalDays)
+  }
+
+  return calculateLongestDailyStreak(completionDates)
 }
 
 export function calculateCompletionRate(completionDates: string[], createdDate: string): number {
