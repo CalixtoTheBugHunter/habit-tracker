@@ -186,6 +186,7 @@ export const en = {
       cancel: 'Cancel',
       saving: 'Saving...',
       nameRequired: 'Name is required',
+      nameDuplicate: 'A category with this name already exists',
       saveFailed: 'Failed to save category. Please try again.',
       createdSuccess: 'Category created successfully!',
       updatedSuccess: 'Category updated successfully!',

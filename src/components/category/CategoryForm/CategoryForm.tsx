@@ -13,7 +13,7 @@ interface CategoryFormProps {
 
 export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProps) {
   const { messages } = useLanguage()
-  const { addCategory, updateCategory } = useCategories()
+  const { categories, addCategory, updateCategory } = useCategories()
   const [name, setName] = useState(category?.name ?? '')
   const [nameError, setNameError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -34,17 +34,28 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
     setSubmitError(null)
     setSubmitSuccess(false)
 
-    if (!name.trim()) {
+    const trimmedName = name.trim()
+    if (!trimmedName) {
       setNameError(messages.categories.form.nameRequired)
+      return
+    }
+
+    const isDuplicate = categories.some(
+      existing =>
+        existing.id !== category?.id &&
+        existing.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    )
+    if (isDuplicate) {
+      setNameError(messages.categories.form.nameDuplicate)
       return
     }
 
     setIsSubmitting(true)
     try {
       if (isEditMode && category) {
-        await updateCategory({ ...category, name: name.trim() })
+        await updateCategory({ ...category, name: trimmedName })
       } else {
-        await addCategory(name.trim())
+        await addCategory(trimmedName)
       }
       setSubmitSuccess(true)
       if (!isEditMode) {

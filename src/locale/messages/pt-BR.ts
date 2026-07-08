@@ -187,6 +187,7 @@ export const ptBR = {
       cancel: 'Cancelar',
       saving: 'Salvando...',
       nameRequired: 'O nome é obrigatório',
+      nameDuplicate: 'Já existe uma categoria com este nome',
       saveFailed: 'Falha ao salvar categoria. Tente novamente.',
       createdSuccess: 'Categoria criada com sucesso!',
       updatedSuccess: 'Categoria atualizada com sucesso!',

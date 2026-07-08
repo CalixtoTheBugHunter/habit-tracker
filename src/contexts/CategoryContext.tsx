@@ -100,8 +100,11 @@ export function CategoryProvider({ children }: CategoryProviderProps) {
     async (categoryId: string) => {
       try {
         setError(null)
-        await deleteCategoryFromDB(categoryId)
+        // Strip the category from habits first so a failure here leaves the
+        // category intact and the delete retryable, rather than orphaning
+        // habit references to an already-deleted category.
         await removeCategoryFromHabits(categoryId)
+        await deleteCategoryFromDB(categoryId)
         setSelectedCategoryIds(prev => prev.filter(id => id !== categoryId))
         await refreshCategories()
       } catch (err) {

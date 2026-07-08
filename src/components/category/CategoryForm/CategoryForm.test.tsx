@@ -62,6 +62,35 @@ describe('CategoryForm', () => {
     expect(vi.mocked(addCategory)).not.toHaveBeenCalled()
   })
 
+  it('rejects a duplicate name (case-insensitive) without saving', async () => {
+    const user = userEvent.setup()
+    vi.mocked(getAllCategories).mockResolvedValue([createMockCategory({ id: 'c1', name: 'Health' })])
+    renderWithProviders(<CategoryForm />)
+
+    await waitFor(() => expect(vi.mocked(getAllCategories)).toHaveBeenCalled())
+    await user.type(screen.getByLabelText(/name/i), 'health')
+    await user.click(screen.getByRole('button', { name: /^create$/i }))
+
+    expect(await screen.findByText(/already exists/i)).toBeInTheDocument()
+    expect(vi.mocked(addCategory)).not.toHaveBeenCalled()
+  })
+
+  it('allows saving an edited category without renaming it', async () => {
+    const user = userEvent.setup()
+    const category = createMockCategory({ id: 'c1', name: 'Health' })
+    vi.mocked(getAllCategories).mockResolvedValue([category])
+    renderWithProviders(<CategoryForm category={category} />)
+
+    await waitFor(() => expect(vi.mocked(getAllCategories)).toHaveBeenCalled())
+    await user.click(screen.getByRole('button', { name: /^update$/i }))
+
+    await waitFor(() =>
+      expect(vi.mocked(updateCategory)).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'c1', name: 'Health' })
+      )
+    )
+  })
+
   it('pre-fills and updates an existing category', async () => {
     const user = userEvent.setup()
     const category = createMockCategory({ id: 'c1', name: 'Old' })

@@ -22,6 +22,7 @@ import { formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { filterHabitsByCategories } from '../../../utils/habit/filterHabitsByCategories'
+import { mergeReorderedVisibleHabits } from '../../../utils/habit/mergeReorderedVisibleHabits'
 import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stackingCompletionCoordinator'
 import { archiveHabit } from '../../../utils/habit/archiveHabit'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
@@ -119,7 +120,12 @@ export function HabitList({ onEdit }: HabitListProps) {
       if (oldIndex === -1 || newIndex === -1) {
         return
       }
-      const nextOrder = arrayMove(sortableItemIds, oldIndex, newIndex)
+      // `sortableItemIds` only contains the habits visible under the active
+      // category filter, so merge the reordered subset back into the full active
+      // order before persisting — otherwise the reorder is dropped for a
+      // filtered list (subset length !== active length).
+      const reorderedVisible = arrayMove(sortableItemIds, oldIndex, newIndex)
+      const nextOrder = mergeReorderedVisibleHabits(activeHabits.map(h => h.id), reorderedVisible)
       try {
         await reorderActiveHabits(nextOrder)
         setReorderAnnouncement(messages.habitList.reorderAnnouncement)
@@ -128,7 +134,13 @@ export function HabitList({ onEdit }: HabitListProps) {
         // Error surfaced via HabitContext
       }
     },
-    [sortableItemIds, reorderActiveHabits, messages.habitList.reorderAnnouncement, scheduleClearAnnouncement]
+    [
+      sortableItemIds,
+      activeHabits,
+      reorderActiveHabits,
+      messages.habitList.reorderAnnouncement,
+      scheduleClearAnnouncement,
+    ]
   )
 
   const handleToggle = async (habitId: string) => {
