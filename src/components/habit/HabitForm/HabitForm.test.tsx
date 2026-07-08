@@ -4,8 +4,9 @@ import userEvent from '@testing-library/user-event'
 import { HabitForm } from './HabitForm'
 import { renderWithProviders } from '../../../test/utils/render-helpers'
 import { createMockHabit } from '../../../test/fixtures/habits'
-import { addHabit, updateHabit, openDB, getAllHabits } from '../../../services/indexedDB'
+import { addHabit, updateHabit, openDB, getAllHabits, getAllCategories } from '../../../services/indexedDB'
 import { track } from '../../../analytics/umami'
+import { createMockCategory } from '../../../test/fixtures/categories'
 import { verifyButtonContrast, mockComputedStyleForElement } from '../../../test/utils/accessibility-helpers'
 
 vi.mock('../../../analytics/umami', () => ({
@@ -17,6 +18,11 @@ vi.mock('../../../services/indexedDB', () => ({
   getAllHabits: vi.fn(),
   addHabit: vi.fn(),
   updateHabit: vi.fn(),
+  getAllCategories: vi.fn(),
+  addCategory: vi.fn(),
+  updateCategory: vi.fn(),
+  deleteCategory: vi.fn(),
+  putHabits: vi.fn(),
   testUtils: {
     resetDB: vi.fn(),
   },
@@ -32,6 +38,7 @@ describe('HabitForm', () => {
     vi.clearAllMocks()
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
     vi.mocked(getAllHabits).mockResolvedValue([])
+    vi.mocked(getAllCategories).mockResolvedValue([])
   })
 
   describe('Create mode', () => {
@@ -351,6 +358,31 @@ describe('HabitForm', () => {
         )
       })
       expect(vi.mocked(track)).not.toHaveBeenCalled()
+    })
+
+    it('should include the selected category when updating a habit', async () => {
+      const user = userEvent.setup()
+      const habit = createMockHabit({ id: '1', name: 'Exercise' })
+      vi.mocked(updateHabit).mockResolvedValue('1')
+      vi.mocked(getAllCategories).mockResolvedValue([
+        createMockCategory({ id: 'cat-1', name: 'Health' }),
+      ])
+
+      renderWithProviders(<HabitForm habit={habit} />)
+
+      const healthCheckbox = await screen.findByRole('checkbox', { name: /health/i })
+      await user.click(healthCheckbox)
+
+      await user.click(screen.getByRole('button', { name: /update habit/i }))
+
+      await waitFor(() => {
+        expect(vi.mocked(updateHabit)).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: '1',
+            categories: ['cat-1'],
+          })
+        )
+      })
     })
 
     it('should preserve habit id, createdDate, and completionDates when updating', async () => {

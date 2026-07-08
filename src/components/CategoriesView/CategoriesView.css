@@ -1,0 +1,18 @@
+.categories-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.categories-view-title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 600px) {
+  .categories-view-title {
+    font-size: var(--font-size-xl);
+  }
+}

@@ -1,5 +1,6 @@
 // Habit components
 export { HabitForm, HabitList, AnnualCalendar } from './habit'
+export { CategoryFilterBar } from './habit/CategoryFilterBar/CategoryFilterBar'
 
 // Modal components
 export { Modal, ConfirmationModal } from './modal'
@@ -23,3 +24,6 @@ export { StatisticsView } from './Statistics/StatisticsView'
 
 // Archived habits components
 export { ArchivedHabitsView } from './ArchivedHabitsView/ArchivedHabitsView'
+
+// Categories components
+export { CategoriesView } from './CategoriesView/CategoriesView'

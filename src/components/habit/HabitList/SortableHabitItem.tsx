@@ -7,13 +7,16 @@ import { formatMessage } from '../../../locale'
 import { HabitStackingAccordion } from '../HabitStackingAccordion/HabitStackingAccordion'
 import { StreakBadge } from '../StreakBadge/StreakBadge'
 import { GoalBadge } from '../GoalBadge/GoalBadge'
+import { CategoryBadgeList } from '../CategoryBadge/CategoryBadgeList'
 import type { Habit } from '../../../types/habit'
+import type { Category } from '../../../types/category'
 
 export type HabitWithListFields = Habit & { streak: number; completedToday: boolean }
 
 interface SortableHabitItemProps {
   habit: HabitWithListFields
   habits: Habit[]
+  categories: Category[]
   togglingId: string | null
   archivingId: string | null
   onEdit?: (habit: Habit) => void
@@ -26,6 +29,7 @@ interface SortableHabitItemProps {
 export function SortableHabitItem({
   habit,
   habits,
+  categories,
   togglingId,
   archivingId,
   onEdit,
@@ -76,6 +80,7 @@ export function SortableHabitItem({
         )}
       </div>
       {habit.description && <p className="habit-description">{habit.description}</p>}
+      <CategoryBadgeList categoryIds={habit.categories ?? []} categories={categories} />
       {habit.stackingHabits && habit.stackingHabits.length > 0 && (
         <HabitStackingAccordion
           parentHabit={habit}

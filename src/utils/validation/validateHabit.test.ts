@@ -405,6 +405,57 @@ describe('validateHabit', () => {
     })
   })
 
+  describe('categories validation', () => {
+    it('should accept undefined categories', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
+
+    it('should accept a valid categories array', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        categories: ['a', 'b'],
+      }
+      expect(() => validateHabit(habit)).not.toThrow()
+    })
+
+    it('should reject categories that is not an array', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        categories: 'a',
+      }
+      expect(() => validateHabit(habit)).toThrow('Habit categories must be an array if provided')
+    })
+
+    it('should reject categories with an empty string element', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        categories: ['a', ''],
+      }
+      expect(() => validateHabit(habit)).toThrow('All categories elements must be non-empty strings')
+    })
+
+    it('should reject categories with duplicate values', () => {
+      const habit = {
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        categories: ['a', 'a'],
+      }
+      expect(() => validateHabit(habit)).toThrow('Habit categories must not contain duplicate values')
+    })
+  })
+
   describe('archivedAt validation', () => {
     it('should accept habit with valid ISO 8601 archivedAt', () => {
       const habit: Habit = {

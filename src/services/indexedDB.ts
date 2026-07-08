@@ -1,14 +1,17 @@
 import type { Habit } from '../types/habit'
+import type { Category } from '../types/category'
 import { isQuotaExceededError } from '../utils/error/isQuotaExceededError'
 import { IndexedDBError } from '../utils/error/errorTypes'
 import { logError } from '../utils/error/errorLogger'
 import { validateHabit } from '../utils/validation/validateHabit'
+import { validateCategory } from '../utils/validation/validateCategory'
 import { validateId } from '../utils/validation/validateId'
 
 const DB_NAME = 'habit-tracker'
-const DB_VERSION = 2
+const DB_VERSION = 3
 export const STORE_NAME = 'habits'
 export const SETTINGS_STORE = 'settings'
+export const CATEGORIES_STORE = 'categories'
 
 let dbInstance: IDBDatabase | null = null
 
@@ -104,6 +107,14 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
         db.createObjectStore(SETTINGS_STORE, { keyPath: 'key' })
       }
+
+      if (!db.objectStoreNames.contains(CATEGORIES_STORE)) {
+        const categoriesStore = db.createObjectStore(CATEGORIES_STORE, {
+          keyPath: 'id',
+        })
+
+        categoriesStore.createIndex('name', 'name', { unique: false })
+      }
     }
   })
 }
@@ -160,6 +171,92 @@ function getObjectStore(mode: IDBTransactionMode = 'readonly'): Promise<ObjectSt
         }
       })
   })
+}
+
+function getCategoriesObjectStore(
+  mode: IDBTransactionMode = 'readonly'
+): Promise<ObjectStoreResult> {
+  return new Promise((resolve, reject) => {
+    openDB()
+      .then((db) => {
+        if (!db.objectStoreNames.contains(CATEGORIES_STORE)) {
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            `Object store "${CATEGORIES_STORE}" does not exist`
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
+          return
+        }
+
+        const transaction = db.transaction([CATEGORIES_STORE], mode)
+        const objectStore = transaction.objectStore(CATEGORIES_STORE)
+
+        transaction.onerror = () => {
+          const error = transaction.error || new Error('Transaction failed')
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            error instanceof Error ? error.message : String(error)
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
+        }
+
+        resolve({ objectStore, transaction })
+      })
+      .catch((error) => {
+        if (error instanceof IndexedDBError) {
+          reject(error)
+        } else {
+          const indexedDBError = new IndexedDBError(
+            'INDEXEDDB_TRANSACTION_FAILED',
+            'Unable to access storage. Please refresh the page.',
+            error instanceof Error ? error.message : String(error)
+          )
+          logError(indexedDBError)
+          reject(indexedDBError)
+        }
+      })
+  })
+}
+
+export async function addCategory(category: Category): Promise<string> {
+  validateCategory(category)
+
+  const { objectStore } = await getCategoriesObjectStore('readwrite')
+  const request = objectStore.add(category)
+  const result = await handleRequestError<IDBValidKey>(request, 'Failed to add category')
+  return String(result)
+}
+
+export async function getAllCategories(): Promise<Category[]> {
+  const { objectStore } = await getCategoriesObjectStore('readonly')
+  const request = objectStore.getAll()
+  const result = await handleRequestError(request, 'Failed to get all categories')
+  const categories = result || []
+  for (const category of categories) {
+    validateCategory(category)
+  }
+  return categories
+}
+
+export async function updateCategory(category: Category): Promise<string> {
+  validateCategory(category)
+
+  const { objectStore } = await getCategoriesObjectStore('readwrite')
+  const request = objectStore.put(category)
+  const result = await handleRequestError<IDBValidKey>(request, 'Failed to update category')
+  return String(result)
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  validateId(id)
+
+  const { objectStore } = await getCategoriesObjectStore('readwrite')
+  const request = objectStore.delete(id)
+  await handleRequestError(request, 'Failed to delete category')
 }
 
 interface SettingsRow {

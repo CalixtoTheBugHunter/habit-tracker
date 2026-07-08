@@ -17,9 +17,11 @@ import {
 } from '@dnd-kit/sortable'
 import { useHabits } from '../../../contexts/HabitContext'
 import { useLanguage } from '../../../contexts/LanguageContext'
+import { useCategories } from '../../../contexts/CategoryContext'
 import { formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
+import { filterHabitsByCategories } from '../../../utils/habit/filterHabitsByCategories'
 import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stackingCompletionCoordinator'
 import { archiveHabit } from '../../../utils/habit/archiveHabit'
 import { ConfirmationModal } from '../../modal/ConfirmationModal/ConfirmationModal'
@@ -58,6 +60,7 @@ export function HabitList({ onEdit }: HabitListProps) {
   const { messages } = useLanguage()
   const { habits, activeHabits, isLoading, error, toggleHabitCompletion, updateHabit, reorderActiveHabits } =
     useHabits()
+  const { categories, selectedCategoryIds } = useCategories()
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [archivingId, setArchivingId] = useState<string | null>(null)
   const [habitToArchive, setHabitToArchive] = useState<{ id: string; name?: string } | null>(null)
@@ -81,7 +84,12 @@ export function HabitList({ onEdit }: HabitListProps) {
     }))
   }, [activeHabits])
 
-  const sortableItemIds = useMemo(() => habitsWithCalculations.map(h => h.id), [habitsWithCalculations])
+  const visibleHabits = useMemo(
+    () => filterHabitsByCategories(habitsWithCalculations, selectedCategoryIds),
+    [habitsWithCalculations, selectedCategoryIds]
+  )
+
+  const sortableItemIds = useMemo(() => visibleHabits.map(h => h.id), [visibleHabits])
 
   const useGridSortableStrategy = useSyncExternalStore(
     subscribeGridLayoutMatch,
@@ -222,11 +230,12 @@ export function HabitList({ onEdit }: HabitListProps) {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={sortableItemIds} strategy={sortableStrategy}>
             <ul className="habit-list" aria-label={messages.habitList.aria.list}>
-              {habitsWithCalculations.map(habit => (
+              {visibleHabits.map(habit => (
                 <SortableHabitItem
                   key={habit.id}
                   habit={habit}
                   habits={habits}
+                  categories={categories}
                   togglingId={togglingId}
                   archivingId={archivingId}
                   onEdit={onEdit}

@@ -7,11 +7,17 @@ import {
   updateHabit,
   deleteHabit,
   putHabits,
+  addCategory,
+  getAllCategories,
+  updateCategory,
+  deleteCategory,
   closeDB,
   testUtils,
 } from './indexedDB'
 import type { Habit } from '../types/habit'
+import type { Category } from '../types/category'
 import { createMockHabit, mockHabits } from '../test/fixtures/habits'
+import { createMockCategory } from '../test/fixtures/categories'
 import {
   triggerIDBRequestSuccess,
   triggerIDBRequestError,
@@ -129,10 +135,46 @@ describe('IndexedDB Service', () => {
 
       const db = await openPromise
 
-      expect(mockIndexedDB.open).toHaveBeenCalledWith('habit-tracker', 2)
+      expect(mockIndexedDB.open).toHaveBeenCalledWith('habit-tracker', 3)
       expect(createObjectStore).toHaveBeenCalledWith('habits', { keyPath: 'id' })
       expect(createObjectStore).toHaveBeenCalledWith('settings', { keyPath: 'key' })
+      expect(createObjectStore).toHaveBeenCalledWith('categories', { keyPath: 'id' })
       expect(db).toBe(mockDB)
+    })
+
+    it('creates categories store on upgrade when habits and settings already exist', async () => {
+      const mockOpenRequest = createMockRequest()
+      mockOpenRequest.result = mockDB
+      const createObjectStore = vi.fn().mockReturnValue({
+        createIndex: vi.fn(),
+      })
+
+      ;(mockIndexedDB.open as ReturnType<typeof vi.fn>).mockReturnValue(mockOpenRequest)
+
+      const openPromise = openDB()
+
+      await Promise.resolve()
+      const openRequest = mockOpenRequest as unknown as IDBOpenDBRequest
+      if (openRequest.onupgradeneeded) {
+        openRequest.onupgradeneeded({
+          target: {
+            result: {
+              objectStoreNames: {
+                contains: (name: string) => name === 'habits' || name === 'settings',
+              },
+              createObjectStore,
+            },
+          },
+        } as unknown as IDBVersionChangeEvent)
+      }
+      if (mockOpenRequest.onsuccess) {
+        mockOpenRequest.onsuccess({ target: { result: mockDB } })
+      }
+
+      await openPromise
+
+      expect(createObjectStore).toHaveBeenCalledWith('categories', { keyPath: 'id' })
+      expect(createObjectStore).not.toHaveBeenCalledWith('habits', { keyPath: 'id' })
     })
 
     it('creates settings store on upgrade when habits already exist', async () => {
@@ -508,6 +550,72 @@ describe('IndexedDB Service', () => {
       await triggerIDBRequestSuccess(addRequest, habit.id)
 
       await expect(addPromise).resolves.toBe('1')
+    })
+  })
+
+  describe('category CRUD', () => {
+    beforeEach(async () => {
+      await setupMockDB()
+    })
+
+    it('adds a category to the database', async () => {
+      const category = createMockCategory()
+      const addRequest = createMockRequest()
+      ;(mockObjectStore.add as ReturnType<typeof vi.fn>).mockReturnValue(addRequest)
+
+      const addPromise = addCategory(category)
+      await triggerIDBRequestSuccess(addRequest, category.id)
+      const result = await addPromise
+
+      expect(mockObjectStore.add).toHaveBeenCalledWith(category)
+      expect(result).toBe(category.id)
+    })
+
+    it('rejects an invalid category on add', async () => {
+      const invalid = createMockCategory({ name: '' })
+      await expect(addCategory(invalid)).rejects.toThrow(
+        'Category must have a non-empty string name'
+      )
+    })
+
+    it('retrieves all categories from the database', async () => {
+      const categories: Category[] = [
+        createMockCategory({ id: 'c1', name: 'Health' }),
+        createMockCategory({ id: 'c2', name: 'Work' }),
+      ]
+      const getAllRequest = createMockRequest()
+      ;(mockObjectStore.getAll as ReturnType<typeof vi.fn>).mockReturnValue(getAllRequest)
+
+      const getAllPromise = getAllCategories()
+      await triggerIDBRequestSuccess(getAllRequest, categories)
+      const result = await getAllPromise
+
+      expect(mockObjectStore.getAll).toHaveBeenCalled()
+      expect(result).toEqual(categories)
+    })
+
+    it('updates a category', async () => {
+      const category = createMockCategory({ name: 'Renamed' })
+      const putRequest = createMockRequest()
+      ;(mockObjectStore.put as ReturnType<typeof vi.fn>).mockReturnValue(putRequest)
+
+      const updatePromise = updateCategory(category)
+      await triggerIDBRequestSuccess(putRequest, category.id)
+      const result = await updatePromise
+
+      expect(mockObjectStore.put).toHaveBeenCalledWith(category)
+      expect(result).toBe(category.id)
+    })
+
+    it('deletes a category by id', async () => {
+      const deleteRequest = createMockRequest()
+      ;(mockObjectStore.delete as ReturnType<typeof vi.fn>).mockReturnValue(deleteRequest)
+
+      const deletePromise = deleteCategory('c1')
+      await triggerIDBRequestSuccess(deleteRequest, undefined)
+      await deletePromise
+
+      expect(mockObjectStore.delete).toHaveBeenCalledWith('c1')
     })
   })
 
