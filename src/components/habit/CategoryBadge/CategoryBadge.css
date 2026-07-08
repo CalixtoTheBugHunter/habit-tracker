@@ -3,6 +3,7 @@
   flex-wrap: wrap;
   gap: var(--spacing-xs);
   margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .category-badge {
