@@ -4,6 +4,7 @@ import { formatMessage } from './locale'
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { HabitProvider, useHabits } from './contexts/HabitContext'
+import { CategoryProvider } from './contexts/CategoryContext'
 import {
   HabitList,
   HabitForm,
@@ -15,6 +16,8 @@ import {
   Settings,
   StatisticsView,
   ArchivedHabitsView,
+  CategoriesView,
+  CategoryFilterBar,
 } from './components'
 import type { AppView } from './components'
 import type { Habit } from './types/habit'
@@ -94,6 +97,7 @@ function AppContent() {
               onCancel={() => setEditingHabit(undefined)}
             />
             <section className="habit-list-container">
+              <CategoryFilterBar />
               <HabitList onEdit={setEditingHabit} />
             </section>
           </>
@@ -107,6 +111,9 @@ function AppContent() {
         {activeView === 'archived' && (
           <ArchivedHabitsView />
         )}
+        {activeView === 'categories' && (
+          <CategoriesView />
+        )}
       </main>
     </div>
   )
@@ -118,7 +125,9 @@ function App() {
       <LanguageProvider>
         <ErrorBoundary>
           <HabitProvider>
-            <AppContent />
+            <CategoryProvider>
+              <AppContent />
+            </CategoryProvider>
           </HabitProvider>
         </ErrorBoundary>
       </LanguageProvider>

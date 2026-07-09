@@ -4,6 +4,7 @@ import { openDB, getAllHabits, updateHabit as updateHabitInDB, deleteHabit as de
 import { runMigrations, migrations } from '../services/migration'
 import { toggleCompletion } from '../utils/habit/toggleCompletion'
 import { stripTodayFromAutoCompletedDates } from '../utils/habit/checkAutoCompletion'
+import { removeCategoryFromHabits as computeHabitsWithoutCategory } from '../utils/habit/removeCategoryFromHabits'
 import { createAppError } from '../utils/error/errorTypes'
 import { logError } from '../utils/error/errorLogger'
 import type { Habit } from '../types/habit'
@@ -20,6 +21,7 @@ interface HabitContextType {
   updateHabit: (habit: Habit) => Promise<void>
   deleteHabit: (habitId: string) => Promise<void>
   reorderActiveHabits: (orderedIds: string[]) => Promise<void>
+  removeCategoryFromHabits: (categoryId: string) => Promise<void>
 }
 
 const HabitContext = createContext<HabitContextType | undefined>(undefined)
@@ -156,6 +158,30 @@ export function HabitProvider({ children }: HabitProviderProps) {
     [habits, messages.app.updateHabitError, refreshHabits]
   )
 
+  const removeCategoryFromHabits = useCallback(
+    async (categoryId: string) => {
+      try {
+        setError(null)
+        const changed = computeHabitsWithoutCategory(habits, categoryId)
+        if (changed.length === 0) {
+          return
+        }
+        await putHabits(changed)
+        await refreshHabits()
+      } catch (err) {
+        const appError = createAppError(
+          err,
+          'UNKNOWN_ERROR',
+          messages.app.updateHabitError
+        )
+        logError(appError)
+        setError(appError.userMessage)
+        throw err
+      }
+    },
+    [habits, messages.app.updateHabitError, refreshHabits]
+  )
+
   useEffect(() => {
     async function initializeApp() {
       try {
@@ -201,6 +227,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       updateHabit,
       deleteHabit,
       reorderActiveHabits,
+      removeCategoryFromHabits,
     }),
     [
       habits,
@@ -213,6 +240,7 @@ export function HabitProvider({ children }: HabitProviderProps) {
       updateHabit,
       deleteHabit,
       reorderActiveHabits,
+      removeCategoryFromHabits,
     ]
   )
 

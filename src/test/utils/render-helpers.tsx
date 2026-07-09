@@ -1,6 +1,7 @@
 import { ReactElement, ReactNode, Component, ErrorInfo } from 'react'
 import { render, RenderOptions } from '@testing-library/react'
 import { HabitProvider } from '../../contexts/HabitContext'
+import { CategoryProvider } from '../../contexts/CategoryContext'
 import { LanguageProvider } from '../../contexts/LanguageContext'
 import { ThemeProvider } from '../../contexts/ThemeContext'
 import type { LocaleCode } from '../../locale/types'
@@ -25,7 +26,9 @@ export function renderWithProviders(
     return (
       <ThemeProvider initialTheme={initialTheme}>
         <LanguageProvider initialLocale={initialLocale}>
-          <HabitProvider>{children}</HabitProvider>
+          <HabitProvider>
+            <CategoryProvider>{children}</CategoryProvider>
+          </HabitProvider>
         </LanguageProvider>
       </ThemeProvider>
     )

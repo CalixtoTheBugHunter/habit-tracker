@@ -5,6 +5,27 @@ Todas as mudanças relevantes neste projeto são documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 e este projeto segue o [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-08
+
+### Adicionado
+
+- Categorias de hábitos: criar, editar e excluir categorias em uma tela dedicada de Categorias; atribuir múltiplas categorias a um hábito; filtrar a lista de hábitos por categoria; selos de categoria nos cartões de hábito
+- Reordenação de hábitos por arrastar e soltar com ordem persistida
+- Fluxo de arquivamento com uma tela dedicada de Arquivados
+- Alternância de tema controlada pelo usuário (claro/escuro/sistema)
+- Layout em grade responsivo para hábitos e estatísticas em telas maiores
+- Ícone PWA mascarável, favicon dimensionado e apple-touch-icon
+- Resumos de changelog gerados por IA no workflow de release
+
+### Alterado
+
+- Simplificação da configuração dos tokens de tema e prevenção do flash de tema no carregamento
+
+### Corrigido
+
+- Cálculo de sequência agora respeita os dias da meta (ignora dias fora da meta e valida toda a cadeia de dias da meta)
+- Correção de alertas de segurança em dependências (vite, form-data, js-yaml, babel, vitest UI, brace-expansion, ws, fast-uri, postcss)
+
 ## [0.4.2] - 2026-04-22
 
 ### Alterado

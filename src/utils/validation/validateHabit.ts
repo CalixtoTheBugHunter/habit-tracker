@@ -136,6 +136,20 @@ export function validateHabit(habit: unknown): asserts habit is Habit {
     }
   }
 
+  if (habitObj.categories !== undefined) {
+    if (!Array.isArray(habitObj.categories)) {
+      throw new Error('Habit categories must be an array if provided')
+    }
+    for (const categoryId of habitObj.categories) {
+      if (typeof categoryId !== 'string' || categoryId.trim() === '') {
+        throw new Error('All categories elements must be non-empty strings')
+      }
+    }
+    if (new Set(habitObj.categories).size !== habitObj.categories.length) {
+      throw new Error('Habit categories must not contain duplicate values')
+    }
+  }
+
   if (habitObj.archivedAt !== undefined) {
     if (typeof habitObj.archivedAt !== 'string' || habitObj.archivedAt.trim() === '') {
       throw new Error('Habit archivedAt must be a non-empty string if provided')

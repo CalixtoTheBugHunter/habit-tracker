@@ -1,12 +1,14 @@
 import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useHabits } from '../../../contexts/HabitContext'
 import { useLanguage } from '../../../contexts/LanguageContext'
+import { useCategories } from '../../../contexts/CategoryContext'
 import { addHabit, updateHabit } from '../../../services/indexedDB'
 import { track } from '../../../analytics/umami'
 import type { Habit } from '../../../types/habit'
 import { MAX_NAME_LENGTH, MAX_DESCRIPTION_LENGTH } from '../../../utils/validation/validateHabit'
 import { nextSortOrderForNewHabit } from '../../../utils/habit/nextSortOrderForNewHabit'
 import { StackingHabitsSelector } from '../StackingHabitsSelector/StackingHabitsSelector'
+import { CategorySelector } from '../CategorySelector/CategorySelector'
 import './HabitForm.css'
 
 const TEXTAREA_MAX_HEIGHT = 200
@@ -20,11 +22,13 @@ interface HabitFormProps {
 export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
   const { messages } = useLanguage()
   const { habits, refreshHabits } = useHabits()
+  const { categories } = useCategories()
   const [name, setName] = useState(habit?.name || '')
   const [description, setDescription] = useState(habit?.description || '')
   const [stackingHabitIds, setStackingHabitIds] = useState<string[]>(habit?.stackingHabits ?? [])
   const [stackingStepLabels, setStackingStepLabels] = useState<Record<string, string>>(habit?.stackingStepLabels ?? {})
   const [goalDays, setGoalDays] = useState<number[]>(habit?.goalDays ?? [])
+  const [categoryIds, setCategoryIds] = useState<string[]>(habit?.categories ?? [])
   const [nameError, setNameError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -41,6 +45,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       setStackingHabitIds(habit.stackingHabits ?? [])
       setStackingStepLabels(habit.stackingStepLabels ?? {})
       setGoalDays(habit.goalDays ?? [])
+      setCategoryIds(habit.categories ?? [])
       setShowDescription(true)
     } else {
       setName('')
@@ -48,6 +53,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       setStackingHabitIds([])
       setStackingStepLabels({})
       setGoalDays([])
+      setCategoryIds([])
       setShowDescription(false)
     }
   }, [habit])
@@ -110,6 +116,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
         stackingStepLabels: labelsForStack && Object.keys(labelsForStack).length > 0 ? labelsForStack : undefined,
         autoCompletedDates: hasStacking ? habit?.autoCompletedDates : undefined,
         goalDays: goalDays.length > 0 ? goalDays : undefined,
+        categories: categoryIds.length > 0 ? categoryIds : undefined,
         sortOrder: isEditMode ? habit?.sortOrder : nextSortOrderForNewHabit(habits),
       }
 
@@ -130,6 +137,7 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
         setDescription('')
         setStackingHabitIds([])
         setStackingStepLabels({})
+        setCategoryIds([])
         setShowDescription(false)
       }
 
@@ -154,12 +162,14 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
       setStackingHabitIds(habit.stackingHabits ?? [])
       setStackingStepLabels(habit.stackingStepLabels ?? {})
       setGoalDays(habit.goalDays ?? [])
+      setCategoryIds(habit.categories ?? [])
     } else {
       setName('')
       setDescription('')
       setStackingHabitIds([])
       setStackingStepLabels({})
       setGoalDays([])
+      setCategoryIds([])
       setShowDescription(false)
     }
     setNameError(null)
@@ -262,6 +272,13 @@ export function HabitForm({ habit, onSuccess, onCancel }: HabitFormProps) {
               })}
             </div>
           </fieldset>
+          <CategorySelector
+            id="habit-form-categories"
+            value={categoryIds}
+            onChange={setCategoryIds}
+            categories={categories}
+            disabled={isSubmitting}
+          />
         </>
       )}
 
