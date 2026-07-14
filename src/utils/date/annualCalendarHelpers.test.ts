@@ -4,6 +4,8 @@ import {
   getWeekStartDate,
   getDateString,
   isDateCompleted,
+  isExpectedGoalDay,
+  isMissedGoalDay,
 } from './annualCalendarHelpers'
 
 describe('annualCalendarHelpers', () => {
@@ -111,6 +113,91 @@ describe('annualCalendarHelpers', () => {
 
     it('should handle empty completion dates', () => {
       expect(isDateCompleted('2025-01-15', [])).toBe(false)
+    })
+  })
+
+  describe('isExpectedGoalDay', () => {
+    // 2025-11-17 is a Monday (getDay() === 1)
+    const monday = new Date(2025, 10, 17)
+
+    it('should return false when goalDays is undefined', () => {
+      expect(isExpectedGoalDay(monday, undefined)).toBe(false)
+    })
+
+    it('should return false when goalDays is empty', () => {
+      expect(isExpectedGoalDay(monday, [])).toBe(false)
+    })
+
+    it("should return true when the date's weekday is in goalDays", () => {
+      expect(isExpectedGoalDay(monday, [1])).toBe(true)
+      expect(isExpectedGoalDay(monday, [1, 3, 5])).toBe(true)
+    })
+
+    it("should return false when the date's weekday is not in goalDays", () => {
+      expect(isExpectedGoalDay(monday, [2, 4])).toBe(false)
+    })
+  })
+
+  describe('isMissedGoalDay', () => {
+    // System time is fixed to 2025-11-19 (Wednesday). Local "today" is 2025-11-19.
+    const today = '2025-11-19'
+    const createdEarly = '2025-01-01T00:00:00.000Z'
+    // 2025-11-17 Monday(1), 2025-11-18 Tuesday(2), 2025-11-19 Wednesday(3), 2025-11-21 Friday(5)
+    const pastMonday = new Date(2025, 10, 17)
+    const pastMondayStr = getDateString(pastMonday)
+
+    it('should return false when the habit has no goalDays (daily, backward compatible)', () => {
+      expect(
+        isMissedGoalDay(pastMonday, pastMondayStr, today, createdEarly, [], undefined)
+      ).toBe(false)
+    })
+
+    it('should return true for a past, uncompleted goal day after the created date', () => {
+      expect(
+        isMissedGoalDay(pastMonday, pastMondayStr, today, createdEarly, [], [1])
+      ).toBe(true)
+    })
+
+    it('should return false when the goal day was completed', () => {
+      expect(
+        isMissedGoalDay(
+          pastMonday,
+          pastMondayStr,
+          today,
+          createdEarly,
+          [`${pastMondayStr}T00:00:00.000Z`],
+          [1]
+        )
+      ).toBe(false)
+    })
+
+    it('should return false for a future goal day', () => {
+      const futureFriday = new Date(2025, 10, 21)
+      const futureFridayStr = getDateString(futureFriday)
+      expect(
+        isMissedGoalDay(futureFriday, futureFridayStr, today, createdEarly, [], [5])
+      ).toBe(false)
+    })
+
+    it('should return false for today (not strictly in the past)', () => {
+      const todayDate = new Date(2025, 10, 19)
+      expect(
+        isMissedGoalDay(todayDate, today, today, createdEarly, [], [3])
+      ).toBe(false)
+    })
+
+    it('should return false for a non-goal weekday', () => {
+      const pastTuesday = new Date(2025, 10, 18)
+      const pastTuesdayStr = getDateString(pastTuesday)
+      expect(
+        isMissedGoalDay(pastTuesday, pastTuesdayStr, today, createdEarly, [], [1])
+      ).toBe(false)
+    })
+
+    it('should return false for a date before the habit was created', () => {
+      expect(
+        isMissedGoalDay(pastMonday, pastMondayStr, today, '2025-11-18T00:00:00.000Z', [], [1])
+      ).toBe(false)
     })
   })
 })

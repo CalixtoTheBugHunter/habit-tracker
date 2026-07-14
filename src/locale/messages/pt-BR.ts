@@ -151,6 +151,8 @@ export const ptBR = {
     nameFallback: 'hábito',
     today: 'Hoje, {date}',
     date: '{date}',
+    completed: 'Concluído, {date}',
+    missed: 'Esperado mas não concluído, {date}',
   },
   errorFallback: {
     reloadButton: 'Recarregar Página',

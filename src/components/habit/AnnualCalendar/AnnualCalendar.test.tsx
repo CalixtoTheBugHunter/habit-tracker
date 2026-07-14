@@ -201,9 +201,9 @@ describe('AnnualCalendar', () => {
 
       const { container } = render(<AnnualCalendar habit={habit} />)
       const allDays = container.querySelectorAll('.annual-calendar-day')
-      
+
       expect(allDays.length).toBe(7 * 53)
-      
+
       // All days should have the base class
       allDays.forEach(day => {
         expect(day).toHaveClass('annual-calendar-day')
@@ -211,6 +211,91 @@ describe('AnnualCalendar', () => {
         expect(day).toHaveAttribute('aria-label')
         expect(day).toHaveAttribute('title')
       })
+    })
+  })
+
+  describe('goal days — expected vs actual', () => {
+    // System time is fixed to 2025-11-19 (a Wednesday). Recent goal weekdays in
+    // the current year: Mondays (getDay() === 1) such as 2025-11-17.
+    it('should mark past, uncompleted goal days as missed', () => {
+      const habit = createMockHabit({
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        goalDays: [1],
+      })
+
+      const { container } = render(<AnnualCalendar habit={habit} />)
+      const missedCells = container.querySelectorAll('.annual-calendar-day.missed')
+
+      expect(missedCells.length).toBeGreaterThan(0)
+    })
+
+    it('should not mark a completed goal day as missed', () => {
+      const habit = createMockHabit({
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: ['2025-11-17T00:00:00.000Z'],
+        goalDays: [1],
+      })
+
+      const { container } = render(<AnnualCalendar habit={habit} />)
+      const completedCell = container.querySelector(
+        '.annual-calendar-day.completed[title="2025-11-17"]'
+      )
+      const missedForThatDay = container.querySelector(
+        '.annual-calendar-day.missed[title="2025-11-17"]'
+      )
+
+      expect(completedCell).toBeInTheDocument()
+      expect(missedForThatDay).not.toBeInTheDocument()
+    })
+
+    it('should not mark any day as missed for a habit without goalDays', () => {
+      const habit = createMockHabit({
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+      })
+
+      const { container } = render(<AnnualCalendar habit={habit} />)
+      const missedCells = container.querySelectorAll('.annual-calendar-day.missed')
+
+      expect(missedCells.length).toBe(0)
+    })
+
+    it('should not mark future goal days as missed', () => {
+      const habit = createMockHabit({
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        goalDays: [5],
+      })
+
+      const { container } = render(<AnnualCalendar habit={habit} />)
+      // 2025-11-21 is a future Friday relative to the pinned "today" (2025-11-19)
+      const futureCell = container.querySelector(
+        '.annual-calendar-day.missed[title="2025-11-21"]'
+      )
+
+      expect(futureCell).not.toBeInTheDocument()
+    })
+
+    it('should expose the missed aria-label on missed cells', () => {
+      const habit = createMockHabit({
+        id: '1',
+        createdDate: '2025-01-01T00:00:00.000Z',
+        completionDates: [],
+        goalDays: [1],
+      })
+
+      const { container } = render(<AnnualCalendar habit={habit} />)
+      const missedCell = container.querySelector('.annual-calendar-day.missed')
+
+      expect(missedCell).toHaveAttribute(
+        'aria-label',
+        expect.stringContaining('Expected but not completed')
+      )
     })
   })
 })
