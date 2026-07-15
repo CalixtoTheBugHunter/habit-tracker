@@ -148,26 +148,19 @@ describe('annualCalendarHelpers', () => {
 
     it('should return false when the habit has no goalDays (daily, backward compatible)', () => {
       expect(
-        isMissedGoalDay(pastMonday, pastMondayStr, today, createdEarly, [], undefined)
+        isMissedGoalDay(pastMonday, pastMondayStr, today, createdEarly, false, undefined)
       ).toBe(false)
     })
 
     it('should return true for a past, uncompleted goal day after the created date', () => {
       expect(
-        isMissedGoalDay(pastMonday, pastMondayStr, today, createdEarly, [], [1])
+        isMissedGoalDay(pastMonday, pastMondayStr, today, createdEarly, false, [1])
       ).toBe(true)
     })
 
     it('should return false when the goal day was completed', () => {
       expect(
-        isMissedGoalDay(
-          pastMonday,
-          pastMondayStr,
-          today,
-          createdEarly,
-          [`${pastMondayStr}T00:00:00.000Z`],
-          [1]
-        )
+        isMissedGoalDay(pastMonday, pastMondayStr, today, createdEarly, true, [1])
       ).toBe(false)
     })
 
@@ -175,14 +168,14 @@ describe('annualCalendarHelpers', () => {
       const futureFriday = new Date(2025, 10, 21)
       const futureFridayStr = getDateString(futureFriday)
       expect(
-        isMissedGoalDay(futureFriday, futureFridayStr, today, createdEarly, [], [5])
+        isMissedGoalDay(futureFriday, futureFridayStr, today, createdEarly, false, [5])
       ).toBe(false)
     })
 
     it('should return false for today (not strictly in the past)', () => {
       const todayDate = new Date(2025, 10, 19)
       expect(
-        isMissedGoalDay(todayDate, today, today, createdEarly, [], [3])
+        isMissedGoalDay(todayDate, today, today, createdEarly, false, [3])
       ).toBe(false)
     })
 
@@ -190,13 +183,13 @@ describe('annualCalendarHelpers', () => {
       const pastTuesday = new Date(2025, 10, 18)
       const pastTuesdayStr = getDateString(pastTuesday)
       expect(
-        isMissedGoalDay(pastTuesday, pastTuesdayStr, today, createdEarly, [], [1])
+        isMissedGoalDay(pastTuesday, pastTuesdayStr, today, createdEarly, false, [1])
       ).toBe(false)
     })
 
     it('should return false for a date before the habit was created', () => {
       expect(
-        isMissedGoalDay(pastMonday, pastMondayStr, today, '2025-11-18T00:00:00.000Z', [], [1])
+        isMissedGoalDay(pastMonday, pastMondayStr, today, '2025-11-18T00:00:00.000Z', false, [1])
       ).toBe(false)
     })
   })

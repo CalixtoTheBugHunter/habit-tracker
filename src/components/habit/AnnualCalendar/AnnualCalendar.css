@@ -54,8 +54,8 @@
 }
 
 .annual-calendar-day.missed {
-  background-color: #ffebe9;
-  border-color: rgba(255, 129, 130, 0.7);
+  background-color: #ffc1ba;
+  border-color: rgba(207, 34, 46, 0.75);
 }
 
 .annual-calendar-day.today {
@@ -85,8 +85,8 @@
 }
 
 :root[data-theme='dark'] .annual-calendar-day.missed {
-  background-color: rgba(248, 81, 73, 0.15);
-  border-color: rgba(248, 81, 73, 0.4);
+  background-color: rgba(248, 81, 73, 0.45);
+  border-color: rgba(248, 81, 73, 0.8);
 }
 
 :root[data-theme='dark'] .annual-calendar-day.completed:hover {

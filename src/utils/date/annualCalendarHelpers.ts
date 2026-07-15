@@ -95,7 +95,8 @@ export function isExpectedGoalDay(date: Date, goalDays?: number[]): boolean {
  * @param dateStr - The cell date as a YYYY-MM-DD string
  * @param today - Today's date as a YYYY-MM-DD string
  * @param createdDate - The habit's ISO 8601 creation date string
- * @param completionDates - Array of ISO 8601 completion date strings
+ * @param isCompletedDay - Whether the date was completed (caller supplies this
+ *   so the completion scan is not repeated per cell)
  * @param goalDays - Optional array of expected weekday numbers (0-6)
  * @returns true if the date is an expected, past, uncompleted goal day
  */
@@ -104,7 +105,7 @@ export function isMissedGoalDay(
   dateStr: string,
   today: string,
   createdDate: string,
-  completionDates: string[],
+  isCompletedDay: boolean,
   goalDays?: number[]
 ): boolean {
   if (!isExpectedGoalDay(date, goalDays)) {
@@ -120,5 +121,5 @@ export function isMissedGoalDay(
     return false
   }
 
-  return !isDateCompleted(dateStr, completionDates)
+  return !isCompletedDay
 }

@@ -63,7 +63,7 @@ export function AnnualCalendar({ habit }: AnnualCalendarProps) {
                 dateStr,
                 today,
                 habit.createdDate,
-                habit.completionDates,
+                completed,
                 habit.goalDays
               )
 
