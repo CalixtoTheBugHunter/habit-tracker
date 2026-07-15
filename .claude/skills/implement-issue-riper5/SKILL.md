@@ -59,6 +59,8 @@ Present a summary of research findings (requirements/criteria, code patterns/arc
 
 Present multiple approach possibilities with advantages/disadvantages and trade-offs. Use language like "One possibility is…" / "Another approach could be…". Avoid definitive statements about what will be implemented; seek the user's preferred direction.
 
+**Decision polls (user preference)**: When decisions arise in this mode, use the `AskUserQuestion` tool ("poll mode") to present the options and let the user choose, rather than only asking in prose. Frame each open design dimension as a poll question with concrete options and trade-offs in the descriptions. Prose brainstorming still precedes the polls; the polls are how the user commits to a direction.
+
 ### INNOVATE Mode Transition Checkpoint
 
 Present the brainstormed solutions and any expressed preferences. Request explicit approval — the user must signal **"ENTER PLAN MODE"** to proceed. Do NOT proceed without the signal.

@@ -67,3 +67,59 @@ export function isDateCompleted(dateStr: string, completionDates: string[]): boo
     return completionDateStr === dateStr
   })
 }
+
+/**
+ * Checks whether a date falls on one of a habit's expected goal days.
+ *
+ * Goal days use JS weekday numbers (0=Sunday … 6=Saturday), matching
+ * Date.getDay(). When goalDays is undefined or empty the habit is treated as
+ * daily, so no specific day is "expected" and this returns false.
+ *
+ * @param date - Date object
+ * @param goalDays - Optional array of expected weekday numbers (0-6)
+ * @returns true if goalDays is non-empty and includes the date's weekday
+ */
+export function isExpectedGoalDay(date: Date, goalDays?: number[]): boolean {
+  return Array.isArray(goalDays) && goalDays.length > 0 && goalDays.includes(date.getDay())
+}
+
+/**
+ * Checks whether a date is a "missed" goal day: an expected goal day in the
+ * past (on or after the habit was created) that was not completed.
+ *
+ * Returns false for habits without goal days, future dates, today, dates before
+ * the habit's creation, and completed dates. All date comparisons are
+ * lexicographic on YYYY-MM-DD strings, which is correct for ISO dates.
+ *
+ * @param date - Date object for the calendar cell
+ * @param dateStr - The cell date as a YYYY-MM-DD string
+ * @param today - Today's date as a YYYY-MM-DD string
+ * @param createdDate - The habit's ISO 8601 creation date string
+ * @param isCompletedDay - Whether the date was completed (caller supplies this
+ *   so the completion scan is not repeated per cell)
+ * @param goalDays - Optional array of expected weekday numbers (0-6)
+ * @returns true if the date is an expected, past, uncompleted goal day
+ */
+export function isMissedGoalDay(
+  date: Date,
+  dateStr: string,
+  today: string,
+  createdDate: string,
+  isCompletedDay: boolean,
+  goalDays?: number[]
+): boolean {
+  if (!isExpectedGoalDay(date, goalDays)) {
+    return false
+  }
+
+  if (dateStr >= today) {
+    return false
+  }
+
+  const createdDateStr = createdDate.split('T')[0] ?? createdDate
+  if (dateStr < createdDateStr) {
+    return false
+  }
+
+  return !isCompletedDay
+}

@@ -150,6 +150,8 @@ export const en = {
     nameFallback: 'habit',
     today: 'Today, {date}',
     date: '{date}',
+    completed: 'Completed, {date}',
+    missed: 'Expected but not completed, {date}',
   },
   errorFallback: {
     reloadButton: 'Reload Page',

@@ -53,6 +53,11 @@
   border-color: transparent;
 }
 
+.annual-calendar-day.missed {
+  background-color: #ffc1ba;
+  border-color: rgba(207, 34, 46, 0.75);
+}
+
 .annual-calendar-day.today {
   border: 2px solid #0969da;
   box-sizing: border-box;
@@ -77,6 +82,11 @@
 :root[data-theme='dark'] .annual-calendar-day.completed {
   background-color: #26a641;
   border-color: transparent;
+}
+
+:root[data-theme='dark'] .annual-calendar-day.missed {
+  background-color: rgba(248, 81, 73, 0.45);
+  border-color: rgba(248, 81, 73, 0.8);
 }
 
 :root[data-theme='dark'] .annual-calendar-day.completed:hover {

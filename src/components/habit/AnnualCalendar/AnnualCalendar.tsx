@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { formatMessage } from '../../../locale'
 import { useLanguage } from '../../../contexts/LanguageContext'
-import { getYearGrid, getDateString, isDateCompleted } from '../../../utils/date/annualCalendarHelpers'
+import { getYearGrid, getDateString, isDateCompleted, isMissedGoalDay } from '../../../utils/date/annualCalendarHelpers'
 import { getTodayLocalDateString } from '../../../utils/date/dateHelpers'
 import type { Habit } from '../../../types/habit'
 import './AnnualCalendar.css'
@@ -58,17 +58,29 @@ export function AnnualCalendar({ habit }: AnnualCalendarProps) {
               const completed = isCompleted(date)
               const isTodayDate = isToday(date)
               const isCurrentYear = date.getFullYear() === currentYear
+              const missed = isMissedGoalDay(
+                date,
+                dateStr,
+                today,
+                habit.createdDate,
+                completed,
+                habit.goalDays
+              )
+
+              const cellAriaLabel = isTodayDate
+                ? formatMessage(messages.annualCalendar.today, { date: dateStr })
+                : missed
+                  ? formatMessage(messages.annualCalendar.missed, { date: dateStr })
+                  : completed
+                    ? formatMessage(messages.annualCalendar.completed, { date: dateStr })
+                    : formatMessage(messages.annualCalendar.date, { date: dateStr })
 
               return (
                 <div
                   key={weekIndex}
-                  className={`annual-calendar-day ${completed ? 'completed' : ''} ${isTodayDate ? 'today' : ''} ${!isCurrentYear ? 'other-year' : ''}`}
+                  className={`annual-calendar-day ${completed ? 'completed' : ''} ${missed ? 'missed' : ''} ${isTodayDate ? 'today' : ''} ${!isCurrentYear ? 'other-year' : ''}`}
                   role="gridcell"
-                  aria-label={
-                    isTodayDate
-                      ? formatMessage(messages.annualCalendar.today, { date: dateStr })
-                      : formatMessage(messages.annualCalendar.date, { date: dateStr })
-                  }
+                  aria-label={cellAriaLabel}
                   title={dateStr}
                   {...(isTodayDate && { 'aria-current': 'date' })}
                 />
