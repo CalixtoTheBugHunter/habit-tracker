@@ -28,6 +28,7 @@ vi.mock('../../../services/migration', () => ({
 describe('HabitList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    window.localStorage.clear()
     // openDB is required because HabitContext calls it during initialization
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
   })
@@ -38,6 +39,23 @@ describe('HabitList', () => {
     renderWithProviders(<HabitList />)
 
     expect(await screen.findByText(/no habits yet/i)).toBeInTheDocument()
+  })
+
+  it('shows a no-results message when filters exclude all habits', async () => {
+    window.localStorage.setItem(
+      'habitFilterCriteria',
+      JSON.stringify({
+        searchQuery: 'zzzznomatch',
+        completionStatus: 'all',
+        streakRange: 'all',
+        sortBy: 'manual',
+      })
+    )
+    vi.mocked(getAllHabits).mockResolvedValue([createMockHabit({ id: '1', name: 'Exercise' })])
+
+    renderWithProviders(<HabitList />)
+
+    expect(await screen.findByText(/no habits match your filters/i)).toBeInTheDocument()
   })
 
   it('should render list of habits with name, description, and streak', async () => {
