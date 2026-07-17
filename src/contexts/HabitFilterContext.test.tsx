@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { act, renderHook } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { HabitFilterProvider, useHabitFilter } from './HabitFilterContext'
 import { DEFAULT_HABIT_FILTER_CRITERIA } from '../types/habitFilter'
@@ -54,10 +54,10 @@ describe('HabitFilterContext', () => {
     expect(result.current.hasActiveFilters).toBe(false)
   })
 
-  it('persists criteria changes to localStorage', () => {
+  it('persists criteria changes to localStorage', async () => {
     const { result } = renderHook(() => useHabitFilter(), { wrapper })
     act(() => result.current.setSortBy('streak'))
-    expect(loadHabitFilterCriteria().sortBy).toBe('streak')
+    await waitFor(() => expect(loadHabitFilterCriteria().sortBy).toBe('streak'))
   })
 
   it('initializes from persisted localStorage criteria', () => {

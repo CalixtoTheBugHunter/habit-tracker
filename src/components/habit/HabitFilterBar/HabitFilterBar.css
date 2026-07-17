@@ -11,6 +11,25 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* Advanced controls (status, streak, sort, Clear) — revealed on focus or
+   whenever a filter/sort is active. Collapsed to just the search otherwise. */
+.habit-filter__advanced {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm) var(--spacing-md);
+}
+
+.habit-filter__advanced[hidden] {
+  display: none;
+}
+
+/* Collapsed: the search is the only control, so let it span the whole row. */
+.habit-filter--collapsed .habit-filter__search {
+  max-width: none;
+}
+
 /* Shared control box so search, selects, chips, and Clear align to one height. */
 .habit-filter__search,
 .habit-filter__select,
@@ -154,6 +173,13 @@
     width: 100%;
     min-width: 0;
     max-width: none;
+  }
+
+  .habit-filter__advanced {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
   }
 
   .habit-filter__filters {

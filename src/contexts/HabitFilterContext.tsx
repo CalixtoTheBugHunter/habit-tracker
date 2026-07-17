@@ -32,11 +32,15 @@ interface HabitFilterProviderProps {
   children: ReactNode
 }
 
+/** Debounce persistence so typing in the search field doesn't write on every keystroke. */
+const SAVE_DEBOUNCE_MS = 300
+
 export function HabitFilterProvider({ children }: HabitFilterProviderProps) {
   const [criteria, setCriteria] = useState<HabitFilterCriteria>(() => loadHabitFilterCriteria())
 
   useEffect(() => {
-    saveHabitFilterCriteria(criteria)
+    const handle = window.setTimeout(() => saveHabitFilterCriteria(criteria), SAVE_DEBOUNCE_MS)
+    return () => window.clearTimeout(handle)
   }, [criteria])
 
   const setSearchQuery = useCallback((searchQuery: string) => {

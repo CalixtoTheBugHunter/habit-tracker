@@ -100,6 +100,12 @@ export function HabitList({ onEdit }: HabitListProps) {
 
   const sortableItemIds = useMemo(() => visibleHabits.map(h => h.id), [visibleHabits])
 
+  // Drag-to-reorder persists a manual order, which is only meaningful under the
+  // `manual` sort. Under any other sort the list is re-derived on every render,
+  // so a drag would appear to do nothing while silently overwriting the saved
+  // manual order — disable reordering entirely in that case.
+  const isReorderEnabled = criteria.sortBy === 'manual'
+
   const useGridSortableStrategy = useSyncExternalStore(
     subscribeGridLayoutMatch,
     getGridLayoutMatchSnapshot,
@@ -119,6 +125,9 @@ export function HabitList({ onEdit }: HabitListProps) {
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
+      if (!isReorderEnabled) {
+        return
+      }
       const { active, over } = event
       if (!over || active.id === over.id) {
         return
@@ -143,6 +152,7 @@ export function HabitList({ onEdit }: HabitListProps) {
       }
     },
     [
+      isReorderEnabled,
       sortableItemIds,
       activeHabits,
       reorderActiveHabits,
@@ -271,6 +281,7 @@ export function HabitList({ onEdit }: HabitListProps) {
                   onArchiveClick={handleArchiveClick}
                   onToggleStackingHabit={handleToggleStackingHabit}
                   updateHabit={updateHabit}
+                  reorderDisabled={!isReorderEnabled}
                 />
               ))}
             </ul>
