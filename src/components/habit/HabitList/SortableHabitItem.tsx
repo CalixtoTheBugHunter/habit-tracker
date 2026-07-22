@@ -24,6 +24,8 @@ interface SortableHabitItemProps {
   onArchiveClick: (habitId: string, habitName?: string) => void
   onToggleStackingHabit: (parentHabitId: string, stackingHabitId: string) => Promise<void>
   updateHabit: (habit: Habit) => Promise<void>
+  /** Manual drag-to-reorder only makes sense in `manual` sort; disabled otherwise. */
+  reorderDisabled?: boolean
 }
 
 export function SortableHabitItem({
@@ -37,10 +39,12 @@ export function SortableHabitItem({
   onArchiveClick,
   onToggleStackingHabit,
   updateHabit,
+  reorderDisabled = false,
 }: SortableHabitItemProps) {
   const { messages } = useLanguage()
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: habit.id,
+    disabled: reorderDisabled,
   })
 
   const style: CSSProperties = {
@@ -60,19 +64,21 @@ export function SortableHabitItem({
       ref={setNodeRef}
       style={style}
       className={`habit-item${isDragging ? ' habit-item--dragging' : ''}`}
-      {...attributes}
+      {...(reorderDisabled ? {} : attributes)}
       role="listitem"
     >
-      <div className="habit-header habit-header--with-handle">
-        <button
-          type="button"
-          ref={setActivatorNodeRef}
-          className="habit-drag-handle"
-          {...listeners}
-          aria-label={handleLabel}
-        >
-          <GripVertical size={20} aria-hidden />
-        </button>
+      <div className={`habit-header${reorderDisabled ? '' : ' habit-header--with-handle'}`}>
+        {!reorderDisabled && (
+          <button
+            type="button"
+            ref={setActivatorNodeRef}
+            className="habit-drag-handle"
+            {...listeners}
+            aria-label={handleLabel}
+          >
+            <GripVertical size={20} aria-hidden />
+          </button>
+        )}
         <h3 className="habit-name">{habit.name || messages.habitList.unnamedHabit}</h3>
         <StreakBadge streak={habit.streak} />
         {habit.goalDays !== undefined && habit.goalDays.length > 0 && (

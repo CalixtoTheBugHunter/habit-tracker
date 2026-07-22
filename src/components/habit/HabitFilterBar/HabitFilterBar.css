@@ -1,0 +1,212 @@
+.habit-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Advanced controls (status, streak, sort, Clear) — revealed on focus or
+   whenever a filter/sort is active. Collapsed to just the search otherwise. */
+.habit-filter__advanced {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm) var(--spacing-md);
+}
+
+.habit-filter__advanced[hidden] {
+  display: none;
+}
+
+/* Collapsed: the search is the only control, so let it span the whole row. */
+.habit-filter--collapsed .habit-filter__search {
+  max-width: none;
+}
+
+/* Shared control box so search, selects, chips, and Clear align to one height. */
+.habit-filter__search,
+.habit-filter__select,
+.habit-filter__chip,
+.habit-filter__clear {
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-base), background-color var(--transition-base),
+    color var(--transition-base);
+}
+
+/* Search --------------------------------------------------------------- */
+.habit-filter__search {
+  flex: 1 1 14rem;
+  min-width: 10rem;
+  max-width: 22rem;
+  border-radius: var(--radius-md);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.habit-filter__search::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.habit-filter__search:hover {
+  border-color: var(--color-border-hover);
+}
+
+/* Status + streak filters cluster -------------------------------------- */
+.habit-filter__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm) var(--spacing-md);
+}
+
+/* Selects (status + sort) — native chevron removed, drawn via ::after. -- */
+.habit-filter__select-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.habit-filter__select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-md);
+  width: var(--spacing-sm);
+  height: var(--spacing-sm);
+  border-right: 2px solid var(--color-text-secondary);
+  border-bottom: 2px solid var(--color-text-secondary);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.habit-filter__select {
+  padding-right: var(--spacing-2xl);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.habit-filter__select:hover {
+  border-color: var(--color-border-hover);
+}
+
+/* Streak chips — siblings of the category chips. ----------------------- */
+.habit-filter__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.habit-filter__chip {
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.habit-filter__chip:not(.habit-filter__chip--active):hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.habit-filter__chip--active {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* Clear action — separated at the end of the row. ---------------------- */
+.habit-filter__clear {
+  margin-left: auto;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.habit-filter__clear:not(:disabled):hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.habit-filter__clear:disabled {
+  background-color: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+/* Focus ---------------------------------------------------------------- */
+.habit-filter__search:focus-visible,
+.habit-filter__select:focus-visible,
+.habit-filter__chip:focus-visible,
+.habit-filter__clear:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Mobile — stack into full-width rows, keep chips comfortably tappable. - */
+@media (max-width: 600px) {
+  .habit-filter {
+    padding: var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+
+  .habit-filter__search {
+    flex-basis: 100%;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .habit-filter__advanced {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .habit-filter__filters {
+    width: 100%;
+    gap: var(--spacing-sm);
+  }
+
+  .habit-filter__select-wrap {
+    display: flex;
+    width: 100%;
+  }
+
+  .habit-filter__select {
+    width: 100%;
+  }
+
+  .habit-filter__group {
+    width: 100%;
+  }
+
+  .habit-filter__chip {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+  }
+
+  .habit-filter__clear {
+    width: 100%;
+    margin-left: 0;
+  }
+}

@@ -18,10 +18,12 @@ import {
 import { useHabits } from '../../../contexts/HabitContext'
 import { useLanguage } from '../../../contexts/LanguageContext'
 import { useCategories } from '../../../contexts/CategoryContext'
+import { useHabitFilter } from '../../../contexts/HabitFilterContext'
 import { formatMessage } from '../../../locale'
 import { calculateStreak } from '../../../utils/habit/calculateStreak'
 import { isTodayCompleted } from '../../../utils/habit/isTodayCompleted'
 import { filterHabitsByCategories } from '../../../utils/habit/filterHabitsByCategories'
+import { filterAndSortHabits } from '../../../utils/habit/filterAndSortHabits'
 import { mergeReorderedVisibleHabits } from '../../../utils/habit/mergeReorderedVisibleHabits'
 import { getHabitsToPersistAfterStackingToggle } from '../../../utils/habit/stackingCompletionCoordinator'
 import { archiveHabit } from '../../../utils/habit/archiveHabit'
@@ -62,6 +64,7 @@ export function HabitList({ onEdit }: HabitListProps) {
   const { habits, activeHabits, isLoading, error, toggleHabitCompletion, updateHabit, reorderActiveHabits } =
     useHabits()
   const { categories, selectedCategoryIds } = useCategories()
+  const { criteria } = useHabitFilter()
   const [togglingId, setTogglingId] = useState<string | null>(null)
   const [archivingId, setArchivingId] = useState<string | null>(null)
   const [habitToArchive, setHabitToArchive] = useState<{ id: string; name?: string } | null>(null)
@@ -85,12 +88,23 @@ export function HabitList({ onEdit }: HabitListProps) {
     }))
   }, [activeHabits])
 
-  const visibleHabits = useMemo(
+  const categoryFilteredHabits = useMemo(
     () => filterHabitsByCategories(habitsWithCalculations, selectedCategoryIds),
     [habitsWithCalculations, selectedCategoryIds]
   )
 
+  const visibleHabits = useMemo(
+    () => filterAndSortHabits(categoryFilteredHabits, criteria),
+    [categoryFilteredHabits, criteria]
+  )
+
   const sortableItemIds = useMemo(() => visibleHabits.map(h => h.id), [visibleHabits])
+
+  // Drag-to-reorder persists a manual order, which is only meaningful under the
+  // `manual` sort. Under any other sort the list is re-derived on every render,
+  // so a drag would appear to do nothing while silently overwriting the saved
+  // manual order — disable reordering entirely in that case.
+  const isReorderEnabled = criteria.sortBy === 'manual'
 
   const useGridSortableStrategy = useSyncExternalStore(
     subscribeGridLayoutMatch,
@@ -111,6 +125,9 @@ export function HabitList({ onEdit }: HabitListProps) {
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
+      if (!isReorderEnabled) {
+        return
+      }
       const { active, over } = event
       if (!over || active.id === over.id) {
         return
@@ -135,6 +152,7 @@ export function HabitList({ onEdit }: HabitListProps) {
       }
     },
     [
+      isReorderEnabled,
       sortableItemIds,
       activeHabits,
       reorderActiveHabits,
@@ -219,6 +237,14 @@ export function HabitList({ onEdit }: HabitListProps) {
     )
   }
 
+  if (visibleHabits.length === 0) {
+    return (
+      <div className="habit-list">
+        <p className="empty-state">{messages.habitList.noFilterResults}</p>
+      </div>
+    )
+  }
+
   const habitDisplayName = habitToArchive?.name || messages.habitList.thisHabit
 
   return (
@@ -255,6 +281,7 @@ export function HabitList({ onEdit }: HabitListProps) {
                   onArchiveClick={handleArchiveClick}
                   onToggleStackingHabit={handleToggleStackingHabit}
                   updateHabit={updateHabit}
+                  reorderDisabled={!isReorderEnabled}
                 />
               ))}
             </ul>

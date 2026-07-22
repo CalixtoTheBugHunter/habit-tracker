@@ -28,6 +28,7 @@ vi.mock('../../../services/migration', () => ({
 describe('HabitList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    window.localStorage.clear()
     // openDB is required because HabitContext calls it during initialization
     vi.mocked(openDB).mockResolvedValue({} as IDBDatabase)
   })
@@ -38,6 +39,57 @@ describe('HabitList', () => {
     renderWithProviders(<HabitList />)
 
     expect(await screen.findByText(/no habits yet/i)).toBeInTheDocument()
+  })
+
+  it('shows a no-results message when filters exclude all habits', async () => {
+    window.localStorage.setItem(
+      'habitFilterCriteria',
+      JSON.stringify({
+        searchQuery: 'zzzznomatch',
+        completionStatus: 'all',
+        streakRange: 'all',
+        sortBy: 'manual',
+      })
+    )
+    vi.mocked(getAllHabits).mockResolvedValue([createMockHabit({ id: '1', name: 'Exercise' })])
+
+    renderWithProviders(<HabitList />)
+
+    expect(await screen.findByText(/no habits match your filters/i)).toBeInTheDocument()
+  })
+
+  it('renders drag-to-reorder handles under the default manual sort', async () => {
+    vi.mocked(getAllHabits).mockResolvedValue([
+      createMockHabit({ id: '1', name: 'Exercise' }),
+      createMockHabit({ id: '2', name: 'Read' }),
+    ])
+
+    renderWithProviders(<HabitList />)
+
+    expect(await screen.findByRole('button', { name: /reorder exercise/i })).toBeInTheDocument()
+  })
+
+  it('hides drag-to-reorder handles when a non-manual sort is active', async () => {
+    // A manual reorder would silently overwrite the saved order while the list is
+    // re-sorted on every render, so reordering is disabled outside `manual` sort.
+    window.localStorage.setItem(
+      'habitFilterCriteria',
+      JSON.stringify({
+        searchQuery: '',
+        completionStatus: 'all',
+        streakRange: 'all',
+        sortBy: 'name',
+      })
+    )
+    vi.mocked(getAllHabits).mockResolvedValue([
+      createMockHabit({ id: '1', name: 'Exercise' }),
+      createMockHabit({ id: '2', name: 'Read' }),
+    ])
+
+    renderWithProviders(<HabitList />)
+
+    expect(await screen.findByText('Exercise')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /reorder/i })).not.toBeInTheDocument()
   })
 
   it('should render list of habits with name, description, and streak', async () => {

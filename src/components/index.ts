@@ -1,6 +1,7 @@
 // Habit components
 export { HabitForm, HabitList, AnnualCalendar } from './habit'
 export { CategoryFilterBar } from './habit/CategoryFilterBar/CategoryFilterBar'
+export { HabitFilterBar } from './habit/HabitFilterBar/HabitFilterBar'
 
 // Modal components
 export { Modal, ConfirmationModal } from './modal'
