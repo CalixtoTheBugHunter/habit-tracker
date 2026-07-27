@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="A simple, free and offline habit tracker application" />
     <meta name="theme-color" content="#4a90e2" />
-    <title>Atomic Habit Tracker</title>
+    <title>[CANARY] Atomic Habit Tracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sansita+Swashed:wght@400;600;700&display=swap" rel="stylesheet" media="all">
@@ -32,6 +32,9 @@
       })()
     </script>
     <div id="root"></div>
+    <div style="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#ff6a00;color:#111;font:600 14px/1.4 system-ui,sans-serif;text-align:center;padding:6px;">
+      CANARY BUILD — GH-71 Netlify Split Testing PoC — not for production
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
